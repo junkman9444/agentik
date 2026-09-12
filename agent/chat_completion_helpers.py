@@ -2025,9 +2025,8 @@ def _iteration_summary_chat_kwargs(agent, api_messages: list) -> dict:
     extra_body = {}
     if not is_lmstudio and agent._supports_reasoning_extra_body():
         extra_body["reasoning"] = agent.reasoning_config if agent.reasoning_config is not None else {"enabled": True, "effort": "medium"}
-    if "nousresearch" in agent._base_url_lower:
-        from agent.portal_tags import nous_portal_tags
-        extra_body["tags"] = nous_portal_tags()
+    # Nous Portal attribution tagging removed — this fork sends no attribution tags to the
+    # former managed relay.
 
     summary_kwargs = {"model": agent.model, "messages": api_messages}
     if temperature is not None:

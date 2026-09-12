@@ -889,14 +889,7 @@ _AI_GATEWAY_HEADERS = {
     "User-Agent": f"HermesAgent/{_HERMES_VERSION}",
 }
 
-# Nous Portal attribution extra_body. Tags come from agent.portal_tags so the client= marker
-# tracks hermes_cli.__version__ — never inline a literal here.
-from agent.portal_tags import nous_portal_tags as _nous_portal_tags
-
-
-def _nous_extra_body() -> dict:
-    """Fresh Nous Portal ``extra_body`` (per call, so a hot-reloaded version is reflected)."""
-    return {"tags": _nous_portal_tags()}
+# AI-gateway request headers (generic identification, no managed-relay attribution).
 
 
 # Set at resolve time — True if the auxiliary client points to Nous Portal
@@ -5234,8 +5227,8 @@ def resolve_vision_provider_client(
 
 
 def get_auxiliary_extra_body() -> dict:
-    """Return extra_body kwargs (Nous Portal product tags when Nous-backed, else {})."""
-    return _nous_extra_body() if auxiliary_is_nous else {}
+    """Return extra_body kwargs for the auxiliary provider (none needed by default)."""
+    return {}
 
 
 def auxiliary_max_tokens_param(value: int, *, model: Optional[str] = None) -> dict:
@@ -6072,12 +6065,9 @@ def _merge_aux_extra_body(
             merged_extra["reasoning"] = {"enabled": False}
         else:
             merged_extra["reasoning"] = {"enabled": True, "effort": reasoning_config.get("effort") or "medium"}
-    # Portal tags + sticky session_id fallback when the profile didn't supply them; session_id
-    # keeps aux calls on the main turn's upstream instance (cache warmth) — tags alone are not
-    # enough on /v1/messages.
+    # Sticky session_id fallback when the profile didn't supply one — keeps aux calls on the
+    # main turn's upstream instance for prompt-cache warmth.
     if provider_norm in _NOUS_PROVIDER_NAMES:
-        if "tags" not in merged_extra:
-            merged_extra["tags"] = _nous_portal_tags()
         if "session_id" not in merged_extra:
             try:
                 from agent.portal_tags import get_conversation_context
@@ -7560,7 +7550,7 @@ async def _async_call_llm_impl(
 from pathlib import Path  # noqa: F401,E402
 import copy  # noqa: F401,E402
 
-NOUS_EXTRA_BODY = _nous_extra_body()
+NOUS_EXTRA_BODY: dict = {}  # Nous Portal removed in this fork; kept as an empty-dict compat shim.
 
 def get_async_text_auxiliary_client(task: str = "", *, main_runtime: Optional[Dict[str, Any]] = None):
     """Return (async_client, model_slug) for async consumers.
