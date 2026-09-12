@@ -84,18 +84,6 @@ def _image_error_max_dimension(error: Exception) -> Optional[int]:
     return max_dimension if 512 <= max_dimension <= 8000 else None
 
 
-def _try_refresh_nous_paid_entitlement_credentials(agent) -> bool:
-    """Refresh Nous runtime credentials after a fresh paid-entitlement check."""
-    try:
-        from hermes_cli.nous_account import get_nous_portal_account_info
-
-        if get_nous_portal_account_info(force_fresh=True).paid_service_access is not True:
-            return False
-        return agent._try_refresh_nous_client_credentials(force=True)
-    except Exception:
-        return False
-
-
 def _recover_unicode_encode_error(
     agent: Any, api_error: Exception, messages: List[Dict[str, Any]], api_messages: Any,
     api_kwargs: Any, active_system_prompt: Any,
@@ -247,33 +235,6 @@ def recover_before_classification(
     return False, active_system_prompt
 
 
-def _print_nous_401_diagnostics(agent: Any, api_error: Exception) -> None:
-    """Nous 401 that survived a credential refresh: likely Portal OAuth expired/revoked,
-    no credits, or agent key blocked."""
-    from agent.conversation_loop import _print_nous_entitlement_guidance
-    from hermes_constants import display_hermes_home
-    _body_text = ""
-    try:
-        _body = getattr(api_error, "body", None) or getattr(api_error, "response", None)
-        if _body is not None:
-            _body_text = str(_body)[:200]
-    except Exception:
-        pass
-    _plines(agent, "🔐 Nous 401 — Portal authentication failed.")
-    if _body_text:
-        _plines(agent, f"   Response: {_body_text}")
-    if not _print_nous_entitlement_guidance(agent, "Nous model access"):
-        _plines(agent, "   Most likely: Portal OAuth expired, account out of credits, or agent key revoked.")
-    _plines(
-        agent,
-        "   Troubleshooting:",
-        "     • Re-authenticate: hermes auth add nous",
-        "     • Check credits / billing: https://portal.nousresearch.com",
-        f"     • Verify stored credentials: {display_hermes_home()}/auth.json",
-        "     • Switch providers temporarily: /model <model> --provider openrouter",
-    )
-
-
 def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
     """Anthropic 401 that survived a credential refresh: show auth method + fixes."""
     from agent.anthropic_credentials import _is_oauth_token
@@ -312,8 +273,8 @@ def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
 def _refresh_credentials_after_401(
     agent: Any, api_error: Exception, _retry: TurnRetryState, status_code: Optional[int]
 ) -> bool:
-    """Per-provider one-shot credential refresh on 401 (codex/xai, vertex, nous, copilot,
-    anthropic), printing user-facing diagnostics when the nous/anthropic refresh fails.
+    """Per-provider one-shot credential refresh on 401 (codex/xai, vertex, copilot,
+    anthropic), printing user-facing diagnostics when the anthropic refresh fails.
     Returns True when a refresh succeeded and the call should be retried."""
     from agent.conversation_loop import _is_copilot_provider
 
@@ -334,16 +295,6 @@ def _refresh_credentials_after_401(
         if agent._try_refresh_vertex_client_credentials():
             agent._buffer_vprint("🔐 Vertex AI token refreshed after 401. Retrying request...")
             return True
-    if (
-        agent.api_mode in ("chat_completions", "anthropic_messages")
-        and agent.provider == "nous"
-        and not _retry.nous_auth_retry_attempted
-    ):
-        _retry.nous_auth_retry_attempted = True
-        if agent._try_refresh_nous_client_credentials(force=True):
-            agent._buffer_vprint("🔐 Nous agent key refreshed after 401. Retrying request...")
-            return True
-        _print_nous_401_diagnostics(agent, api_error)
     if _is_copilot_provider(agent) and not _retry.copilot_auth_retry_attempted:
         _retry.copilot_auth_retry_attempted = True
         if agent._try_refresh_copilot_client_credentials():
@@ -472,23 +423,10 @@ def recover_after_classification(
 ) -> Tuple[bool, bool]:
     """One-shot recovery chain that runs AFTER ``classify_api_error`` and before the
     generic retry path. Order is load-bearing (each branch may ``return`` early):
-    Nous paid-entitlement refresh → credential-pool rotation → image shrink →
-    multimodal-tool-content strip → corrupt-image strip → Anthropic OAuth 1M-beta
-    disable → per-provider 401 credential refresh → format-recovery strips.
-    Returns ``(retry_now, recovered_with_pool)``; the latter feeds the Nous rate-limit guard."""
-    from agent.conversation_loop import _is_nous_inference_route
-
-    if (
-        classified.reason == FailoverReason.billing
-        and _is_nous_inference_route(
-            getattr(agent, "provider", "") or "", getattr(agent, "base_url", "") or ""
-        )
-        and not _retry.nous_paid_entitlement_refresh_attempted
-    ):
-        _retry.nous_paid_entitlement_refresh_attempted = True
-        if _try_refresh_nous_paid_entitlement_credentials(agent):
-            _vlines(agent, "🔐 Nous paid access verified — refreshed runtime credentials and retrying request...")
-            return True, False
+    credential-pool rotation → image shrink → multimodal-tool-content strip →
+    corrupt-image strip → Anthropic OAuth 1M-beta disable → per-provider 401
+    credential refresh → format-recovery strips.
+    Returns ``(retry_now, recovered_with_pool)``."""
 
     recovered_with_pool, _retry.has_retried_429 = agent._recover_with_credential_pool(
         status_code=status_code, has_retried_429=_retry.has_retried_429,
@@ -596,16 +534,14 @@ def _print_nonretryable_auth_guidance(
     agent: Any, classified: Any, *, status_code: Optional[int], provider: Any, base_url: Any, model: Any,
 ) -> None:
     """Actionable guidance for a terminal auth / billing error."""
-    from agent.conversation_loop import _print_billing_or_entitlement_guidance, _print_nous_entitlement_guidance
+    from agent.conversation_loop import _print_billing_or_entitlement_guidance
 
     if classified.reason == FailoverReason.billing and _print_billing_or_entitlement_guidance(
         agent, capability="model access", provider=provider, base_url=str(base_url),
         model=model, unverified=classified.billing_unverified,
     ):
         return
-    if provider == "nous" and _print_nous_entitlement_guidance(agent, "Nous model access"):
-        return
-    if provider in {"openai-codex", "xai-oauth", "nous"} and status_code == 401:
+    if provider in {"openai-codex", "xai-oauth"} and status_code == 401:
         if provider == "openai-codex":
             _vlines(
                 agent,
@@ -614,29 +550,12 @@ def _print_nonretryable_auth_guidance(
                 "      1. Run `codex` in your terminal to generate fresh tokens.",
                 "      2. Then run `hermes auth` to re-authenticate.",
             )
-        elif provider == "xai-oauth":
+        else:  # xai-oauth
             _vlines(
                 agent,
                 "   💡 xAI OAuth token was rejected (HTTP 401). To fix:",
                 "      re-authenticate with xAI Grok OAuth (SuperGrok / Premium+) from `hermes model`.",
             )
-        else:  # nous
-            _vlines(
-                agent,
-                "   💡 Nous Portal OAuth token was rejected (HTTP 401). Your token may be",
-                "      expired, revoked, or your account may be out of credits. To fix:",
-                "      1. Re-authenticate: hermes portal",
-                "      2. Check your portal account: https://portal.nousresearch.com",
-            )
-            # ``:free`` is OpenRouter slug syntax; Nous Portal will reject the model
-            # name even after a successful re-auth.
-            if isinstance(model, str) and model.endswith(":free"):
-                _vlines(
-                    agent,
-                    f"      ⚠️  Note: `{model}` looks like an OpenRouter slug (`:free` suffix).",
-                    "         Nous Portal won't recognize that model name. Either switch to a",
-                    f"         Nous catalog model, or run `/model openrouter:{model}` to use OpenRouter.",
-                )
         return
     _vlines(
         agent,
@@ -1277,29 +1196,6 @@ def _eager_fallback_status(classified: Any, is_upstream: bool, is_transport_fail
     return "⚠️ Rate limited — switching to fallback provider..."
 
 
-def _is_genuine_nous_rate_limit(agent: Any, api_error: Exception, error_context: Any) -> bool:
-    """Record a genuine account-level Nous 429 to the cross-session breaker; upstream
-    capacity 429s (no exhausted bucket in headers or last-known state) are left alone."""
-    _genuine = False
-    try:
-        from agent.nous_rate_guard import is_genuine_nous_rate_limit, record_nous_rate_limit
-        _err_resp = getattr(api_error, "response", None)
-        _err_hdrs = getattr(_err_resp, "headers", None) if _err_resp else None
-        _genuine = is_genuine_nous_rate_limit(headers=_err_hdrs, last_known_state=agent._rate_limit_state)
-        if _genuine:
-            record_nous_rate_limit(headers=_err_hdrs, error_context=error_context)
-        else:
-            logger.info(
-                "Nous 429 looks like upstream capacity "
-                "(no exhausted bucket in headers or "
-                "last-known state) -- not tripping "
-                "cross-session breaker."
-            )
-    except Exception:
-        pass
-    return _genuine
-
-
 def route_classified_error(
     agent: Any, api_error: Exception, classified: Any, _retry: TurnRetryState, *, error_msg: str,
     error_context: Any, recovered_with_pool: bool, base_url: Any, model: Any,
@@ -1460,18 +1356,5 @@ def route_classified_error(
         if agent._try_activate_fallback(reason=classified.reason):
             return _fallback_break()
 
-    # Nous Portal: a genuine account-level 429 is recorded to a shared file so ALL
-    # sessions back off; is_genuine_nous_rate_limit excludes upstream 429s.
-    if (
-        is_rate_limited
-        and agent.provider == "nous"
-        and classified.reason == FailoverReason.rate_limit
-        and not recovered_with_pool
-        and _is_genuine_nous_rate_limit(agent, api_error, error_context)
-    ):
-        # Re-enter the loop exactly once so the top-of-loop Nous guard runs
-        # (retry_count = max_retries would skip it entirely).
-        retry_count = max(0, max_retries - 1)
-        return _verdict("continue")
     # Upstream capacity 429: normal retry logic will typically succeed.
     return _verdict("fallthrough")

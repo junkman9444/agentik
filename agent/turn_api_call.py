@@ -194,8 +194,8 @@ def handle_api_interrupt(
 
 @dataclass
 class NousRateGuardVerdict:
-    """``action``: ``"fallthrough"`` (no active limit — make the call), ``"break"``
-    (fallback armed on ``_retry``) or ``"return"`` (``result``: no fallback available)."""
+    """``action``: always ``"fallthrough"`` in the absence of a managed rate-limit relay
+    (kept as a no-op stub so ``conversation_loop`` doesn't need a special case)."""
 
     action: str
     active_system_prompt: Any
@@ -208,59 +208,9 @@ def nous_rate_limit_guard(
     agent: Any, *, _retry: Any, api_messages: Any, messages: Any, conversation_history: Any,
     active_system_prompt: Any, retry_count: Any, compression_attempts: Any, api_call_count: Any,
 ) -> NousRateGuardVerdict:
-    """Skip the call if another session recorded a Nous Portal rate limit: every attempt (incl.
-    SDK retries) counts against RPH. Never lets the guard itself break the agent loop."""
-    from agent.conversation_loop import _arm_fallback_restart
-
-    def _verdict(action: str, result: Optional[Dict[str, Any]] = None) -> NousRateGuardVerdict:
-        return NousRateGuardVerdict(
-            action=action, active_system_prompt=active_system_prompt, retry_count=retry_count,
-            compression_attempts=compression_attempts, result=result,
-        )
-
-    if agent.provider == "nous":
-        # A gateway ``x-nous-model-switch`` recorded on the previous response moves this session
-        # (and the config default, when it still names the free tier's model) before the next call.
-        try:
-            from hermes_cli.anon_auth import apply_model_switch
-            apply_model_switch(agent)
-        except Exception:
-            pass
-        try:
-            from agent.nous_rate_guard import (
-                nous_rate_limit_remaining, format_remaining as _fmt_nous_remaining
-            )
-            _nous_remaining = nous_rate_limit_remaining()
-            if _nous_remaining is not None and _nous_remaining > 0:
-                from hermes_cli import anon_auth
-                reset = _fmt_nous_remaining(_nous_remaining)
-                if anon_auth.route_is_welcome_host(getattr(agent, "base_url", "")):
-                    _nous_msg = anon_auth.FREE_TIER_RATE_LIMIT_CHAT.format(reset=reset)
-                else:
-                    _nous_msg = f"Nous Portal rate limit active — resets in {reset}."
-                agent._buffer_vprint(f"⏳ {_nous_msg} Trying fallback...")
-                agent._buffer_status(f"⏳ {_nous_msg}")
-                if agent._try_activate_fallback():
-                    active_system_prompt = _arm_fallback_restart(
-                        agent, api_messages, active_system_prompt, _retry)
-                    retry_count = 0
-                    compression_attempts = 0
-                    return _verdict("break")
-                # No fallback — surface the buffered rate-limit context that led here.
-                agent._flush_status_buffer()
-                agent._persist_session(messages, conversation_history)
-                return _verdict("return", {
-                    "final_response": (
-                        f"⏳ {_nous_msg}\n\n"
-                        "No fallback provider available. Try again after the reset, or add a "
-                        "fallback provider in config.yaml."
-                    ),
-                    "messages": messages,
-                    "api_calls": api_call_count,
-                    "completed": False,
-                    "failed": True,
-                    "error": _nous_msg,
-                })
-        except Exception:
-            pass  # Never let rate guard break the agent loop
-    return _verdict("fallthrough")
+    """No-op stub: the Nous-Portal-hosted cross-session rate-limit relay has been removed.
+    BYO-API-key providers rely on standard per-request retry/backoff instead."""
+    return NousRateGuardVerdict(
+        action="fallthrough", active_system_prompt=active_system_prompt, retry_count=retry_count,
+        compression_attempts=compression_attempts, result=None,
+    )
