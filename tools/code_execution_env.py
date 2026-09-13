@@ -34,7 +34,7 @@ _SECRET_SUBSTRINGS = ("KEY", "TOKEN", "SECRET", "PASSWORD", "CREDENTIAL", "PASSW
 # along or a child that imports Hermes code loses the Kanban mutation guard
 # while still inheriting HERMES_HOME.
 _HERMES_CHILD_ALLOWED = frozenset({
-    "AGENTIK_HOME", "HERMES_PROFILE", "HERMES_CONFIG", "HERMES_ENV", "HERMES_DELEGATED_CHILD_CONTEXT",
+    "SAGE_HOME", "HERMES_PROFILE", "HERMES_CONFIG", "HERMES_ENV", "HERMES_DELEGATED_CHILD_CONTEXT",
 })
 
 # Windows-only: without these the CRT itself fails — socket.socket() raises

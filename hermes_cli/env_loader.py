@@ -135,7 +135,7 @@ def _hydrate_profile_secret_sources(home: Path) -> dict[str, str]:
         if op_env.exists():
             for _name, _value in load_env_file(op_env).items():
                 local_env.setdefault(_name, _value)
-        local_env["AGENTIK_HOME"] = str(home)
+        local_env["SAGE_HOME"] = str(home)
         report = apply_all(cfg, home, environ=local_env)
     except Exception:  # noqa: BLE001 — preserve fail-open startup behavior
         return {}
@@ -332,7 +332,7 @@ def load_hermes_dotenv(
 ) -> list[Path]:
     """Load Hermes env files: ``~/.hermes/.env`` overrides stale shell exports; project ``.env`` is a dev
     fallback that only fills gaps when the user env exists (and overrides shell vars when it does not)."""
-    home_path = Path(hermes_home or os.getenv("AGENTIK_HOME", Path.home() / ".agentik"))
+    home_path = Path(hermes_home or os.getenv("SAGE_HOME", Path.home() / ".sage"))
 
     # Multiplex gateway: while a routed profile-home override is active, copying that profile's .env
     # into os.environ would expose its credentials to sibling turns and every spawned child. Unscoped
@@ -589,4 +589,4 @@ def _process_hermes_home() -> Path:
 
         return get_process_hermes_home()
     except Exception:
-        return Path.home() / ".agentik"
+        return Path.home() / ".sage"

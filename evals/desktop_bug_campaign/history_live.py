@@ -20,7 +20,7 @@ out = Path(args.output).resolve()
 out.mkdir(parents=True, exist_ok=False)
 home = Path(tempfile.mkdtemp(prefix='history-'+tag+'-', dir=out))
 os.environ['HOME'] = str(home)
-os.environ['AGENTIK_HOME'] = str(home)
+os.environ['SAGE_HOME'] = str(home)
 from hermes_state import SessionDB
 from websockets.sync.client import connect
 

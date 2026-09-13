@@ -327,7 +327,7 @@ def main() -> int:
         print("reconcile: skipping (dashboard container — does not need per-profile gateways)")
         return 0
 
-    hermes_home = Path(os.environ.get("AGENTIK_HOME", "/opt/data"))
+    hermes_home = Path(os.environ.get("SAGE_HOME", "/opt/data"))
     scandir = Path(os.environ.get("S6_PROFILE_GATEWAY_SCANDIR", "/run/service"))
     actions = reconcile_profile_gateways(hermes_home=hermes_home, scandir=scandir)
     for a in actions:

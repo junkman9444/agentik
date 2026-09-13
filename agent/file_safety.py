@@ -14,13 +14,13 @@ from typing import Optional
 
 
 def _constants_path(getter_name: str) -> Path:
-    """Call ``hermes_constants.<getter_name>()`` (local import avoids cycles); ``~/.agentik`` on any failure."""
+    """Call ``hermes_constants.<getter_name>()`` (local import avoids cycles); ``~/.sage`` on any failure."""
     try:
         import hermes_constants
 
         return getattr(hermes_constants, getter_name)()
     except Exception:
-        return Path(os.path.expanduser("~/.agentik"))
+        return Path(os.path.expanduser("~/.sage"))
 
 
 def _hermes_home_path() -> Path:
@@ -275,8 +275,8 @@ def raise_if_read_blocked(path: str) -> None:
 
 
 def _resolve_active_profile_name() -> str:
-    """Active profile name from HERMES_HOME: ``~/.agentik`` -> ``"default"``,
-    ``~/.agentik/profiles/X`` -> ``"X"``; ``"default"`` on any resolution failure."""
+    """Active profile name from HERMES_HOME: ``~/.sage`` -> ``"default"``,
+    ``~/.sage/profiles/X`` -> ``"X"``; ``"default"`` on any resolution failure."""
     try:
         parts = _hermes_home_path().resolve().relative_to(_hermes_root_path().resolve() / "profiles").parts
     except (OSError, RuntimeError, ValueError):
@@ -314,7 +314,7 @@ def classify_sandbox_mirror_target(path: str) -> Optional[dict]:
     # Need at least: sandboxes / <backend> / <task> / home / .hermes / <thing>; inner_idx = the .hermes part.
     inner_idx = next(
         (i + 4 for i, part in enumerate(parts)
-         if part == "sandboxes" and i + 5 < len(parts) and parts[i + 3] == "home" and parts[i + 4] == ".agentik"),
+         if part == "sandboxes" and i + 5 < len(parts) and parts[i + 3] == "home" and parts[i + 4] == ".sage"),
         None,
     )
     if inner_idx is None:

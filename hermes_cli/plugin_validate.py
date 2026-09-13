@@ -272,7 +272,7 @@ def _run_capability_probe(plugin_dir: Path) -> Tuple[Optional[dict], str]:
     """
     with tempfile.TemporaryDirectory(prefix="hermes-validate-") as scratch:
         env = dict(os.environ)
-        env["AGENTIK_HOME"] = scratch
+        env["SAGE_HOME"] = scratch
         try:
             result = subprocess.run(
                 [

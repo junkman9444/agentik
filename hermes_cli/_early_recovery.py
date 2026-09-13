@@ -272,7 +272,7 @@ def _find_uv_binary() -> str | None:
     vendors (``~/.hermes/bin/uv.exe``) or the user has on PATH.
     """
     exe = "uv.exe" if sys.platform == "win32" else "uv"
-    for sub in ((".agentik", "bin"), (".local", "bin"), (".cargo", "bin")):
+    for sub in ((".sage", "bin"), (".local", "bin"), (".cargo", "bin")):
         path = Path.home().joinpath(*sub, exe)
         if path.is_file():
             return str(path)

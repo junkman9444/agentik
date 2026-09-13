@@ -28,8 +28,8 @@ except (ModuleNotFoundError, ImportError):
         """Return the Hermes home directory (default: ~/.hermes).
 
         Mirrors ``hermes_constants.get_hermes_home()``."""
-        val = os.environ.get("AGENTIK_HOME", "").strip()
-        return Path(val) if val else Path.home() / ".agentik"
+        val = os.environ.get("SAGE_HOME", "").strip()
+        return Path(val) if val else Path.home() / ".sage"
 
     def display_hermes_home() -> str:
         """Return a user-friendly ``~/``-shortened display string.

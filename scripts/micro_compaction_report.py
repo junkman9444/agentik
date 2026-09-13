@@ -44,7 +44,7 @@ BATCH_MARKER = "context compression attempt telemetry: "
 
 
 def default_log() -> Path:
-    home = os.environ.get("AGENTIK_HOME") or str(Path.home() / ".agentik")
+    home = os.environ.get("SAGE_HOME") or str(Path.home() / ".sage")
     return Path(home) / "logs" / "agent.log"
 
 

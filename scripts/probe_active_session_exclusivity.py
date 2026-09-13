@@ -43,7 +43,7 @@ class Gateway:
 
     def __init__(self, name: str, home: Path):
         env = dict(os.environ)
-        env["AGENTIK_HOME"] = str(home)
+        env["SAGE_HOME"] = str(home)
         env["PYTHONUNBUFFERED"] = "1"
         self.name = name
         self.proc = subprocess.Popen(

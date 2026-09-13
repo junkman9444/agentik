@@ -6,9 +6,9 @@ import os, sys, re, time, json, copy, subprocess
 # LIVE: makes ~6 real calls to the configured provider (a few cents). Usage:
 #   python cache_prefix_wire.py <repo_root> <A|B> [--hermes-home DIR]   (default HERMES_HOME: the real one, for credentials)
 sys.path.insert(0, sys.argv[1])
-os.environ.setdefault("AGENTIK_HOME", os.path.expanduser("~/.agentik"))
+os.environ.setdefault("SAGE_HOME", os.path.expanduser("~/.sage"))
 if "--hermes-home" in sys.argv:
-    os.environ["AGENTIK_HOME"] = sys.argv[sys.argv.index("--hermes-home") + 1]
+    os.environ["SAGE_HOME"] = sys.argv[sys.argv.index("--hermes-home") + 1]
 arm = sys.argv[2] if len(sys.argv) > 2 else "A"
 import agent.anthropic_message_convert as amc
 if arm == "B":
@@ -56,7 +56,7 @@ task = ("Work in /tmp/f0wire (create it). Before EACH tool call, think carefully
         "5) read it back; then reply DONE.")
 ag.run_conversation(task)
 time.sleep(1)
-log = subprocess.run(f"grep -h '\\[{sid}\\]' ~/.agentik/logs/agent.log | grep 'API call #'", shell=True, capture_output=True).stdout.decode("utf-8", "replace")
+log = subprocess.run(f"grep -h '\\[{sid}\\]' ~/.sage/logs/agent.log | grep 'API call #'", shell=True, capture_output=True).stdout.decode("utf-8", "replace")
 rows = re.findall(r"API call #(\d+): .*in=(\d+) out=(\d+) .*cache=(\d+)/(\d+) \((\d+)%\)", log)
 for r in rows: print(f"  call {r[0]:>2} in={int(r[1]):>6} out={int(r[2]):>5} cached={int(r[3]):>6} ({r[5]}%) uncached={int(r[1])-int(r[3])}")
 print(f"ARM {arm}: captured {len(captured)} payloads")

@@ -1,7 +1,7 @@
 {
-  "name": "agentik-agent",
+  "name": "sage-agent",
   "version": "1.0.0",
-  "description": "Agentik — an AI agent with advanced tool-calling capabilities, featuring a flexible toolsets system for organizing and managing tools. A Sekuro fork of Hermes Agent.",
+  "description": "Sage — an AI agent with advanced tool-calling capabilities, featuring a flexible toolsets system for organizing and managing tools. A Sekuro fork of Hermes Agent.",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -27,13 +27,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/junkman9444/agentik.git"
+    "url": "git+https://github.com/junkman9444/sage.git"
   },
   "license": "GPL-2.0",
   "bugs": {
-    "url": "https://github.com/junkman9444/agentik/issues"
+    "url": "https://github.com/junkman9444/sage/issues"
   },
-  "homepage": "https://github.com/junkman9444/agentik#readme",
+  "homepage": "https://github.com/junkman9444/sage#readme",
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "typescript-eslint": "8.64.0",

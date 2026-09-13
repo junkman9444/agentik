@@ -135,7 +135,7 @@ def _which_with_config_pathext(command: str, path_arg, env: dict):
 def _node_fallback(command: str) -> str:
     """Well-known Node install locations for bare ``npx``/``npm``/``node``; *command* unchanged when none exists."""
     home = os.path.expanduser("~")
-    hermes_home = os.path.expanduser(os.getenv("AGENTIK_HOME", os.path.join(home, ".agentik")))
+    hermes_home = os.path.expanduser(os.getenv("SAGE_HOME", os.path.join(home, ".sage")))
     # /usr/local/bin: canonical Node location (from-source Linux, Hermes Docker image, Intel Homebrew),
     # needed when a hand-authored env.PATH omits it — npx's shebang re-execs /usr/bin/env node.
     candidates = (os.path.join(hermes_home, "node", "bin", command), os.path.join(home, ".local", "bin", command),

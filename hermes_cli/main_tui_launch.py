@@ -344,7 +344,7 @@ def _ensure_tui_node() -> None:
         # edits don't leak back into Python, so the capture is the bridge.
         result = subprocess.run(
             ["bash", "-c", f'source "{helper}" >&2 && ensure_node >&2 && command -v node'],
-            env={**os.environ, "AGENTIK_HOME": hermes_home},
+            env={**os.environ, "SAGE_HOME": hermes_home},
             capture_output=True, text=True, encoding="utf-8", errors="replace", check=False)
     except (OSError, subprocess.SubprocessError):
         return

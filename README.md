@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Agentik" width="100%">
+  <img src="assets/banner.png" alt="Sage" width="100%">
 </p>
 
-# Agentik ☤
+# Sage ☤
 <p align="center">
-  <a href="https://github.com/junkman9444/agentik">Agentik</a> — a <a href="https://sekuro.io">Sekuro</a> fork of <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a>
+  <a href="https://github.com/junkman9444/sage">Sage</a> (<b>S</b>ekuro <b>AGE</b>nt) — a <a href="https://sekuro.io">Sekuro</a> fork of <a href="https://github.com/NousResearch/hermes-agent">Hermes Agent</a>
 </p>
 <p align="center">
-  <a href="https://github.com/junkman9444/agentik/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-GPLv2-green?style=for-the-badge" alt="License: GPLv2"></a>
+  <a href="https://github.com/junkman9444/sage/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-GPLv2-green?style=for-the-badge" alt="License: GPLv2"></a>
   <a href="https://sekuro.io"><img src="https://img.shields.io/badge/Fork%20by-Sekuro-C6007E?style=for-the-badge" alt="Fork by Sekuro"></a>
   <a href="https://github.com/NousResearch/hermes-agent"><img src="https://img.shields.io/badge/Upstream-Hermes%20Agent-FFD700?style=for-the-badge" alt="Upstream: Hermes Agent"></a>
 </p>
 
-**The self-improving AI agent.** Agentik is a [Sekuro](https://sekuro.io)-branded fork of [Hermes Agent](https://github.com/NousResearch/hermes-agent) — the managed Nous Portal service layer (hosted OAuth login, billing, subscription tiers) has been removed in favor of bring-your-own-API-key providers only. It keeps the built-in learning loop from upstream — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
+**The self-improving AI agent.** Sage is a [Sekuro](https://sekuro.io)-branded fork of [Hermes Agent](https://github.com/NousResearch/hermes-agent) — the managed Nous Portal service layer (hosted OAuth login, billing, subscription tiers) has been removed in favor of bring-your-own-API-key providers only. It keeps the built-in learning loop from upstream — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions. Run it on a $5 VPS, a GPU cluster, or serverless infrastructure that costs nearly nothing when idle. It's not tied to your laptop — talk to it from Telegram while it works on a cloud VM.
 
 Use any model you want — Anthropic, OpenAI, OpenRouter, your own endpoint, and many others. Switch with `hermes model` — no code changes, no lock-in, no managed portal.
 
@@ -30,23 +30,23 @@ Use any model you want — Anthropic, OpenAI, OpenRouter, your own endpoint, and
 
 ## Quick Install
 
-> **Note:** This fork does not (yet) run its own install-script hosting. Clone and install with `uv`/`pip` directly until a hosted installer exists for Agentik.
+> **Note:** This fork does not (yet) run its own install-script hosting. Clone and install with `uv`/`pip` directly until a hosted installer exists for Sage.
 
 ### Linux, macOS, WSL2, Termux
 
 ```bash
-git clone https://github.com/junkman9444/agentik.git
-cd agentik
+git clone https://github.com/junkman9444/sage.git
+cd sage
 uv sync --all-extras   # or: pip install -e ".[all]"
 ```
 
 ### Windows (native, PowerShell)
 
-> **Heads up:** Native Windows runs Agentik without WSL — CLI, gateway, TUI, and tools all work natively. If you'd rather use WSL2, the Linux/macOS commands above work there too. Found a bug? Please file issues on [this fork](https://github.com/junkman9444/agentik/issues).
+> **Heads up:** Native Windows runs Sage without WSL — CLI, gateway, TUI, and tools all work natively. If you'd rather use WSL2, the Linux/macOS commands above work there too. Found a bug? Please file issues on [this fork](https://github.com/junkman9444/sage/issues).
 
 ```powershell
-git clone https://github.com/junkman9444/agentik.git
-cd agentik
+git clone https://github.com/junkman9444/sage.git
+cd sage
 uv sync --all-extras
 ```
 
@@ -119,7 +119,7 @@ hermes doctor       # Diagnose any issues
 
 ## API keys (BYO-key only in this fork)
 
-Agentik removed the managed Nous Portal service layer (hosted OAuth login, billing, subscription tiers, and the bundled Tool Gateway that routed web search / image gen / TTS / cloud browser through one subscription). Bring your own API key for whichever provider(s) you want — Anthropic, OpenAI, OpenRouter, a self-hosted endpoint, etc. — and configure per-tool credentials (Firecrawl, FAL, OpenAI TTS, Browser Use) individually if you use those tools.
+Sage removed the managed Nous Portal service layer (hosted OAuth login, billing, subscription tiers, and the bundled Tool Gateway that routed web search / image gen / TTS / cloud browser through one subscription). Bring your own API key for whichever provider(s) you want — Anthropic, OpenAI, OpenRouter, a self-hosted endpoint, etc. — and configure per-tool credentials (Firecrawl, FAL, OpenAI TTS, Browser Use) individually if you use those tools.
 
 ---
 
@@ -186,8 +186,8 @@ We welcome contributions! For upstream Hermes Agent's development conventions, s
 Quick start for contributors — clone this fork and work from a normal git checkout:
 
 ```bash
-git clone https://github.com/junkman9444/agentik.git
-cd agentik
+git clone https://github.com/junkman9444/sage.git
+cd sage
 uv pip install -e ".[all,dev]"
 scripts/run_tests.sh
 ```
@@ -198,8 +198,8 @@ against its own checkout, destroying the running runtime mid-session.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv ~/.hermes/venvs/agentik-dev --python 3.11
-source ~/.hermes/venvs/agentik-dev/bin/activate
+uv venv ~/.hermes/venvs/sage-dev --python 3.11
+source ~/.hermes/venvs/sage-dev/bin/activate
 uv pip install -e ".[all,dev]"
 scripts/run_tests.sh
 ```
@@ -208,7 +208,7 @@ scripts/run_tests.sh
 
 ## Community
 
-- 🐛 [Issues](https://github.com/junkman9444/agentik/issues)
+- 🐛 [Issues](https://github.com/junkman9444/sage/issues)
 - 📚 [Skills Hub](https://agentskills.io) (upstream, applies here too)
 
 ---

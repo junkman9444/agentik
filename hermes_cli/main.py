@@ -227,11 +227,11 @@ def _config_default_interface_early() -> str:
         return _EARLY_INTERFACE_CACHE[0]
     value = "cli"
     try:
-        home = os.environ.get("AGENTIK_HOME")
+        home = os.environ.get("SAGE_HOME")
         if home:
             cfg_path = os.path.join(home, "config.yaml")
         else:
-            cfg_path = os.path.join(os.path.expanduser("~"), ".agentik", "config.yaml")
+            cfg_path = os.path.join(os.path.expanduser("~"), ".sage", "config.yaml")
         if os.path.exists(cfg_path):
             import yaml as _yaml_iface
 
@@ -461,7 +461,7 @@ def _resolve_sudo_user_profile_env(name: str) -> str | None:
     try:
         import pwd
 
-        candidate = Path(pwd.getpwnam(sudo_user).pw_dir) / ".agentik" / "profiles" / name
+        candidate = Path(pwd.getpwnam(sudo_user).pw_dir) / ".sage" / "profiles" / name
         return str(candidate) if candidate.is_dir() else None
     except Exception:
         return None
@@ -518,7 +518,7 @@ def _apply_profile_override() -> None:
     # points at the hermes root (systemd hardcodes HERMES_HOME=/root/.hermes)
     # we must still read active_profile — the user may have run
     # `hermes profile use` and the gateway should honour it (#22502).
-    hermes_home_env = os.environ.get("AGENTIK_HOME", "")
+    hermes_home_env = os.environ.get("SAGE_HOME", "")
     if profile_name is None and hermes_home_env and Path(hermes_home_env).parent.name == "profiles":
         return
 
@@ -552,7 +552,7 @@ def _apply_profile_override() -> None:
         # A bug in profiles.py must NEVER prevent hermes from starting
         print(f"Warning: profile override failed ({exc}), using default", file=sys.stderr)
         return
-    os.environ["AGENTIK_HOME"] = hermes_home
+    os.environ["SAGE_HOME"] = hermes_home
     # Strip the flag from argv so argparse doesn't choke
     if consume > 0 and profile_index is not None:
         start = profile_index + 1  # +1 because argv is sys.argv[1:]

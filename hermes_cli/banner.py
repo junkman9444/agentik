@@ -57,15 +57,15 @@ def _skin_color(key: str, fallback: str) -> str:
 
 from hermes_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
 
-AGENTIK_LOGO = """[bold #C6007E] █████   ██████  ███████ ███    ██ ████████ ██ ██   ██[/]
-[bold #C6007E]██   ██ ██       ██      ████   ██    ██    ██ ██  ██[/]
-[#C6007E]███████ ██   ███ █████   ██ ██  ██    ██    ██ █████[/]
-[#C6007E]██   ██ ██    ██ ██      ██  ██ ██    ██    ██ ██  ██[/]
-[#8A0058]██   ██  ██████  ███████ ██   ████    ██    ██ ██   ██[/]"""
+SAGE_LOGO = """[bold #C6007E]██████    ████    ██████  ████████ [/]
+[bold #C6007E]██        ██  ██  ██       ██       [/]
+[#C6007E] █████   ███████  ██  ████ ██████   [/]
+[#C6007E]      ██ ██    ██ ██    ██ ██       [/]
+[#8A0058]██████   ██    ██  ██████  ████████[/]"""
 
 # Sekuro brand mark, rendered as ASCII from the real sekuro.io logo (three-shard
 # pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_source.png.
-AGENTIK_SEKURO_MARK = """[bold #C6007E]       ...::::-----======++++=:.                ++++++===--.[/]
+SAGE_SEKURO_MARK = """[bold #C6007E]       ...::::-----======++++=:.                ++++++===--.[/]
 [bold #C6007E]:-==++++++++++++++++++*++=-:                    ++++++++++*=[/]
 [bold #C6007E]=*+++++++++++++++++++=-:                        +++++++++++.[/]
 [bold #C6007E] =++++++++++++++++=:.                           =+++++++++:[/]
@@ -93,10 +93,10 @@ AGENTIK_SEKURO_MARK = """[bold #C6007E]       ...::::-----======++++=:.         
 [bold #C6007E]                            -+++++:[/]
 [bold #C6007E]                             .-+-.[/]"""
 
-# Back-compat aliases during the Hermes -> Agentik rebrand; downstream code that still
+# Back-compat aliases during the Hermes -> Sage rebrand; downstream code that still
 # imports the old names keeps working until all call sites are migrated.
-HERMES_AGENT_LOGO = AGENTIK_LOGO
-HERMES_CADUCEUS = AGENTIK_SEKURO_MARK
+HERMES_AGENT_LOGO = SAGE_LOGO
+HERMES_CADUCEUS = SAGE_SEKURO_MARK
 
 # === Skills scanning ===
 
@@ -495,7 +495,7 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
 
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
-    base = f"Agentik v{VERSION} ({RELEASE_DATE})"
+    base = f"Sage v{VERSION} ({RELEASE_DATE})"
     state = get_git_banner_state()
     if not state:
         return base

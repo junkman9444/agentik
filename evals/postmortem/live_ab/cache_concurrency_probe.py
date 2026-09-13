@@ -63,7 +63,7 @@ ARGS = _parse()
 REPO, PROVIDER, N, CALLS, OUT = ARGS.repo, ARGS.provider, ARGS.workers, ARGS.calls, ARGS.out
 SETTLE_S = ARGS.settle
 sys.path.insert(0, os.path.abspath(REPO))
-os.environ.setdefault("AGENTIK_HOME", os.path.expanduser("~/.agentik"))
+os.environ.setdefault("SAGE_HOME", os.path.expanduser("~/.sage"))
 import anthropic
 from anthropic.resources.messages import Messages
 _orig_stream = Messages.stream

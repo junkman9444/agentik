@@ -191,7 +191,7 @@ mode = "overwrite"
             env = dict(os.environ)
             env.update({
                 "PYTHONPATH": pythonpath,
-                "AGENTIK_HOME": str(HOME),
+                "SAGE_HOME": str(HOME),
                 "HERMES_NEMO_RELAY_PLUGINS_TOML": str(relay_config),
             })
             q = TASKS[name].replace("{WORK}", str(work))

@@ -122,7 +122,7 @@ def scenario(name, provider="openai-codex", replay=True):
 
 def main():
     print(json.dumps({"run_agent": run_agent.__file__, "classifier": error_classifier.__file__,
-                      "home": os.environ["AGENTIK_HOME"]}))
+                      "home": os.environ["SAGE_HOME"]}))
     results = [scenario("success"), scenario("masked_replay"), scenario("explicit_encrypted"),
                scenario("unrelated_block"), scenario("unrelated_block", replay=False),
                scenario("masked_replay", provider="custom"), scenario("failed_frame"), scenario("failed_frame", replay=False)]

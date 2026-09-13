@@ -10,7 +10,7 @@ for key in list(os.environ):
     if key.startswith("HERMES_") or key.endswith(("_API_KEY", "_TOKEN")):
         os.environ.pop(key, None)
 os.environ["HOME"] = str(home)
-os.environ["AGENTIK_HOME"] = str(home / ".agentik")
+os.environ["SAGE_HOME"] = str(home / ".sage")
 sys.path.insert(0, sys.argv[1])
 from gateway.config import GatewayConfig, Platform
 from gateway.session import SessionStore, SessionSource

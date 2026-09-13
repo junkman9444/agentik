@@ -21,7 +21,7 @@ _SSH_SENSITIVE_PATH = r'(?:~|\$home|\$\{home\})/\.ssh(?:/|$)'
 _HERMES_ENV_PATH = (
     r'(?:~\/\.hermes/|(?:\$home|\$\{home\})/\.hermes/|(?:\$hermes_home|\$\{hermes_home\})/)' r'\.env\b'
 )
-# ~/.agentik/config.yaml IS the security policy (approvals.mode, yolo, allowlist) and the config cache is mtime-keyed,
+# ~/.sage/config.yaml IS the security policy (approvals.mode, yolo, allowlist) and the config cache is mtime-keyed,
 # so a write takes effect mid-session. Terminal-side coverage (sed -i, tee, >, cp) pairs the file_tools deny.
 _HERMES_CONFIG_PATH = (
     r'(?:~\/\.hermes/|(?:\$home|\$\{home\})/\.hermes/|(?:\$hermes_home|\$\{hermes_home\})/)' r'config\.yaml\b'
@@ -342,7 +342,7 @@ DANGEROUS_PATTERNS = [
     # DESTINATION fires; reading OUT of a sensitive path (`cp ~/.ssh/config /tmp/x`) stays safe.
     # The trailing `[^\s"\']*` consumes the rest of the destination filename.
     # The tee/redirection patterns above already gate _SENSITIVE_WRITE_TARGET (~/.ssh/*,
-    # ~/.netrc/.pgpass/.npmrc/.pypirc, shell rc files, ~/.agentik/config.yaml/.env), but cp/mv/install was
+    # ~/.netrc/.pgpass/.npmrc/.pypirc, shell rc files, ~/.sage/config.yaml/.env), but cp/mv/install was
     # only paired for /etc and project-relative env/config — so `cp evil ~/.ssh/authorized_keys` (key
     # implant), `cp creds ~/.netrc`, and `cp evil ~/.bashrc` (login-time command injection) slipped through
     # with auto-approve. Same unpaired-door rationale as #14639 / the sed-tee-redirect pairing on these
@@ -357,7 +357,7 @@ DANGEROUS_PATTERNS = [
     (rf'\bsed\s+--in-place\b.*\s{_SYSTEM_CONFIG_PATH}', "in-place edit of system config (long flag)"),
     # sed -i on Hermes config/.env bypasses the redirection/tee rules; pairs the file_tools
     # write_file/patch deny so the terminal side is not an open door.
-    # In-place edit of a Hermes-managed security file (~/.agentik/config.yaml or .env). sed -i bypasses the
+    # In-place edit of a Hermes-managed security file (~/.sage/config.yaml or .env). sed -i bypasses the
     # redirection/tee patterns above because it mutates the file directly. See #14639.
     (rf'\bsed\s+-[^\s]*i.*(?:{_HERMES_CONFIG_PATH}|{_HERMES_ENV_PATH})', "in-place edit of Hermes config/env"),
     (rf'\bsed\s+--in-place\b.*(?:{_HERMES_CONFIG_PATH}|{_HERMES_ENV_PATH})', "in-place edit of Hermes config/env (long flag)"),
@@ -429,7 +429,7 @@ def _normalize_command_for_detection(command: str) -> str:
     # precede the generic escape strip below, whose [^\n] class skips newlines and would leave the
     # backslash wedged between tokens, defeating the structured rm/mkfs/dd patterns incl. the HARDLINE floor.
     command = re.sub(r'\\\r?\n', '', command)
-    # Fold absolute user/Hermes home prefixes to ~/ and ~/.agentik/ so the static patterns catch /home/alice/.bashrc
+    # Fold absolute user/Hermes home prefixes to ~/ and ~/.sage/ so the static patterns catch /home/alice/.bashrc
     # and C:\Users\alice\.bashrc. Resolved at detection time (not import time) so it tracks HOME/HERMES_HOME set
     # later. MUST run before the backslash strip (which would dissolve C:\Users\alice to C:Usersalice). Hermes home
     # first: on Windows it nests under the user home, and folding the user home first would eat the prefix it needs.
@@ -484,7 +484,7 @@ def _rewrite_resolved_user_home(command: str) -> str:
 
 
 def _rewrite_resolved_hermes_home(command: str) -> str:
-    """Resolved HERMES_HOME (and its realpath) -> ``~/.agentik/`` so the _HERMES_CONFIG_PATH /
+    """Resolved HERMES_HOME (and its realpath) -> ``~/.sage/`` so the _HERMES_CONFIG_PATH /
     _HERMES_ENV_PATH rules match Docker/gateway deployments that spell the absolute path."""
     try:
         from hermes_constants import get_hermes_home
@@ -492,7 +492,7 @@ def _rewrite_resolved_hermes_home(command: str) -> str:
         paths = [str(home), str(home.resolve(strict=False))]
     except Exception:
         return command
-    return _fold_home_prefixes(command, paths, "~/.agentik")
+    return _fold_home_prefixes(command, paths, "~/.sage")
 
 
 _PARAM_REPLACEMENT_RE = re.compile(r"\$\{[^}/\s]+/[^}/]*/(?P<replacement>[^}]*)\}")

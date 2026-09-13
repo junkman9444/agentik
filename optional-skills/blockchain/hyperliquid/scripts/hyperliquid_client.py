@@ -46,7 +46,7 @@ DEFAULT_API_BASE = "https://api.hyperliquid.xyz"
 
 
 def _hermes_home() -> Path:
-    return Path(os.environ.get("AGENTIK_HOME", "~/.agentik")).expanduser()
+    return Path(os.environ.get("SAGE_HOME", "~/.sage")).expanduser()
 
 
 def _dotenv_paths() -> List[Path]:

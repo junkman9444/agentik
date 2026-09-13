@@ -4,7 +4,7 @@ Arm A = current code. Arm B = HERMES_KEEP_ALL_THINKING=1 monkeypatch of _manage_
 that passes thinking blocks back unchanged for the Nous/Anthropic route."""
 import os, sys, re, time, subprocess, json
 # LIVE: real provider calls (cents). Usage: python cache_prefix_live.py <repo_root> <A|B>
-os.environ.setdefault("AGENTIK_HOME", os.path.expanduser("~/.agentik"))
+os.environ.setdefault("SAGE_HOME", os.path.expanduser("~/.sage"))
 sys.path.insert(0, sys.argv[1])
 arm = sys.argv[2] if len(sys.argv) > 2 else "A"
 import agent.anthropic_message_convert as amc
@@ -39,7 +39,7 @@ t0 = time.time()
 r = ag.run_conversation(task)
 print("final:", (r.get("final_response") or "")[:80], "| wall", round(time.time() - t0, 1), "s")
 time.sleep(1)
-log = subprocess.run(f"grep -h '\\[{sid}\\]' ~/.agentik/logs/agent.log | grep 'API call #'", shell=True, capture_output=True).stdout.decode("utf-8", "replace")
+log = subprocess.run(f"grep -h '\\[{sid}\\]' ~/.sage/logs/agent.log | grep 'API call #'", shell=True, capture_output=True).stdout.decode("utf-8", "replace")
 rows = re.findall(r"API call #(\d+): .*in=(\d+) out=(\d+) .*cache=(\d+)/(\d+) \((\d+)%\)", log)
 tot_in = tot_c = 0
 for n, i, o, c, ct, p in rows:

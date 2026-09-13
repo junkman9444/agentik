@@ -1051,7 +1051,7 @@ def _decision(status, should_continue: bool, prompt: Optional[str], verdict: str
 
 
 _JUDGE_CONFIG_HINT = (
-    "~/.agentik/config.yaml:\n  auxiliary:\n    goal_judge:\n      provider: {provider}\n      model: {model}\n"
+    "~/.sage/config.yaml:\n  auxiliary:\n    goal_judge:\n      provider: {provider}\n      model: {model}\n"
     "Then /goal resume to continue."
 )
 

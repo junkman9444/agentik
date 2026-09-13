@@ -307,7 +307,7 @@ def from_agent_visible_cache_path(container_path: str, container_base: str = "/r
     return mapped if mapped is not None else container_path
 
 
-# Backends whose file-sync lands under the remote home: ``~/.agentik`` is
+# Backends whose file-sync lands under the remote home: ``~/.sage`` is
 # expanded by the remote shell, so it resolves regardless of the actual home.
 _HOME_RELATIVE_BACKENDS = frozenset({"ssh", "daytona", "vercel_sandbox"})
 
@@ -316,19 +316,19 @@ def to_agent_visible_cache_path(host_path: str, container_base: str = "/root/.he
     """Translate a host cache path to where the active backend (TERMINAL_ENV) sees it.
 
     Mirrors ``_agent_cache_base_for_env`` in tools/image_generation_tool.py: docker/modal mount at
-    ``/root/.hermes``; ssh/daytona/vercel_sandbox under ``~/.agentik``; plugin backends declare
+    ``/root/.hermes``; ssh/daytona/vercel_sandbox under ``~/.sage``; plugin backends declare
     ``cache_path_base`` (None = host paths stay correct); local/singularity/unknown unchanged
     (Apptainer auto-binds the host home, so translation would dangle).
 
     * docker / modal — bind-mounted (docker) or per-file-synced (modal) at ``/root/.hermes`` (the
     *container_base* default). * ssh / daytona / vercel_sandbox — file-synced under the remote user's home;
-    ``~/.agentik`` is shell-expanded by the remote shell, so tool commands resolve it regardless of the
+    ``~/.sage`` is shell-expanded by the remote shell, so tool commands resolve it regardless of the
     actual remote home. Previously these backends synced the bytes but still rendered the dangling host path
     (#76577 gap).
     """
     backend = (os.environ.get("TERMINAL_ENV") or "local").strip().lower()
     if backend in _HOME_RELATIVE_BACKENDS:
-        container_base = "~/.agentik"
+        container_base = "~/.sage"
     elif backend not in ("docker", "modal"):
         try:
             from agent.terminal_env_registry import provider_flag

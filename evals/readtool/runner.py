@@ -74,12 +74,12 @@ def _count_metrics(messages: list) -> dict:
 def run_task(task, model: str, provider: str, timeout_mult: float,
              toolsets: list[str]) -> dict:
     ws = Path(tempfile.mkdtemp(prefix=f"readtool-{task.task_id}-"))
-    hermes_home = Path(tempfile.mkdtemp(prefix="readtool-home-")) / ".agentik"
+    hermes_home = Path(tempfile.mkdtemp(prefix="readtool-home-")) / ".sage"
     hermes_home.mkdir(parents=True)
     build_workspace(ws)
 
     old_env = dict(os.environ)
-    os.environ["AGENTIK_HOME"] = str(hermes_home)
+    os.environ["SAGE_HOME"] = str(hermes_home)
     os.environ["TERMINAL_CWD"] = str(ws)
     # Keep only the API key the run needs; hide the rest so provider
     # auto-detection can't wander (mirrors run_tests.sh hermeticity).

@@ -4,7 +4,7 @@ import os, sys, tempfile, shutil
 root = sys.argv[1]
 sys.path.insert(0, root)
 home = tempfile.mkdtemp(prefix="hh-")
-os.environ["AGENTIK_HOME"] = home
+os.environ["SAGE_HOME"] = home
 os.environ["HERMES_STREAM_RETRIES"] = "0"
 try:
     from run_agent import AIAgent

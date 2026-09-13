@@ -60,7 +60,7 @@ def find_removal_step(provider: str, source: str) -> Optional[RemovalStep]:
 
 
 def _remove_env_source(provider: str, removed) -> RemovalResult:
-    """env:<VAR> — clear from ~/.agentik/.env; hint when the shell exports it."""
+    """env:<VAR> — clear from ~/.sage/.env; hint when the shell exports it."""
     from hermes_cli.config import get_env_path, remove_env_value
 
     result = RemovalResult()
@@ -89,7 +89,7 @@ def _remove_env_source(provider: str, removed) -> RemovalResult:
     if env_in_process and not env_in_dotenv:
         result.hints.extend([
             f"Note: {env_var} is still set in your shell environment "
-            f"(not in ~/.agentik/.env).",
+            f"(not in ~/.sage/.env).",
             "  Unset it there (shell profile, systemd EnvironmentFile, "
             "launchd plist, etc.) or it will keep being visible to Hermes.",
             f"  The pool entry is now suppressed — Hermes will ignore "
@@ -104,7 +104,7 @@ def _remove_env_source(provider: str, removed) -> RemovalResult:
 
 
 def _remove_hermes_pkce(provider: str, removed) -> RemovalResult:
-    """~/.agentik/.anthropic_oauth.json is ours — delete it outright."""
+    """~/.sage/.anthropic_oauth.json is ours — delete it outright."""
     from hermes_constants import get_hermes_home
 
     result = RemovalResult()
@@ -216,7 +216,7 @@ _REGISTRY: List[RemovalStep] = [
     RemovalStep(
         provider="anthropic", source_id="hermes_pkce",
         remove_fn=_remove_hermes_pkce,
-        description="~/.agentik/.anthropic_oauth.json",
+        description="~/.sage/.anthropic_oauth.json",
     ),
     RemovalStep(
         provider="nous", source_id="device_code",

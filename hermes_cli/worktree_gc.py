@@ -91,7 +91,7 @@ def _dirty_split(path: str) -> tuple[bool, List[str]]:
 def _archive_untracked(tree: Path, untracked: List[str]) -> Optional[Path]:
     """Copy untracked files out of a doomed tree; None on any failure (caller must then keep)."""
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    dest = Path.home() / ".agentik" / "archive" / "worktree-prune" / f"{tree.name}-{stamp}"
+    dest = Path.home() / ".sage" / "archive" / "worktree-prune" / f"{tree.name}-{stamp}"
     try:
         for rel in untracked:
             src = tree / rel

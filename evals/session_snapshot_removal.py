@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from types import SimpleNamespace
 
-home = Path(os.environ["AGENTIK_HOME"])
+home = Path(os.environ["SAGE_HOME"])
 home.mkdir(parents=True, exist_ok=True)
 (home / "config.yaml").write_text("sessions:\n  write_json_snapshots: true\n", encoding="utf-8")
 from agent.agent_init import _init_session_state

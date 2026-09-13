@@ -240,7 +240,7 @@ def _profile_dir_for_gateway_service(name: str) -> Path:
     """
     profile = _profile_from_service(name)
     validate_profile_name(profile)
-    hermes_home = Path(os.environ.get("AGENTIK_HOME", "/opt/data"))
+    hermes_home = Path(os.environ.get("SAGE_HOME", "/opt/data"))
     root = hermes_home.parent.parent if hermes_home.parent.name == "profiles" else hermes_home
     return root if profile == "default" else root / "profiles" / profile
 

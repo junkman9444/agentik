@@ -48,7 +48,7 @@ def _doctor_runtime(plugin_path: Path):
             plugin_path, copied,
             ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", "*.pyc"))
         stack.enter_context(patch.dict(os.environ, {
-            "AGENTIK_HOME": str(home),
+            "SAGE_HOME": str(home),
             "HERMES_BUNDLED_PLUGINS": str(bundled),
             "HERMES_ENABLE_PROJECT_PLUGINS": "0",
         }, clear=False))
@@ -199,7 +199,7 @@ def resolve_plugin_path(target: str | os.PathLike[str] | None = None) -> Path:
             candidates += [bundled / raw, bundled / "platforms" / raw, bundled / "model-providers" / raw]
         except Exception:
             pass
-        candidates.append(Path.cwd() / ".agentik" / "plugins" / raw)
+        candidates.append(Path.cwd() / ".sage" / "plugins" / raw)
     for candidate in candidates:
         if _holds_plugin(candidate):
             return candidate.resolve()

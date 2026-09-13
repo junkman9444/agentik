@@ -17,7 +17,7 @@ home = Path(tempfile.mkdtemp(prefix="idle-controls-"))
 for key in list(os.environ):
     if key.startswith("HERMES_") or key.endswith(("_API_KEY", "_TOKEN")):
         os.environ.pop(key, None)
-os.environ.update(HOME=str(home), HERMES_HOME=str(home / ".agentik"), SESSION_IDLE_MINUTES="1", SESSION_RESET_HOUR="0")
+os.environ.update(HOME=str(home), HERMES_HOME=str(home / ".sage"), SESSION_IDLE_MINUTES="1", SESSION_RESET_HOUR="0")
 sys.path.insert(0, str(repo))
 import yaml
 from gateway.config import load_gateway_config, GatewayConfig, Platform
@@ -25,8 +25,8 @@ from gateway.session import SessionStore, SessionSource
 from gateway.run import GatewayRunner
 from gateway.agent_cache_pressure import AgentCacheBounds
 
-Path(os.environ["AGENTIK_HOME"]).mkdir(exist_ok=True)
-Path(os.environ["AGENTIK_HOME"], "config.yaml").write_text(yaml.safe_dump({"session_reset": {"mode": "both", "idle_minutes": 1}, "gateway": {"session_reset": {"mode": "daily", "at_hour": 0}}}), encoding="utf-8")
+Path(os.environ["SAGE_HOME"]).mkdir(exist_ok=True)
+Path(os.environ["SAGE_HOME"], "config.yaml").write_text(yaml.safe_dump({"session_reset": {"mode": "both", "idle_minutes": 1}, "gateway": {"session_reset": {"mode": "daily", "at_hour": 0}}}), encoding="utf-8")
 config = load_gateway_config()
 assert "default_reset_policy" not in config.to_dict()
 source = SessionSource(platform=Platform.TELEGRAM, chat_id="cache", user_id="control")

@@ -15,7 +15,7 @@ with tempfile.TemporaryDirectory(prefix="markdown-producer-") as temporary:
     for key in list(os.environ):
         if key.startswith("HERMES_") or key.endswith(("_API_KEY", "_TOKEN")):
             os.environ.pop(key, None)
-    os.environ.update(HOME=str(home), HERMES_HOME=str(home / ".agentik"))
+    os.environ.update(HOME=str(home), HERMES_HOME=str(home / ".sage"))
     from cron.jobs import create_job, save_job_output
     from gateway.wake import persist_delegation_delivery
     from hermes_state import SessionDB

@@ -15,7 +15,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-_HERMES_HOME = Path(os.environ.get("AGENTIK_HOME", Path.home() / ".agentik"))
+_HERMES_HOME = Path(os.environ.get("SAGE_HOME", Path.home() / ".sage"))
 DATA_DIR = _HERMES_HOME / "skills" / "productivity" / "memento-flashcards" / "data"
 CARDS_FILE = DATA_DIR / "cards.json"
 

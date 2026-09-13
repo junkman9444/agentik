@@ -92,7 +92,7 @@ def gateway_room_grant_secret(root: Path | str | None = None) -> bytes:
         from hermes_constants import get_hermes_home
         # Profile routing uses a context-local HERMES_HOME override; the process environment
         # retains the installation root and is the authority here.
-        root = os.environ.get("AGENTIK_HOME") or get_hermes_home()
+        root = os.environ.get("SAGE_HOME") or get_hermes_home()
     return _gateway_room_grant_secret_for_home(str(Path(root).expanduser().resolve()))
 
 

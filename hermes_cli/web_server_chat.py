@@ -324,7 +324,7 @@ def _resolve_chat_argv(
     from tools.environments.local import build_subprocess_env
     env = build_subprocess_env(scrub_secrets=False, inherit_profile_home=True)
     if profile_dir is not None:
-        env["AGENTIK_HOME"] = str(profile_dir)
+        env["SAGE_HOME"] = str(profile_dir)
     try:
         from hermes_cli.config import (
             apply_terminal_config_to_env, read_raw_config, terminal_config_owned_env_vars)

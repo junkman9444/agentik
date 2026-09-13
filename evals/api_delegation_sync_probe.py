@@ -31,7 +31,7 @@ async def probe():
             decisions[name] = _resolve_async_wake_sid(*args)
         finally:
             clear_session_vars(tokens)
-    db = SessionDB(db_path=Path(os.environ["AGENTIK_HOME"]) / "state.db")
+    db = SessionDB(db_path=Path(os.environ["SAGE_HOME"]) / "state.db")
     db.create_session("api-parent", source="api_server")
     db.create_session("stranger", source="api_server")
     adapter = SimpleNamespace(_ensure_session_db=lambda: db)

@@ -47,8 +47,8 @@ def _get_platform_default_hermes_home() -> Path:
     if sys.platform == "win32":
         local_appdata = os.environ.get("LOCALAPPDATA", "").strip()
         base = Path(local_appdata) if local_appdata else Path.home() / "AppData" / "Local"
-        return base / "agentik"
-    return Path.home() / ".agentik"
+        return base / "sage"
+    return Path.home() / ".sage"
 
 
 def _warn_profile_fallback_once() -> None:
@@ -84,7 +84,7 @@ def get_hermes_home() -> Path:
     override = get_hermes_home_override()
     if override:
         return Path(override)
-    if not os.environ.get("AGENTIK_HOME", "").strip():
+    if not os.environ.get("SAGE_HOME", "").strip():
         _warn_profile_fallback_once()
     return get_process_hermes_home()
 
@@ -134,7 +134,7 @@ def get_process_hermes_home() -> Path:
     For process-level assets (theme YAML, dashboard plugin manifests) that must stay visible while a
     request is scoped to another profile (e.g. embedded ``/chat`` under ``--open-profile``).
     """
-    val = os.environ.get("AGENTIK_HOME", "").strip()
+    val = os.environ.get("SAGE_HOME", "").strip()
     return Path(val) if val else _get_platform_default_hermes_home()
 
 
@@ -147,7 +147,7 @@ def get_default_hermes_root() -> Path:
     """Root Hermes dir for profile-level ops: ``<root>`` when ``HERMES_HOME=<root>/profiles/<name>``."""
     global _default_hermes_root_memo
     native_home = _get_platform_default_hermes_home()
-    env_home = os.environ.get("AGENTIK_HOME", "")
+    env_home = os.environ.get("SAGE_HOME", "")
     memo = _default_hermes_root_memo
     if memo is not None and memo[:2] == (str(native_home), env_home):
         return memo[2]
@@ -175,7 +175,7 @@ def _is_hermes_profiles_root(profiles_dir: Path) -> bool:
     ``profiles/.deleted`` tombstone dir (only ``profile delete`` creates it), or the default root.
     """
     root = profiles_dir.parent
-    if root.name == ".agentik":
+    if root.name == ".sage":
         return True
     try:
         if (profiles_dir / _DELETED_PROFILES_DIR).is_dir() or any(
@@ -201,7 +201,7 @@ def named_profile_home(path: str | Path) -> Path | None:
         if (candidate.parent.name == "profiles" and not candidate.name.startswith(".")
                 and _is_hermes_profiles_root(candidate.parent)):
             return candidate
-        if candidate.name == ".agentik":  # default home: a coincidental profiles/ ancestor is not a root
+        if candidate.name == ".sage":  # default home: a coincidental profiles/ ancestor is not a root
             return None
     return None
 
@@ -601,7 +601,7 @@ def _run_node_bootstrap(func: str, *, timeout: int, **extra_env: str) -> bool:
     try:
         result = subprocess.run(
             ["bash", "-c", f'source "{_NODE_BOOTSTRAP_SCRIPT}" && {func}'],
-            env={**os.environ, "AGENTIK_HOME": str(get_hermes_home()), **extra_env},
+            env={**os.environ, "SAGE_HOME": str(get_hermes_home()), **extra_env},
             capture_output=True, timeout=timeout, check=False,
         )
     except (OSError, subprocess.SubprocessError):
@@ -805,7 +805,7 @@ def _norm_home_path(path: str | None) -> str:
 
 def _profile_home_path(env: dict[str, str] | None = None) -> str | None:
     """Return ``{HERMES_HOME}/home`` when the profile-home directory exists."""
-    hermes_home = get_hermes_home_override() or (env or {}).get("AGENTIK_HOME") or os.getenv("AGENTIK_HOME")
+    hermes_home = get_hermes_home_override() or (env or {}).get("SAGE_HOME") or os.getenv("SAGE_HOME")
     if not hermes_home:
         return None
     profile_home = os.path.join(hermes_home, "home")

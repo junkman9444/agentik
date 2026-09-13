@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 def hermes_home() -> Path:
-    return Path(os.environ.get("AGENTIK_HOME") or (Path.home() / ".agentik"))
+    return Path(os.environ.get("SAGE_HOME") or (Path.home() / ".sage"))
 
 
 def data_dir() -> Path:

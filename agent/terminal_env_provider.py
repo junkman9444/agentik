@@ -32,8 +32,8 @@ class TerminalEnvironmentProvider(ProviderBase):
       passed through, host-looking cwds sanitized, file tools use container path resolution.
     * ``skip_container_guards`` — sandbox disposable enough to skip dangerous-command approval
       prompts. Defaults to ``is_container``; backends that can mount host paths override to False.
-    * ``cache_path_base`` — where auto-synced ``~/.agentik/cache`` files land inside the backend
-      (``"~/.agentik"``, ``"/root/.hermes"``), or ``None`` when host paths remain correct.
+    * ``cache_path_base`` — where auto-synced ``~/.sage/cache`` files land inside the backend
+      (``"~/.sage"``, ``"/root/.hermes"``), or ``None`` when host paths remain correct.
     * ``strip_env_keys`` — vendor credential env vars, stripped from every subprocess the agent
       spawns so a model-authored command can never read them.
     * ``session_isolated_when_nonpersistent`` — non-persistent mode gives each session its own

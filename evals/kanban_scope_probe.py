@@ -10,7 +10,7 @@ import tempfile
 repo = Path(sys.argv[1]).resolve()
 if len(sys.argv) == 2:
     with tempfile.TemporaryDirectory(prefix="kanban-transport-") as home:
-        env = {"HOME": home, "AGENTIK_HOME": home + "/hermes", "PATH": os.environ["PATH"], "PYTHONDONTWRITEBYTECODE": "1"}
+        env = {"HOME": home, "SAGE_HOME": home + "/hermes", "PATH": os.environ["PATH"], "PYTHONDONTWRITEBYTECODE": "1"}
         p = subprocess.run([sys.executable, __file__, str(repo), "isolated"], cwd=home, env=env, stdin=subprocess.DEVNULL)
         sys.exit(p.returncode)
 sys.path.insert(0, str(repo))
@@ -19,7 +19,7 @@ from hermes_cli.kanban_db_connect import connect
 from agent.transports.codex_app_server import CodexAppServerClient
 
 home = Path(os.environ["HOME"])
-hh = Path(os.environ["AGENTIK_HOME"])
+hh = Path(os.environ["SAGE_HOME"])
 hh.mkdir(exist_ok=True)
 (hh / "config.yaml").write_text("toolsets: [kanban]\n")
 db = home / "assigned.db"

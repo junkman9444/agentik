@@ -21,7 +21,7 @@ method = _registry.method
 
 def _relay_root() -> Path:
     """Install root shared by every profile (relay state is install-wide)."""
-    home = Path(os.getenv("AGENTIK_HOME") or os.path.expanduser("~/.agentik"))
+    home = Path(os.getenv("SAGE_HOME") or os.path.expanduser("~/.sage"))
     return home.parent.parent if home.parent.name == "profiles" else home
 
 

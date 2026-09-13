@@ -19,5 +19,5 @@ except (ModuleNotFoundError, ImportError):
 
     def get_hermes_home() -> Path:
         """Return the Hermes home directory (default: ``~/.hermes``)."""
-        val = os.environ.get("AGENTIK_HOME", "").strip()
-        return Path(val) if val else Path.home() / ".agentik"
+        val = os.environ.get("SAGE_HOME", "").strip()
+        return Path(val) if val else Path.home() / ".sage"

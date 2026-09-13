@@ -454,8 +454,8 @@ def detect_self_repo_git_mutation(
 
 
 def _block_message(operation: str, root: Path) -> str:
-    hermes_home = os.environ.get("AGENTIK_HOME", "").strip()
-    scratch = (Path(hermes_home).expanduser() if hermes_home else Path.home() / ".agentik") / "scratch"
+    hermes_home = os.environ.get("SAGE_HOME", "").strip()
+    scratch = (Path(hermes_home).expanduser() if hermes_home else Path.home() / ".sage") / "scratch"
     return (
         f"Blocked: `{operation}` would rewrite Hermes's live source checkout "
         f"({root}) and can mix module versions in this running process. "

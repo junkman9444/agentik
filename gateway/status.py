@@ -88,7 +88,7 @@ def _get_process_hermes_home() -> Path:
     """Launch-home HERMES_HOME for identity files (PID, lock, status, markers):
     ``get_hermes_home()`` honors the per-session ``_HERMES_HOME_OVERRIDE`` and would misroute
     them."""
-    val = os.environ.get("AGENTIK_HOME", "").strip()
+    val = os.environ.get("SAGE_HOME", "").strip()
     return Path(val) if val else _get_platform_default_hermes_home()
 
 

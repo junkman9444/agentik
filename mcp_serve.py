@@ -42,7 +42,7 @@ def _hermes_home() -> Path:
         from hermes_constants import get_hermes_home
         return get_hermes_home()
     except ImportError:
-        return Path(os.environ.get("AGENTIK_HOME", Path.home() / ".agentik"))
+        return Path(os.environ.get("SAGE_HOME", Path.home() / ".sage"))
 
 
 def _get_sessions_dir() -> Path:

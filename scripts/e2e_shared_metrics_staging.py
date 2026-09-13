@@ -26,7 +26,7 @@ STAGING = "https://telemetry.staging-nousresearch.com/v1/telemetry"
 
 def main() -> int:
     scratch = Path(tempfile.mkdtemp(prefix="hermes-telemetry-e2e-"))
-    os.environ["AGENTIK_HOME"] = str(scratch)
+    os.environ["SAGE_HOME"] = str(scratch)
 
     # Staging is selected by writing config into the THROWAWAY profile, not by
     # an environment override: a runtime env var that can retarget consented

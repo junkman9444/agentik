@@ -2,7 +2,7 @@
 import os, sys
 root = sys.argv[1]; n = int(sys.argv[2]) if len(sys.argv) > 2 else 3
 sys.path.insert(0, root)
-os.environ.setdefault("AGENTIK_HOME", os.path.expanduser("~/.agentik"))  # LIVE: real auxiliary judge calls (cents)
+os.environ.setdefault("SAGE_HOME", os.path.expanduser("~/.sage"))  # LIVE: real auxiliary judge calls (cents)
 from hermes_cli import goals
 goal = ("Simplify the hermes-agent codebase by >=30% LOC with zero behavior change, decomposing every god file, "
         "through parallel subagent waves; integrate, run the full test suite, and open one PR.")

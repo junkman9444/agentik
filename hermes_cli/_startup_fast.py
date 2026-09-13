@@ -72,11 +72,11 @@ def active_profile_may_override_home(hermes_root: str) -> bool:
 
 
 def _default_home() -> str:
-    return os.path.join(os.path.expanduser("~"), ".agentik")
+    return os.path.join(os.path.expanduser("~"), ".sage")
 
 
 def _resolved_home() -> str:
-    return os.environ.get("AGENTIK_HOME", "").strip() or _default_home()
+    return os.environ.get("SAGE_HOME", "").strip() or _default_home()
 
 
 def container_mode_may_be_active() -> bool:
@@ -88,7 +88,7 @@ def container_mode_may_be_active() -> bool:
     """
     if os.environ.get("HERMES_DEV") == "1" or is_container_startup_environment():
         return False
-    hermes_home = os.environ.get("AGENTIK_HOME", "").strip()
+    hermes_home = os.environ.get("SAGE_HOME", "").strip()
     if hermes_home:
         if os.path.exists(os.path.join(hermes_home, ".container-mode")):
             return True
@@ -142,7 +142,7 @@ def print_fast_version_info(*, check_updates: bool = True) -> None:
     except Exception:
         from hermes_cli import __release_date__, __version__
 
-        print(f"Agentik v{__version__} ({__release_date__})")
+        print(f"Sage v{__version__} ({__release_date__})")
     print(f"Install directory: {project_root_str()}")
     # Authoritative resolver first (code-scoped stamp → managed → nix → git → pip; also self-heals
     # poisoned shared-home 'docker' stamps); cheap stdlib stamp probe only if it fails.

@@ -67,7 +67,7 @@ def audit(event, args):
 
 sys.addaudithook(audit)
 assert Path(os.environ["HOME"]) != Path("/home/teknium")
-assert Path(os.environ["AGENTIK_HOME"]).is_relative_to(Path(os.environ["HOME"]))
+assert Path(os.environ["SAGE_HOME"]).is_relative_to(Path(os.environ["HOME"]))
 assert not any(k for k in os.environ if "API_KEY" in k or "TOKEN" in k or "SECRET" in k)
 
 base_url = f"http://127.0.0.1:{server.server_port}/v1"
@@ -90,9 +90,9 @@ config = {
     "skills": {"creation_nudge_interval": 0},
     "agent": {"reasoning_effort": "high"},
 }
-Path(os.environ["AGENTIK_HOME"]).mkdir(parents=True, exist_ok=True)
+Path(os.environ["SAGE_HOME"]).mkdir(parents=True, exist_ok=True)
 # JSON is valid YAML, allowing the real config loader to read the seeded file.
-(Path(os.environ["AGENTIK_HOME"]) / "config.yaml").write_text(json.dumps(config))
+(Path(os.environ["SAGE_HOME"]) / "config.yaml").write_text(json.dumps(config))
 from run_agent import AIAgent
 from providers import get_provider_profile
 from hermes_cli.config import get_compatible_custom_providers, load_config
@@ -170,7 +170,7 @@ print(
             "status": "PASS: named-route parity restored" if arm == "fixed" else "PASS: named-route reasoning loss reproduced",
             "repo": str(REPO),
             "home": os.environ["HOME"],
-            "hermes_home": os.environ["AGENTIK_HOME"],
+            "hermes_home": os.environ["SAGE_HOME"],
             "captures": captures,
             "rows": rows,
             "profile_controls": profile_controls,

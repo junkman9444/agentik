@@ -20,7 +20,7 @@ def main():
     if ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) != 0:
         raise OSError(ctypes.get_errno(), "PR_SET_CHILD_SUBREAPER")
     with tempfile.TemporaryDirectory(prefix="cron-owned-fork-") as root:
-        os.environ["AGENTIK_HOME"] = root
+        os.environ["SAGE_HOME"] = root
         os.environ["HERMES_CRON_SCRIPT_TIMEOUT"] = "2"
         from cron.scheduler_script import _run_job_script
 

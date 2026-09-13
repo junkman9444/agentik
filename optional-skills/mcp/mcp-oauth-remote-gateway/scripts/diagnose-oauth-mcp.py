@@ -31,12 +31,12 @@ UA = "python-httpx/0.27"  # CF blocks default urllib UA on many providers
 
 
 def _hermes_home():
-    # Prefer Hermes' own resolver (profile-safe); fall back to env then ~/.agentik.
+    # Prefer Hermes' own resolver (profile-safe); fall back to env then ~/.sage.
     try:
         from hermes_constants import get_hermes_home
         return str(get_hermes_home())
     except Exception:
-        return os.environ.get("AGENTIK_HOME") or os.path.expanduser("~/.agentik")
+        return os.environ.get("SAGE_HOME") or os.path.expanduser("~/.sage")
 
 
 def _tokens_dir():

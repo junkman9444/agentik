@@ -18,7 +18,7 @@ import tempfile
 ROOT=Path(sys.argv[1]).resolve()  # repo root under test
 sys.path.insert(0,str(ROOT))
 home=Path(tempfile.mkdtemp(prefix='review103492-confirm-'))
-os.environ['AGENTIK_HOME']=str(home)
+os.environ['SAGE_HOME']=str(home)
 os.environ['HERMES_INTERACTIVE']='1'
 (home/'config.yaml').write_text('approvals:\n  mode: manual\n  timeout: 1\n', encoding='utf-8')
 from tools import approval_detection as d

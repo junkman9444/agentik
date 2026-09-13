@@ -382,7 +382,7 @@ class GoogleChatAdapter(BasePlatformAdapter):
             from hermes_constants import get_hermes_home as _get_hermes_home
             _hermes_home = _get_hermes_home()
         except (ModuleNotFoundError, ImportError):
-            _hermes_home = _Path.home() / ".agentik"
+            _hermes_home = _Path.home() / ".sage"
         self._thread_count_store = _ThreadCountStore(_hermes_home / "google_chat_thread_counts.json")
         # In-flight typing-card creates per chat_id: reserved BEFORE the API call so
         # concurrent _keep_typing calls wait instead of duplicating cards.

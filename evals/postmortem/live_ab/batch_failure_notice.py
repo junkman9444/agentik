@@ -3,7 +3,7 @@ completion queue see the per-task failure notice BEFORE the consolidated batch r
 Usage: python notice_live.py <repo_root>"""
 import json, os, sys, tempfile, threading, time
 root = sys.argv[1]; sys.path.insert(0, root)
-os.environ["AGENTIK_HOME"] = tempfile.mkdtemp(prefix="hh-")
+os.environ["SAGE_HOME"] = tempfile.mkdtemp(prefix="hh-")
 os.environ["HERMES_STREAM_RETRIES"] = "0"
 
 from run_agent import AIAgent

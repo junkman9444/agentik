@@ -407,7 +407,7 @@ def get_all_skills_dirs() -> List[Path]:
 # override same-named profile/bundled skills. cwd + trust list are session-fixed
 # so the skills index stays byte-stable.
 
-PROJECT_SKILLS_SUBDIRS = (os.path.join(".agentik", "skills"), os.path.join(".agents", "skills"))
+PROJECT_SKILLS_SUBDIRS = (os.path.join(".sage", "skills"), os.path.join(".agents", "skills"))
 
 _PROJECT_ROOT_MAX_DEPTH = 64  # walk-up bound for pathological cwds
 

@@ -23,7 +23,7 @@ def _stringify_filter_value(value: Any) -> str:
 
 
 def _resolve_profile_path(path_value: Any) -> Optional[Path]:
-    """Resolve a user path, mapping ~/.agentik to the active profile home."""
+    """Resolve a user path, mapping ~/.sage to the active profile home."""
     if not isinstance(path_value, str):
         return None
     raw = os.path.expandvars(path_value.strip())
@@ -31,8 +31,8 @@ def _resolve_profile_path(path_value: Any) -> Optional[Path]:
         return None
     from hermes_constants import get_hermes_home
     hermes_home = get_hermes_home()
-    if raw == "~/.agentik" or raw.startswith("~/.agentik/"):
-        return hermes_home / raw[len("~/.agentik/"):]
+    if raw == "~/.sage" or raw.startswith("~/.sage/"):
+        return hermes_home / raw[len("~/.sage/"):]
     path = Path(raw).expanduser()
     return path if path.is_absolute() else hermes_home / path
 
@@ -44,7 +44,7 @@ def _resolve_script_path(script_value: Any) -> tuple[Optional[Path], Optional[st
     from hermes_constants import get_hermes_home
     scripts_root = (get_hermes_home() / "scripts").resolve()
     raw_text = os.path.expandvars(script_value.strip())
-    if raw_text == "~/.agentik" or raw_text.startswith("~/.agentik/"):
+    if raw_text == "~/.sage" or raw_text.startswith("~/.sage/"):
         mapped = _resolve_profile_path(raw_text)
         candidate = mapped.resolve() if mapped is not None else scripts_root
     else:

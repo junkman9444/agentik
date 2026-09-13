@@ -43,7 +43,7 @@ TASKS = json.load(open(TASKS_PATH, encoding="utf-8"))
 task = TASKS[TASK_KEY]
 
 home = tempfile.mkdtemp(prefix=f"buhome-{ARM}-")
-hh = os.path.join(home, ".agentik")
+hh = os.path.join(home, ".sage")
 os.makedirs(os.path.join(hh, "logs"), exist_ok=True)
 cdp = os.environ.get("BENCH_CDP_URL", "http://127.0.0.1:9333")
 browser_cfg = (
@@ -60,7 +60,7 @@ import yaml
 
 with open(os.path.join(hh, "config.yaml"), "w", encoding="utf-8") as f:
     yaml.safe_dump(cfg, f)
-os.environ["AGENTIK_HOME"] = hh
+os.environ["SAGE_HOME"] = hh
 # Strip web-fetch shortcuts: every arm must drive the browser.
 os.environ.pop("BROWSER_USE_API_KEY", None)
 for k in ("FIRECRAWL_API_KEY", "NOUS_API_KEY", "TAVILY_API_KEY", "SERPER_API_KEY"):

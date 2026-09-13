@@ -717,7 +717,7 @@ def _detect_prefix(zf: zipfile.ZipFile) -> str:
     """Detect if the zip has a common directory prefix wrapping all entries."""
     names = [n for n in zf.namelist() if not n.endswith("/")]
     first_parts = {Path(n).parts[0] for n in names if len(Path(n).parts) > 1}
-    if len(first_parts) == 1 and first_parts <= {".agentik", "hermes"}:
+    if len(first_parts) == 1 and first_parts <= {".sage", "hermes"}:
         return first_parts.pop() + "/"
     return ""
 
