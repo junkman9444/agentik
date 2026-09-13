@@ -82,7 +82,7 @@ def _path_text(raw_path: str | None) -> str:
 
 
 def _default_hermes_root_is_opt_data() -> bool:
-    raw = os.environ.get("HERMES_HOME", "").strip()
+    raw = os.environ.get("AGENTIK_HOME", "").strip()
     if not raw:
         return False
     try:

@@ -3,7 +3,7 @@
 Management calls hit ``https://app.photon.codes/api/...`` (OAuth 2.0 device flow, Bearer)
 like the official CLI. The dashboard project ``id`` *is* the Spectrum Cloud project id and
 Spectrum is always provisioned at create-time; the sidecar authenticates with
-``(id, projectSecret)``. Storage: runtime SDK creds -> ``~/.hermes/.env``; management
+``(id, projectSecret)``. Storage: runtime SDK creds -> ``~/.agentik/.env``; management
 metadata -> ``auth.json`` under ``credential_pool.photon`` (device token), ``photon_project``
 (ids + secret for offline status) and ``photon_user`` (numbers).
 """
@@ -51,12 +51,12 @@ E164_RE = re.compile(r"^\+[1-9]\d{6,14}$")
 # -- auth.json helpers (shares the file with the rest of hermes-agent) ------------
 
 def _auth_json_path() -> Path:
-    """``~/.hermes/auth.json`` honouring the active Hermes profile."""
+    """``~/.agentik/auth.json`` honouring the active Hermes profile."""
     try:
         from hermes_constants import get_hermes_home
         return Path(get_hermes_home()) / "auth.json"
     except Exception:
-        return Path(os.path.expanduser("~/.hermes")) / "auth.json"
+        return Path(os.path.expanduser("~/.agentik")) / "auth.json"
 
 
 def _load_auth() -> Dict[str, Any]:
@@ -203,7 +203,7 @@ def store_user_numbers(
 
 
 def _persist_runtime_env(spectrum_project_id: str, project_secret: str) -> None:
-    """Write the SDK creds to ``~/.hermes/.env`` (secret never bound to a printable local
+    """Write the SDK creds to ``~/.agentik/.env`` (secret never bound to a printable local
     in a caller — CodeQL clean flow)."""
     try:
         from hermes_cli.config import save_env_value

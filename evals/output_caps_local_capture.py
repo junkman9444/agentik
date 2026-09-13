@@ -49,7 +49,7 @@ server = ThreadingHTTPServer(("127.0.0.1", 0), Capture)
 thread = threading.Thread(target=server.serve_forever, daemon=True)
 thread.start()
 url = f"http://127.0.0.1:{server.server_port}"
-home = Path(os.environ["HERMES_HOME"])
+home = Path(os.environ["AGENTIK_HOME"])
 home.mkdir(parents=True, exist_ok=True)
 config = {"model": {"default": "fixture", "provider": "fixture-local", "max_tokens": 17}, "providers": {"fixture-local": {"api": url + "/v1", "api_key": "fixture", "max_output_tokens": 19}}}
 (home / "config.yaml").write_text(json.dumps(config))

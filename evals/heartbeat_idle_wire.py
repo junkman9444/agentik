@@ -40,7 +40,7 @@ class WireAdapter(BasePlatformAdapter):
 
 
 async def main(base_poller):
-    assert os.environ.get("HERMES_HOME"), "Use a temporary HERMES_HOME"
+    assert os.environ.get("AGENTIK_HOME"), "Use a temporary HERMES_HOME"
     runner = object.__new__(GatewayRunner)
     runner._running_agents = {}
     runner._run_in_executor_with_context = asyncio.to_thread
@@ -121,7 +121,7 @@ async def main(base_poller):
             print(json.dumps({"phase": "cancelled admission", "claim_refunded": True}))
             runner.config = GatewayConfig()
             runner.session_store = SessionStore(
-                sessions_dir=Path(os.environ["HERMES_HOME"]) / "sessions", config=runner.config)
+                sessions_dir=Path(os.environ["AGENTIK_HOME"]) / "sessions", config=runner.config)
             runner.adapters = {Platform.TELEGRAM: adapter}
             runner._profile_adapters = {}
             runner._recover_telegram_topic_thread_id = adapter._topic_recovery_fn

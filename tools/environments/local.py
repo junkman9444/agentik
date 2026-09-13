@@ -207,7 +207,7 @@ def _apply_profile_home(env: dict) -> None:
     from hermes_constants import apply_subprocess_home_env, get_hermes_home_override
     try:
         if value := get_hermes_home_override():
-            env["HERMES_HOME"] = value
+            env["AGENTIK_HOME"] = value
     except Exception:
         pass
     apply_subprocess_home_env(env)

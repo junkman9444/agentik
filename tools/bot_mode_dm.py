@@ -53,7 +53,7 @@ _LOCAL_TARGET_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$")
 
 
 def _default_home() -> str:
-    return os.getenv("HERMES_HOME") or os.path.expanduser("~/.hermes")
+    return os.getenv("AGENTIK_HOME") or os.path.expanduser("~/.agentik")
 
 
 def message_agent_tool_schema() -> dict:

@@ -352,7 +352,7 @@ def _build_gateway_vbs_script(python_path: str, working_dir: str, hermes_home: s
         "Dim sh, env, existing_pp",
         'Set sh = CreateObject("WScript.Shell")',
         'Set env = sh.Environment("PROCESS")',
-        f"env.Item({q('HERMES_HOME')}) = {q(hermes_home)}",
+        f"env.Item({q('AGENTIK_HOME')}) = {q(hermes_home)}",
         *[f"env.Item({q(k)}) = {q(v)}" for k, v in _GATEWAY_ENV],
         f"env.Item({q('VIRTUAL_ENV')}) = {q(_preserve_hermes_home_path(venv_dir))}",
         # Mirror the cmd wrapper's ``PYTHONPATH=<static>;%PYTHONPATH%`` at runtime.
@@ -580,7 +580,7 @@ def _build_gateway_argv() -> tuple[list[str], str, dict[str, str]]:
 
     python_path, working_dir, hermes_home, profile_arg = _launcher_settings()
     python_exe, venv_dir, extra_pythonpath = _resolve_detached_python(python_path)
-    env_overlay = {"HERMES_HOME": hermes_home, **dict(_GATEWAY_ENV), "VIRTUAL_ENV": _preserve_hermes_home_path(venv_dir)}
+    env_overlay = {"AGENTIK_HOME": hermes_home, **dict(_GATEWAY_ENV), "VIRTUAL_ENV": _preserve_hermes_home_path(venv_dir)}
     _prepend_pythonpath(env_overlay, [_preserve_hermes_home_path(p) for p in (PROJECT_ROOT, *extra_pythonpath)])
     return _gateway_run_argv(python_exe, profile_arg), working_dir, env_overlay
 
@@ -612,7 +612,7 @@ def windowless_gateway_restart_spec(run_argv: list[str]) -> tuple[list[str], str
         hermes_home = ""
     env_overlay: dict[str, str] = {"PYTHONIOENCODING": "utf-8", "HERMES_GATEWAY_DETACHED": "1", "VIRTUAL_ENV": str(venv_dir)}
     if hermes_home:
-        env_overlay["HERMES_HOME"] = hermes_home
+        env_overlay["AGENTIK_HOME"] = hermes_home
     _prepend_pythonpath(env_overlay, [str(PROJECT_ROOT), *extra_pythonpath])
     return [hidden_console_python, *run_argv[1:]], _stable_gateway_working_dir(PROJECT_ROOT), env_overlay
 

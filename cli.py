@@ -164,7 +164,7 @@ from hermes_cli.banner import format_banner_version_label
 _COMMAND_SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
 
 
-# ~/.hermes/.env first, project .env as dev fallback; user env files override stale shell exports.
+# ~/.agentik/.env first, project .env as dev fallback; user env files override stale shell exports.
 from hermes_constants import get_hermes_home
 from hermes_cli.env_loader import load_hermes_dotenv
 from utils import base_url_host_matches, base_url_hostname, fast_safe_load
@@ -231,7 +231,7 @@ def _assistant_copy_text(content: Any) -> str:
 
 
 def _load_prefill_messages(file_path: str) -> List[Dict[str, Any]]:
-    """Load prefill messages (JSON array) from *file_path*; relative to ~/.hermes/; missing/empty -> []."""
+    """Load prefill messages (JSON array) from *file_path*; relative to ~/.agentik/; missing/empty -> []."""
     if not file_path:
         return []
     path = Path(file_path).expanduser()
@@ -456,7 +456,7 @@ def _merge_file_config(defaults: Dict[str, Any], file_config: Dict[str, Any]) ->
 
 
 def load_cli_config() -> Dict[str, Any]:
-    """~/.hermes/config.yaml (else ./cli-config.yaml) over built-in defaults; env vars win.
+    """~/.agentik/config.yaml (else ./cli-config.yaml) over built-in defaults; env vars win.
 
     ``HERMES_IGNORE_USER_CONFIG=1`` skips the user config entirely (``.env`` still loads).
     """

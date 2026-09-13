@@ -107,7 +107,7 @@ def _profile_home(profile: str) -> Optional[str]:
         from hermes_cli.profiles import get_profile_dir
         return str(get_profile_dir(profile))
     if profile and profile != "default":
-        return os.path.expanduser(f"~/.hermes/profiles/{profile}")
+        return os.path.expanduser(f"~/.agentik/profiles/{profile}")
     with contextlib.suppress(Exception):
         from hermes_cli.config import get_hermes_home
         return str(get_hermes_home())
@@ -547,7 +547,7 @@ class A2AAdapter(BasePlatformAdapter):
             cmd = ["hermes", "chat", "-q", framed_text, "-Q", "--source", "a2a"] + (["--resume", session_id] if session_id else [])
             env = {**os.environ, "HERMES_A2A_PEER": peer}
             if home := _profile_home(profile):
-                env["HERMES_HOME"] = home
+                env["AGENTIK_HOME"] = home
             start = time.time()
             try:
                 proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",

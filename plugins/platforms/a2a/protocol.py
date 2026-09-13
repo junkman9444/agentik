@@ -60,7 +60,7 @@ def _hermes_home() -> Path:
         from hermes_constants import get_hermes_home
         return Path(get_hermes_home())
     except Exception:
-        return Path(os.path.expanduser("~/.hermes"))
+        return Path(os.path.expanduser("~/.agentik"))
 
 
 def build_agent_card(*, name: str, url: str, description: str, skills: Optional[list[dict]] = None,

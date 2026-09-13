@@ -11,7 +11,7 @@ PY = os.environ.get("NAV_PY", sys.executable)
 HOME = tempfile.mkdtemp(prefix=f"hh_{LABEL}_")
 os.makedirs(f"{HOME}/skills", exist_ok=True)
 open(f"{HOME}/config.yaml", "w", encoding="utf-8").write("model:\n  default: openai/gpt-4o-mini\n  provider: openrouter\nterminal:\n  backend: local\n")
-ENV = {**os.environ, "HERMES_HOME": HOME, "PYTHONPATH": TREE, "PYTHONDONTWRITEBYTECODE": "0", "OPENROUTER_API_KEY": "sk-bench-placeholder",
+ENV = {**os.environ, "AGENTIK_HOME": HOME, "PYTHONPATH": TREE, "PYTHONDONTWRITEBYTECODE": "0", "OPENROUTER_API_KEY": "sk-bench-placeholder",
        "HERMES_SKIP_UPDATE_CHECK": "1", "NO_COLOR": "1", "TERM": "dumb", "COLUMNS": "120"}
 for k in list(ENV):
     if k.startswith(("HERMES_SESSION", "HERMES_PROFILE")): ENV.pop(k)

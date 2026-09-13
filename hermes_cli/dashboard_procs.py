@@ -110,7 +110,7 @@ def _hermes_home_for_pid(pid: int) -> str | None:
     """Best-effort ``HERMES_HOME`` from *pid*'s environment (psutil, then /proc)."""
     with contextlib.suppress(Exception):
         import psutil
-        if home := psutil.Process(pid).environ().get("HERMES_HOME"):
+        if home := psutil.Process(pid).environ().get("AGENTIK_HOME"):
             return home
     try:
         raw = Path(f"/proc/{pid}/environ").read_bytes()
@@ -525,8 +525,8 @@ _HEX32 = set("0123456789abcdef")
 
 def _hermes_home_dir() -> Path:
     """Resolved Hermes home (HERMES_HOME override or ~/.hermes)."""
-    override = os.environ.get("HERMES_HOME", "").strip()
-    return Path(override).expanduser() if override else Path.home() / ".hermes"
+    override = os.environ.get("AGENTIK_HOME", "").strip()
+    return Path(override).expanduser() if override else Path.home() / ".agentik"
 
 
 def _is_hex(value: object, length: int) -> bool:

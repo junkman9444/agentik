@@ -12,7 +12,7 @@ for k in list(os.environ):
     if k.startswith('HERMES_') or k.endswith(('_API_KEY', '_TOKEN')):
         os.environ.pop(k, None)
 home = tempfile.TemporaryDirectory(prefix='deadline-probe-')
-os.environ['HERMES_HOME'] = home.name
+os.environ['AGENTIK_HOME'] = home.name
 os.environ['HERMES_DISABLE_TELEMETRY'] = '1'
 pathlib.Path(home.name, 'config.yaml').write_text('timeouts:\n  tools:\n    sequential_call: 0.3\ndelegation:\n  max_summary_chars: 24000\n', encoding='utf-8')
 # Any accidental provider, metadata, or telemetry request fails closed.

@@ -553,7 +553,7 @@ def _read_ssh_session_token_file(path: str) -> str:
     # validation there, NOT get_hermes_home(): a non-default profile or a Docker
     # /opt/data root re-homes get_hermes_home() and would reject every token.
     # See #69551.
-    token_root = Path.home() / ".hermes" / "desktop-ssh"
+    token_root = Path.home() / ".agentik" / "desktop-ssh"
     try:
         relative = Path(path).relative_to(token_root)
     except ValueError as exc:
@@ -698,9 +698,9 @@ def _route_named_profile_dashboard(
     # get_default_hermes_root() strips a trailing profiles/<name> for both layouts.
     try:
         from hermes_constants import get_default_hermes_root
-        env["HERMES_HOME"] = str(get_default_hermes_root())
+        env["AGENTIK_HOME"] = str(get_default_hermes_root())
     except Exception:
-        env.pop("HERMES_HOME", None)  # prior behaviour rather than blocking the reroute
+        env.pop("AGENTIK_HOME", None)  # prior behaviour rather than blocking the reroute
     # On Windows os.execvpe() spawns via CreateProcess then exits, which under
     # Python 3.14+ can crash with STATUS_ACCESS_VIOLATION; use Popen + exit.
     if sys.platform == "win32":

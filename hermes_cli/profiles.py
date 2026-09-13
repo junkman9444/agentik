@@ -901,7 +901,7 @@ def seed_profile_skills(profile_dir: Path, quiet: bool = False) -> Optional[dict
             [sys.executable, "-c",
              "import json; from tools.skills_sync import sync_skills; "
              "r = sync_skills(quiet=True); print(json.dumps(r))"],
-            env={**os.environ, "HERMES_HOME": str(profile_dir)},
+            env={**os.environ, "AGENTIK_HOME": str(profile_dir)},
             cwd=str(project_root),
             capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60,
         )
@@ -1032,7 +1032,7 @@ def _profile_bound_backend_pids(canon: str, profile_dir: Path) -> list[int]:
             bound = any(normalize_profile_name(sel) == canon for sel in _argv_profile_selectors(argv))
             if not bound:
                 with contextlib.suppress(Exception):  # environ() can raise AccessDenied even same-user
-                    env_home = (proc.environ() or {}).get("HERMES_HOME", "")
+                    env_home = (proc.environ() or {}).get("AGENTIK_HOME", "")
                     bound = bool(env_home) and Path(env_home).resolve() == resolved_dir
             if bound:
                 pids.append(pid)
@@ -1257,9 +1257,9 @@ def _cleanup_gateway_service(name: str, profile_dir: Path) -> None:
     import platform as _platform
 
     # HERMES_HOME is set temporarily so _profile_suffix resolves the service name.
-    old_home = os.environ.get("HERMES_HOME")
+    old_home = os.environ.get("AGENTIK_HOME")
     try:
-        os.environ["HERMES_HOME"] = str(profile_dir)
+        os.environ["AGENTIK_HOME"] = str(profile_dir)
         from hermes_cli.gateway import get_service_name, get_launchd_plist_path
 
         def _run(*cmd: str) -> None:
@@ -1284,9 +1284,9 @@ def _cleanup_gateway_service(name: str, profile_dir: Path) -> None:
     except Exception as e:
         print(f"⚠ Service cleanup: {e}")
     finally:
-        os.environ.pop("HERMES_HOME", None)
+        os.environ.pop("AGENTIK_HOME", None)
         if old_home is not None:
-            os.environ["HERMES_HOME"] = old_home
+            os.environ["AGENTIK_HOME"] = old_home
 
 
 def _stop_gateway_process(profile_dir: Path) -> None:
@@ -1521,7 +1521,7 @@ def export_profile(name: str, output_path: str, extra_files: Optional[Dict[str, 
     # Archive base name without extension (.tar.gz appended by the writer).
     base = str(Path(output_path)).removesuffix(".tar.gz").removesuffix(".tgz")
 
-    # The default profile IS ~/.hermes (dir name ".hermes"), so both paths stage a filtered
+    # The default profile IS ~/.hermes (dir name ".agentik"), so both paths stage a filtered
     # copy under a temp dir named after the canonical id: root allow-list for default,
     # credential exclusion for named profiles.
     def _ignore_credentials(directory: str, contents: list) -> set:
@@ -1695,7 +1695,7 @@ def resolve_profile_env(profile_name: str) -> str:
     (junction-transparent); only the spelling is preserved.
     """
     canon = _canon_valid(profile_name)
-    env_home = os.environ.get("HERMES_HOME", "").strip()
+    env_home = os.environ.get("AGENTIK_HOME", "").strip()
     if env_home:
         env_path = Path(env_home)
         # A profile-shaped env value means the root is the grandparent (mirrors

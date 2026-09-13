@@ -16,7 +16,7 @@ os.environ.update(
     PYTHONDONTWRITEBYTECODE="1",
     HERMES_DISABLE_MODEL_METADATA_FETCH="1",
 )
-Path(os.environ["HERMES_HOME"]).mkdir()
+Path(os.environ["AGENTIK_HOME"]).mkdir()
 os.chdir(sandbox.name)
 sys.path.insert(0, REPO)
 import socket
@@ -127,7 +127,7 @@ config = {
     },
 }
 # JSON is valid YAML; only the temporary Hermes home is written.
-Path(os.environ["HERMES_HOME"], "config.yaml").write_text(
+Path(os.environ["AGENTIK_HOME"], "config.yaml").write_text(
     json.dumps(config), encoding="utf-8"
 )
 from agent import auxiliary_client as aux

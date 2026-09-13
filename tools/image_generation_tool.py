@@ -285,7 +285,7 @@ _CONTAINER_HOME_ENVS = {"DockerEnvironment", "SingularityEnvironment", "ModalEnv
 # No env yet: only deterministic cache roots translate side-effect free (SSH: tilde path; its
 # first sync uploads the cache file).
 _CACHE_BASE_BY_BACKEND = {"docker": "/root/.hermes", "singularity": "/root/.hermes",
-                          "modal": "/root/.hermes", "ssh": "~/.hermes"}
+                          "modal": "/root/.hermes", "ssh": "~/.agentik"}
 
 
 def _looks_like_absolute_file_path(value: str) -> bool:

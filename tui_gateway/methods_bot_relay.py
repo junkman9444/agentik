@@ -21,7 +21,7 @@ method = _registry.method
 
 def _relay_root() -> Path:
     """Install root shared by every profile (relay state is install-wide)."""
-    home = Path(os.getenv("HERMES_HOME") or os.path.expanduser("~/.hermes"))
+    home = Path(os.getenv("AGENTIK_HOME") or os.path.expanduser("~/.agentik"))
     return home.parent.parent if home.parent.name == "profiles" else home
 
 

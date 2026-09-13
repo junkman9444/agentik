@@ -904,8 +904,8 @@ def _hermes_home_path() -> Path:
         from hermes_constants import get_hermes_home
         return get_hermes_home()
     except Exception:
-        env_home = os.environ.get("HERMES_HOME")
-        return Path(env_home).expanduser() if env_home else Path.home() / ".hermes"
+        env_home = os.environ.get("AGENTIK_HOME")
+        return Path(env_home).expanduser() if env_home else Path.home() / ".agentik"
 
 
 def _local_openviking_port_is_open(host: str, port: int) -> bool:

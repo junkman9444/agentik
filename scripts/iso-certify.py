@@ -167,9 +167,9 @@ class ScratchDashboard:
         python = str(venv_py) if venv_py.exists() else sys.executable
         env = dict(os.environ)
         env.update(self.env_extra)
-        env["HERMES_HOME"] = str(self.home)
+        env["AGENTIK_HOME"] = str(self.home)
         env["HOME"] = str(self.home.parent) if str(self.home.parent) else env.get("HOME", "")
-        env["HERMES_HOME"] = str(self.home)
+        env["AGENTIK_HOME"] = str(self.home)
         env["PYTHONPATH"] = str(REPO_ROOT) + os.pathsep + env.get("PYTHONPATH", "")
         env["HERMES_ISO_CERTIFY_SYNTH_TURN"] = "1"
         cmd = [

@@ -293,7 +293,7 @@ def remove_path_from_windows_registry(hermes_home: Path, *, include_managed_bin:
 def remove_hermes_env_vars_windows() -> list[str]:
     """Delete HERMES_HOME and HERMES_GIT_BASH_PATH from User-scope env vars."""
     def edit(winreg, key, removed):
-        for name in ("HERMES_HOME", "HERMES_GIT_BASH_PATH"):
+        for name in ("AGENTIK_HOME", "HERMES_GIT_BASH_PATH"):
             try:
                 winreg.QueryValueEx(key, name)
             except FileNotFoundError:

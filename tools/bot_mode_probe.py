@@ -38,8 +38,8 @@ _cached: dict[str, str] = {}
 
 
 def _default_home() -> str:
-    """Ambient HERMES_HOME (env, else ~/.hermes) as a string."""
-    return os.getenv("HERMES_HOME") or os.path.expanduser("~/.hermes")
+    """Ambient HERMES_HOME (env, else ~/.agentik) as a string."""
+    return os.getenv("AGENTIK_HOME") or os.path.expanduser("~/.agentik")
 
 
 def _resolve_home(home: str | os.PathLike | None) -> Path:
@@ -55,7 +55,7 @@ def _swallow(fn, default):
 
 
 def _hermes_root(home: Path) -> Path:
-    """Root ~/.hermes for both the default profile and named profiles."""
+    """Root ~/.agentik for both the default profile and named profiles."""
     return home.parent.parent if home.parent.name == "profiles" else home
 
 

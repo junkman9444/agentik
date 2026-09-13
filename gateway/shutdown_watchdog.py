@@ -154,7 +154,7 @@ def _mark_exited_quietly(exit_code: int, reason: str) -> None:
 
 def _process_hermes_home() -> Path:
     """HERMES_HOME for process-level identity files (ignore profile overrides)."""
-    val = os.environ.get("HERMES_HOME", "").strip()
+    val = os.environ.get("AGENTIK_HOME", "").strip()
     return Path(val) if val else get_hermes_home()
 
 

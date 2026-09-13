@@ -308,7 +308,7 @@ def _normalise_theme_definition(data: Dict[str, Any]) -> Optional[Dict[str, Any]
     unusable. Accepts the full schema and a loose form (top-level ``colors``, bare hex).
 
     customCSS is clipped but intentionally NOT sanitised — themes are user-authored YAML in
-    ~/.hermes/, the same trust level as config.yaml. Empty asset values are dropped so a
+    ~/.agentik/, the same trust level as config.yaml. Empty asset values are dropped so a
     theme can explicitly clear a slot.
     """
     if not isinstance(data, dict):
@@ -470,7 +470,7 @@ def _dashboard_plugin_search_dirs() -> List[tuple]:
     # context-local HERMES_HOME override (e.g. embedded /chat under --open-profile). #87197: when the
     # process itself is profile-scoped (``--profile <name>`` sets ``HERMES_HOME=<root>/profiles/<name>``),
     # the launch home is the profile directory, which has no ``plugins/`` — user plugins are installed in
-    # the hermes root (``~/.hermes/plugins``). Scan the default root as well (``get_default_hermes_root()``
+    # the hermes root (``~/.agentik/plugins``). Scan the default root as well (``get_default_hermes_root()``
     # unwraps ``<root>/profiles/<name>`` → ``<root>`` and returns a custom ``HERMES_HOME`` unchanged when it
     # *is* the root), mirroring how ``hermes_cli.plugins`` resolves plugin install locations. The
     # ``seen_names`` dedupe below keeps profile-local plugins (if any) authoritative over same-named root
@@ -489,7 +489,7 @@ def _dashboard_plugin_search_dirs() -> List[tuple]:
     # ``true`` / ``yes`` / ``on``) so the gate matches ``hermes_cli/plugins.py`` and the documented user
     # contract.
     if env_var_enabled("HERMES_ENABLE_PROJECT_PLUGINS"):
-        search_dirs.append((Path.cwd() / ".hermes" / "plugins", "project"))
+        search_dirs.append((Path.cwd() / ".agentik" / "plugins", "project"))
     return search_dirs
 
 
@@ -793,7 +793,7 @@ def _mount_plugin_api_routes():
             _log.warning(
                 "Plugin %s: ignoring backend api=%s (project plugins may "
                 "not auto-import Python code; move the plugin to "
-                "~/.hermes/plugins/ if you trust it)",
+                "~/.agentik/plugins/ if you trust it)",
                 plugin["name"], api_file_name,
             )
             continue

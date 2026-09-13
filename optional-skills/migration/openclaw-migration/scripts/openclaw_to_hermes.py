@@ -75,11 +75,11 @@ MIGRATION_OPTION_METADATA: Dict[str, Dict[str, str]] = {
     },
     "skills": {
         "label": "User skills",
-        "description": "Copy OpenClaw skills into ~/.hermes/skills/openclaw-imports/.",
+        "description": "Copy OpenClaw skills into ~/.agentik/skills/openclaw-imports/.",
     },
     "tts-assets": {
         "label": "TTS assets",
-        "description": "Copy compatible workspace TTS assets into ~/.hermes/tts/.",
+        "description": "Copy compatible workspace TTS assets into ~/.agentik/tts/.",
     },
     "discord-settings": {
         "label": "Discord settings",
@@ -418,7 +418,7 @@ def dump_yaml_file(path: Path, data: Dict[str, Any]) -> None:
     cross-device handling mirrors ``utils.atomic_replace``: a plain
     ``os.replace`` onto a symlinked config.yaml would replace the *link* with a
     regular file, silently detaching managed deployments that symlink
-    ``~/.hermes/config.yaml`` into a dotfiles repo or profile package.
+    ``~/.agentik/config.yaml`` into a dotfiles repo or profile package.
     """
     if yaml is None:
         raise RuntimeError("PyYAML is required to update Hermes config.yaml")
@@ -509,7 +509,7 @@ def backup_existing(path: Path, backup_root: Path) -> Optional[Path]:
 #
 # Case-preserving: ``OpenClaw`` → ``Hermes`` (prose), but lowercase matches
 # like ``openclaw`` → ``hermes`` (so filesystem paths like ``~/.openclaw``
-# become ``~/.hermes`` — the real Hermes home — not the broken ``~/.Hermes``).
+# become ``~/.agentik`` — the real Hermes home — not the broken ``~/.Hermes``).
 _REBRAND_PATTERNS: List[Tuple[re.Pattern, str]] = [
     (re.compile(r'\bOpen[\s-]?Claw\b', re.IGNORECASE), 'Hermes'),
     (re.compile(r'\bClawdBot\b', re.IGNORECASE), 'Hermes'),
@@ -523,7 +523,7 @@ def _case_preserving_replacement(replacement: str):
 
     Keeps ``OpenClaw`` → ``Hermes`` but maps ``openclaw`` → ``hermes`` so a
     filesystem path like ``~/.openclaw/config.yaml`` rewrites to
-    ``~/.hermes/config.yaml`` (the real Hermes home) instead of the broken
+    ``~/.agentik/config.yaml`` (the real Hermes home) instead of the broken
     ``~/.Hermes/config.yaml``.
     """
     def _sub(match: "re.Match[str]") -> str:
@@ -3056,7 +3056,7 @@ class Migrator:
 
         notes.extend([
             "- Run `hermes gateway install` if you need the gateway service",
-            "- Review `~/.hermes/config.yaml` for any adjustments",
+            "- Review `~/.agentik/config.yaml` for any adjustments",
             "",
         ])
 
@@ -3070,7 +3070,7 @@ class Migrator:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Migrate OpenClaw user state into Hermes Agent.")
     parser.add_argument("--source", default=str(Path.home() / ".openclaw"), help="OpenClaw home directory")
-    parser.add_argument("--target", default=os.environ.get("HERMES_HOME") or str(Path.home() / ".hermes"), help="Hermes home directory")
+    parser.add_argument("--target", default=os.environ.get("AGENTIK_HOME") or str(Path.home() / ".agentik"), help="Hermes home directory")
     parser.add_argument(
         "--workspace-target",
         help="Optional workspace root where the workspace instructions file should be copied",
@@ -3177,7 +3177,7 @@ def main() -> int:
             seen_kinds.add(label)
             dest = item.get("destination") or ""
             if dest.startswith(str(report["target_root"])):
-                dest = "~/.hermes/" + dest[len(str(report["target_root"])) + 1:]
+                dest = "~/.agentik/" + dest[len(str(report["target_root"])) + 1:]
             meta = MIGRATION_OPTION_METADATA.get(label, {})
             display = meta.get("label", label)
             print(f"    ✔ {display:<35s} -> {dest}")
@@ -3223,7 +3223,7 @@ def main() -> int:
     if args.execute:
         print()
         print("  Next steps:")
-        print("    1. Review ~/.hermes/config.yaml")
+        print("    1. Review ~/.agentik/config.yaml")
         print("    2. Run: hermes mcp list")
         if any(i["kind"] == "cron-jobs" and i["status"] == "archived" for i in items):
             print("    3. Recreate cron jobs: hermes cron")

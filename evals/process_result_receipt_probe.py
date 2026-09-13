@@ -40,7 +40,7 @@ env.update(HOME=str(out), HERMES_HOME=str(out / 'profile'), PYTHONPATH=str(repo)
 def run(code, *args, profile=None):
     child_env = dict(env)
     if profile:
-        child_env['HERMES_HOME'] = str(out / profile)
+        child_env['AGENTIK_HOME'] = str(out / profile)
     result = subprocess.run([sys.executable, '-c', code, *args], cwd=repo,
                             env=child_env, stdin=subprocess.DEVNULL,
                             capture_output=True, text=True, encoding='utf-8', timeout=45)

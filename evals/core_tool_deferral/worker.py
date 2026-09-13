@@ -35,14 +35,14 @@ os.environ.pop("FAL_KEY", None)
 os.environ.pop("HERMES_PROFILE", None)
 
 tmp_root = tempfile.mkdtemp(prefix=f"ab-{ARM}-{TASK_ID}-")
-hermes_home = os.path.join(tmp_root, ".hermes")
+hermes_home = os.path.join(tmp_root, ".agentik")
 workspace = os.path.join(tmp_root, "ws")
 os.makedirs(hermes_home)
 os.makedirs(workspace)
 with open(os.path.join(hermes_home, "config.yaml"), "w", encoding="utf-8") as f:
     f.write("model:\n  provider: openrouter\n  model: %s\n" % MODEL)
 
-os.environ["HERMES_HOME"] = hermes_home
+os.environ["AGENTIK_HOME"] = hermes_home
 os.environ["TERMINAL_CWD"] = workspace
 os.chdir(workspace)
 sys.path.insert(0, HARNESS)

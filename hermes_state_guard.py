@@ -32,7 +32,7 @@ def _real_platform_state_root() -> Optional[Path]:
             base = os.environ.get("LOCALAPPDATA", "").strip()
             root = Path(base) / "hermes" if base else home / "AppData" / "Local" / "hermes"
         else:
-            root = home / ".hermes"
+            root = home / ".agentik"
         return root.resolve()
     except Exception:
         return None

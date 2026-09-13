@@ -240,7 +240,7 @@ class _SlashWorker:
         # (gateway/GitHub/infra) are still stripped (#29157). Global-remote / multi-profile sessions: the
         # worker must resolve config/skills/state against the session's profile home, not the gateway's
         # launch HERMES_HOME (#40677). The override goes through the build_subprocess_env factory's `extra`
-        # (applied last, always wins) instead of a hand-rolled env["HERMES_HOME"] assignment.
+        # (applied last, always wins) instead of a hand-rolled env["AGENTIK_HOME"] assignment.
         from tools.environments.local import build_subprocess_env
 
         # The worker runs the agent → needs provider credentials; tier-1 secrets (gateway/GitHub/
@@ -248,7 +248,7 @@ class _SlashWorker:
         # home via `extra` (applied last, always wins); the base already carries the HOME contract.
         env = _prepend_tool_paths(build_subprocess_env(
             hermes_subprocess_env(inherit_credentials=True), scrub_secrets=False,
-            inherit_profile_home=False, extra={"HERMES_HOME": str(profile_home)} if profile_home else None))
+            inherit_profile_home=False, extra={"AGENTIK_HOME": str(profile_home)} if profile_home else None))
         # start_new_session: otherwise the worker inherits the gateway's pgid and mcp_tool's orphan
         # sweep, racing the spawn, killpg()s the TUI parent itself. errors="replace": bytes invalid
         # in the system locale (GBK Windows) must not raise UnicodeDecodeError in the drain threads.
@@ -452,7 +452,7 @@ def _canonical_profile_request(name: str) -> str:
     installation details — unless a real named profile of that name exists (``hermes`` is a legal
     id), in which case it wins; other unknown names keep failing closed in ``_profile_home``.
     """
-    if name.casefold() in {".hermes", "hermes"}:
+    if name.casefold() in {".agentik", "hermes"}:
         from hermes_cli import profiles as profiles_mod
         if not Path(profiles_mod.get_profile_dir(name)).is_dir():
             return "default"

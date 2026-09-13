@@ -29,7 +29,7 @@ def child(out: Path) -> None:
 
     runner = GatewayRunner.__new__(GatewayRunner)
     runner.config = GatewayConfig()
-    runner.session_store = SessionStore(Path(os.environ["HERMES_HOME"]) / "sessions", runner.config)
+    runner.session_store = SessionStore(Path(os.environ["AGENTIK_HOME"]) / "sessions", runner.config)
     runner._session_db = None
     runner.adapters = {}
     source = SessionSource(platform=Platform.TELEGRAM, user_id="fixture", chat_id="fixture", chat_type="dm")

@@ -14,7 +14,7 @@ for k in list(os.environ):
     if any(s in k for s in ('API_KEY','TOKEN','SECRET')) or k.startswith('HERMES_'):
         os.environ.pop(k, None)
 home = tempfile.mkdtemp(prefix='cap-review-')
-os.environ['HERMES_HOME'] = home
+os.environ['AGENTIK_HOME'] = home
 os.environ['HERMES_DISABLE_REDACTION'] = 'true'
 import yaml
 cfg = {'model': {'default': 'anthropic/claude-fable-5.1', 'provider':'openai-compat', 'base_url':'http://127.0.0.1:1/v1', 'context_length':1000000}, 'compression':{'threshold':0.85}, 'delegation': {}}

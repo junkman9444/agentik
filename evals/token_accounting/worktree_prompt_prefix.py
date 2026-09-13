@@ -62,7 +62,7 @@ if len(sys.argv) == 1:
     env = {
         "PATH": os.environ["PATH"],
         "HOME": str(home),
-        "HERMES_HOME": str(hh),
+        "AGENTIK_HOME": str(hh),
         "PYTHONDONTWRITEBYTECODE": "1",
         "PYTHONPATH": str(SRC),
         "PYTHONHASHSEED": "0",

@@ -737,10 +737,10 @@ def _deliver_to_bot_chat(job: dict, content: str, profile: str) -> Optional[str]
     if profile:
         argv += ["-p", profile]
         # -p owns profile resolution; this scheduler's HERMES_HOME must not shadow it.
-        env.pop("HERMES_HOME", None)
+        env.pop("AGENTIK_HOME", None)
     else:
         # Multiplex workers carry the profile in a ContextVar, not os.environ.
-        env["HERMES_HOME"] = str(source_home)
+        env["AGENTIK_HOME"] = str(source_home)
 
     query_file = None
     try:

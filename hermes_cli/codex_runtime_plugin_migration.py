@@ -354,11 +354,11 @@ def _build_hermes_tools_mcp_entry() -> dict:
     # gateway, kanban dispatcher, custom shell), rather than burning the migrate-time resolved default into
     # config.toml — that would override the launcher's HERMES_HOME and pin the subprocess to the wrong
     # profile. The pytest-tempdir guard below catches the issue #26250 Bug C scenario: a sibling test's
-    # monkeypatch.setenv("HERMES_HOME", tmp_path) would otherwise leak a transient pytest tempdir into the
+    # monkeypatch.setenv("AGENTIK_HOME", tmp_path) would otherwise leak a transient pytest tempdir into the
     # user's real ~/.codex/config.toml and silently brick codex once the tempdir is GC'd.
-    hermes_home = os.environ.get("HERMES_HOME") or ""
+    hermes_home = os.environ.get("AGENTIK_HOME") or ""
     if hermes_home and not _looks_like_test_tempdir(hermes_home):
-        env["HERMES_HOME"] = hermes_home
+        env["AGENTIK_HOME"] = hermes_home
     if os.environ.get("PYTHONPATH"):
         env["PYTHONPATH"] = os.environ["PYTHONPATH"]
     # Quiet mode + redaction defaults so the MCP wire stays clean.

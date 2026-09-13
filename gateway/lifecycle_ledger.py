@@ -28,7 +28,7 @@ def _process_hermes_home() -> Path:
     """HERMES_HOME for process-level identity files (ignore task overrides)."""
     from hermes_constants import get_hermes_home
 
-    val = os.environ.get("HERMES_HOME", "").strip()
+    val = os.environ.get("AGENTIK_HOME", "").strip()
     return Path(val) if val else get_hermes_home()
 
 

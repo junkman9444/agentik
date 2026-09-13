@@ -296,7 +296,7 @@ def _resolve_platform_config(platform_name, config):
         pconfig = _weixin_env_pconfig() if platform_name == "weixin" else None
     if pconfig is None:
         return None, None, None, (f"Platform '{platform_name}' is not configured. Set up credentials in "
-                                  "~/.hermes/config.yaml or environment variables.")
+                                  "~/.agentik/config.yaml or environment variables.")
     return platform, pconfig, entry, None
 
 

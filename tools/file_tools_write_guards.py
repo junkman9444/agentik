@@ -59,13 +59,13 @@ def _hermes_home_real() -> str:
 def _get_hermes_config_resolved() -> str | None:
     """Return the resolved absolute path of the Hermes config file (cached)."""
     return _cached_lookup("_hermes_config_resolved", "_hermes_config_resolved_loaded", _config_path_resolved,
-                          lambda: str(Path(_expand_tilde("~/.hermes/config.yaml")).resolve()))
+                          lambda: str(Path(_expand_tilde("~/.agentik/config.yaml")).resolve()))
 
 
 def _get_real_hermes_home() -> str | None:
     """Return the realpath of the authoritative Hermes home (cached)."""
     return _cached_lookup("_real_hermes_home_cached", "_real_hermes_home_loaded", _hermes_home_real,
-                          lambda: os.path.realpath(_expand_tilde("~/.hermes")))
+                          lambda: os.path.realpath(_expand_tilde("~/.agentik")))
 
 
 def _resolved_or_raw(filepath: str, task_id: str) -> str:
@@ -90,7 +90,7 @@ def _check_sensitive_path(filepath: str, task_id: str = "default") -> str | None
         return (
             f"Refusing to write to Hermes config file: {filepath}\n"
             "Agent cannot modify security-sensitive configuration. "
-            "Edit ~/.hermes/config.yaml directly or use 'hermes config' instead.")
+            "Edit ~/.agentik/config.yaml directly or use 'hermes config' instead.")
     return None
 
 
@@ -149,7 +149,7 @@ def _protected_instruction_reason(filepath: str, task_id: str = "default",
     except (OSError, ValueError, RuntimeError):
         resolved = os.path.realpath(normalized)
 
-    # ~/.hermes itself is governed by its own guards (config.yaml hard-block,
+    # ~/.agentik itself is governed by its own guards (config.yaml hard-block,
     # mirror guard, write_approval); this gate targets PROJECT-LOCAL files only.
     # Must run before the ``.hermes`` component rule, which would match the home.
     real_home = _get_real_hermes_home()
@@ -164,9 +164,9 @@ def _protected_instruction_reason(filepath: str, task_id: str = "default",
             return base
         # Project-local .hermes config dirs (<repo>/.hermes/config.yaml) steer
         # behavior too. Only the IMMEDIATE parent counts — matching any ancestor
-        # would gate every write inside a checkout living under ~/.hermes.
+        # would gate every write inside a checkout living under ~/.agentik.
         parts = candidate.replace("\\", "/").rstrip("/").split("/")
-        if len(parts) >= 2 and parts[-2] == ".hermes":
+        if len(parts) >= 2 and parts[-2] == ".agentik":
             return candidate
     return None
 

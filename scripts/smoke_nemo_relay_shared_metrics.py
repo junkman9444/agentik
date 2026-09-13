@@ -608,7 +608,7 @@ def main() -> int:
     try:
         _write_config(home, server.server_port)
         env = os.environ.copy()
-        env["HERMES_HOME"] = str(home)
+        env["AGENTIK_HOME"] = str(home)
         python_paths = [str(hermes_repo)]
         if relay_python is not None:
             python_paths.append(str(relay_python))

@@ -2194,7 +2194,7 @@ def _default_spawn(task: Task, workspace: str, *, board: Optional[str] = None) -
     # profile root because `hermes -p` applies its override before
     # hermes_constants is imported.
     try:
-        env["HERMES_HOME"] = resolve_profile_env(profile_arg)
+        env["AGENTIK_HOME"] = resolve_profile_env(profile_arg)
     except FileNotFoundError:
         # No profile dir (isolated test fixtures) — the CLI resolves it from
         # HERMES_PROFILE (set below) instead.
@@ -2253,7 +2253,7 @@ def _default_spawn(task: Task, workspace: str, *, board: Optional[str] = None) -
     # older hermes builds on PATH that predate the flag's precedence.
     env.pop("HERMES_TUI", None)
 
-    cmd = _worker_argv(task, profile_arg, env.get("HERMES_HOME"))
+    cmd = _worker_argv(task, profile_arg, env.get("AGENTIK_HOME"))
     # A worker spawned by a managed systemd gateway must leave the gateway's
     # cgroup before startup; otherwise restarting the service kills the worker
     # that is performing the handoff.

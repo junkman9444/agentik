@@ -3110,7 +3110,7 @@ def _launch_external_cron_worker(job: dict) -> bool:
     worker_env = build_subprocess_env(
         scrub_secrets=multiplex_active,
         inherit_profile_home=True,
-        extra={"HERMES_HOME": str(_get_hermes_home().resolve())},
+        extra={"AGENTIK_HOME": str(_get_hermes_home().resolve())},
     )
     worker_env = systemd_user_bus_env(worker_env)
     try:
