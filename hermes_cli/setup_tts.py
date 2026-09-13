@@ -7,7 +7,7 @@ import shutil
 import subprocess
 import sys
 from tools import tool_backend_helpers
-from hermes_cli import nous_subscription
+from hermes_cli import nous_compat as nous_subscription
 
 logger = logging.getLogger("hermes_cli.setup")
 

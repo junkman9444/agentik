@@ -333,7 +333,7 @@ async def get_toolset_config(name: str, profile: Optional[str] = None):
         TOOL_CATEGORIES, _is_provider_active, _visible_providers, provider_readiness_status,
         web_provider_capabilities)
     from hermes_cli.config import get_env_value
-    from hermes_cli.nous_subscription import get_nous_subscription_features
+    from hermes_cli.nous_compat import get_nous_subscription_features
 
     _require_known_toolset(name)
 
@@ -486,7 +486,7 @@ async def select_toolset_provider(
     login, so an unentitled selection would write config and never activate.
     """
     from hermes_cli.tools_config import apply_provider_selection, web_provider_capabilities
-    from hermes_cli.nous_subscription import (
+    from hermes_cli.nous_compat import (
         MANAGED_FEATURE_COVERAGE_CATEGORY, get_nous_subscription_features)
 
     _require_known_toolset(name)

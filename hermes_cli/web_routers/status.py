@@ -642,7 +642,7 @@ def _get_portal_status_sync():
 
     features = []
     try:
-        from hermes_cli.nous_subscription import get_nous_subscription_features
+        from hermes_cli.nous_compat import get_nous_subscription_features
         feats = get_nous_subscription_features(cfg)
         if feats is not None:
             features = [{"label": getattr(feat, "label", ""), "state": _feature_state(feat)}

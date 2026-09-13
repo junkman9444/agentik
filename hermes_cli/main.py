@@ -3246,9 +3246,6 @@ def _build_cli_parser():
     from hermes_cli.subcommands.peer import build_peer_parser
     build_peer_parser(subparsers)
 
-    from hermes_cli.portal_cli import add_parser as _add_portal_parser
-    _add_portal_parser(subparsers)
-
     from hermes_cli.kanban import build_parser as _build_kanban_parser
     _build_kanban_parser(subparsers).set_defaults(func=cmd_kanban)
 

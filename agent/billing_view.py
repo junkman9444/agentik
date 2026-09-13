@@ -255,28 +255,8 @@ def fetch_portal_state(
     set on a portal/HTTP failure. Portal URL: server ``portalUrl`` (absolutized), else
     ``portal_fallback(portal_base_url)``.
     """
-    try:
-        import hermes_cli.nous_billing as nb
-    except Exception:
-        return failed(error="billing client unavailable")
-    try:
-        payload = getattr(nb, endpoint)(timeout=timeout)
-    except nb.BillingAuthError:
-        return failed()
-    except nb.BillingError as exc:
-        log.debug("%s ▸ /state fetch failed (fail-open)", label, exc_info=True)
-        return failed(error=str(exc))
-    except Exception:
-        log.debug("%s ▸ /state unexpected error (fail-open)", label, exc_info=True)
-        return failed(error=f"could not load {label} state")
-    raw_portal = payload.get("portalUrl") if isinstance(payload, dict) else None
-    portal_url = nb._absolutize_portal_url(raw_portal) if raw_portal else None
-    if not portal_url:
-        try:
-            portal_url = portal_fallback(nb.resolve_portal_base_url())
-        except Exception:
-            portal_url = None
-    return parse(payload, portal_url)
+    # Nous Portal billing removed in this fork — no billing client available.
+    return failed(error="billing client unavailable")
 
 
 def build_billing_state(*, timeout: float = 15.0) -> BillingState:

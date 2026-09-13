@@ -12,8 +12,8 @@ from hermes_cli.cli_output import (
 )
 from hermes_cli.colors import Colors, color
 from hermes_cli.config import cfg_get, get_env_value, load_config, save_config, save_env_value
-from hermes_cli.nous_account import format_nous_portal_entitlement_message
-from hermes_cli.nous_subscription import MANAGED_FEATURE_COVERAGE_CATEGORY, NousSubscriptionFeatures
+from hermes_cli.nous_compat import (
+    MANAGED_FEATURE_COVERAGE_CATEGORY, NousSubscriptionFeatures, format_nous_portal_entitlement_message)
 from tools.tool_backend_helpers import NOUS_MANAGED_PROVIDER, fal_key_is_configured
 from utils import base_url_hostname, is_truthy_value
 
@@ -751,7 +751,7 @@ def _nous_provider_gate(provider: dict, config: dict, managed_feature, *, force_
     from hermes_cli.tools_config import get_nous_subscription_features
 
     if managed_feature:
-        from hermes_cli.nous_subscription import ensure_nous_portal_access
+        from hermes_cli.nous_compat import ensure_nous_portal_access
 
         if not ensure_nous_portal_access(
             capability=f"{provider.get('name', 'the Nous Tool Gateway')}",

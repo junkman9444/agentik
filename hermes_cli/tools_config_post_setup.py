@@ -451,7 +451,7 @@ def _agent_browser_installed() -> bool:
     """True when everything ``_run_post_setup("agent_browser")`` installs is present: the agent-browser CLI
     *and* the Chromium build it drives (or the Lightpanda engine, which needs no Chromium), so "Run
     setup" flips to installed only when re-running it would be a no-op."""
-    from hermes_cli.nous_subscription import _local_browser_runnable
+    from hermes_cli.nous_compat import _local_browser_runnable
 
     # The hook runs in a spawned process; this probe runs in the long-lived web-server/CLI process whose
     # browser_tool may have cached a stale "Chromium missing" result. Drop the cache so the pill flips to Ready.
@@ -477,7 +477,7 @@ def _lightpanda_installed() -> bool:
 def _cloud_agent_browser_installed() -> bool:
     """Installed-check for the ``browserbase`` hook: cloud providers host their own Chromium, so
     presence of the agent-browser CLI is the whole contract."""
-    from hermes_cli.nous_subscription import _has_agent_browser
+    from hermes_cli.nous_compat import _has_agent_browser
     return _has_agent_browser()
 
 

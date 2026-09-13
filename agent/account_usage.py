@@ -134,7 +134,7 @@ def build_nous_credits_snapshot(account_info) -> Optional[AccountUsageSnapshot]:
     """NousPortalAccountInfo → /usage snapshot: dollar magnitudes + renewal date + portal CTA, plus a ``% used``
     gauge when the portal supplies ``monthly_credits``. Fail-open → None."""
     try:
-        from hermes_cli.nous_account import nous_portal_topup_url
+        from hermes_cli.nous_compat import nous_portal_topup_url
         if account_info is None or not getattr(account_info, "logged_in", False):
             return None
         access = getattr(account_info, "paid_service_access_info", None)
@@ -186,7 +186,7 @@ def _nous_logged_in() -> bool:
 def _fetch_portal_account(timeout: float):
     """Wall-clock-bounded fresh portal account fetch (raises on any failure/timeout)."""
     import concurrent.futures
-    from hermes_cli.nous_account import get_nous_portal_account_info
+    from hermes_cli.nous_compat import get_nous_portal_account_info
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
         return pool.submit(get_nous_portal_account_info, force_fresh=True).result(timeout=timeout)
 
@@ -266,7 +266,7 @@ def build_credits_view(*, markdown: bool = False, timeout: float = 10.0) -> Cred
         return not_logged_in
     if account is None or not getattr(account, "logged_in", False):
         return not_logged_in
-    from hermes_cli.nous_account import nous_portal_topup_url
+    from hermes_cli.nous_compat import nous_portal_topup_url
     balance_lines = [
         line
         for line in render_account_usage_lines(build_nous_credits_snapshot(account), markdown=markdown)

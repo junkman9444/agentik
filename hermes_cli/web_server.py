@@ -1390,12 +1390,7 @@ def start_server(
 
     import uvicorn  # noqa: F401 — fail fast (before any side effects) when the dashboard extra is missing
 
-    try:
-        from hermes_cli.nous_auth_keepalive import start_nous_auth_keepalive
-
-        start_nous_auth_keepalive()
-    except Exception as exc:
-        _log.debug("Nous auth keepalive did not start: %s", exc)
+    # Nous Portal auth keepalive removed in this fork.
 
     _configure_auth_gate(host, allow_public, ssh_session_token, ssh_owner_nonce)
 

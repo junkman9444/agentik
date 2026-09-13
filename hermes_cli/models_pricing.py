@@ -329,7 +329,7 @@ def nous_policy_allowed_ids(*, force_refresh: bool = False) -> Optional[set[str]
     say), an anonymous read (unfiltered catalog), or an empty read (a fetch failure, not an org
     that may reach nothing)."""
     try:
-        from hermes_cli.nous_account import nous_policy_present
+        from hermes_cli.nous_compat import nous_policy_present
 
         if nous_policy_present() is not True:
             return None

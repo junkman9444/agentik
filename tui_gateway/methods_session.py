@@ -203,14 +203,8 @@ def _active_pet():
 
 
 def _billing_call(rid, fn, extra: dict | None = None) -> dict:
-    """Portal call → ok; BillingError → serialized envelope, else generic; ``extra`` rides both ERROR envelopes."""
-    from hermes_cli.nous_billing import BillingError
-    try:
-        return _ok(rid, fn())
-    except BillingError as exc:
-        return _ok(rid, {**_serialize_billing_error(exc), **(extra or {})})
-    except Exception as exc:
-        return _ok(rid, {"ok": False, "error": "error", "message": str(exc), **(extra or {})})
+    """Nous Portal billing removed in this fork — always reports unavailable."""
+    return _ok(rid, {"ok": False, "error": "error", "message": "Billing is not available in this fork.", **(extra or {})})
 
 
 def _billing_invalid(rid, message: str, error: str = "invalid_request") -> dict:
@@ -1565,31 +1559,16 @@ _billing_view("subscription.state", "agent.subscription_view", "build_subscripti
 
 @method("subscription.preview")
 def _(rid, params: dict) -> dict:
-    """POST /api/billing/subscription/preview → chargeless effect quote. billing:manage."""
-    from agent.subscription_view import subscription_change_preview_from_payload
-    from hermes_cli.nous_billing import post_subscription_preview
-    if not (tier_id := params.get("subscription_type_id")):
-        return _billing_invalid(rid, "subscription_type_id is required")
-    return _billing_call(rid, lambda: _serialize_subscription_preview(
-        subscription_change_preview_from_payload(post_subscription_preview(subscription_type_id=tier_id))))
+    """Nous Portal billing removed in this fork."""
+    return _ok(rid, {"ok": False, "error": "error", "message": "Billing is not available in this fork."})
 
 
 def _billing_route(name: str, call, *, invalid=None, message: str = "", error: str = "invalid_request",
                    idempotent: bool = False):
-    """Portal write route on ``hermes_cli.nous_billing`` (lazy; tests patch its functions): ``invalid(params)``
-    → ``_billing_invalid(message, error)``; ``call(nb, params, key)`` performs the request. ``idempotent``
-    mints ``idempotency_key`` if absent and echoes it (also on error) so the TUI retries the SAME operation."""
+    """Portal write route — Nous Portal billing removed in this fork; every route reports unavailable."""
     @method(name)
     def _(rid, params: dict) -> dict:
-        import hermes_cli.nous_billing as nb
-        if invalid is not None and invalid(params):
-            return _billing_invalid(rid, message, error=error)
-        key = extra = None
-        if idempotent:
-            from agent.billing_view import new_idempotency_key
-            key = params.get("idempotency_key") or new_idempotency_key()
-            extra = {"idempotency_key": key}
-        return _billing_call(rid, lambda: call(nb, params, key) | (extra or {}), extra=extra)
+        return _ok(rid, {"ok": False, "error": "error", "message": "Billing is not available in this fork."})
 
 
 # PUT pending-change: schedule a downgrade / same-price change OR a period-end cancellation.

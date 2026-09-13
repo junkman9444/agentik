@@ -582,7 +582,7 @@ def _apply_nous_gateway_defaults(cfg: dict) -> list:
     *unconfigured* tools through the Nous Tool Gateway. Purely additive — tools with a direct
     key or explicit backend are skipped. Failures never block saving the assignment."""
     try:
-        from hermes_cli.nous_subscription import apply_nous_managed_defaults
+        from hermes_cli.nous_compat import apply_nous_managed_defaults
         from hermes_cli.tools_config import _get_platform_tools
 
         enabled = _get_platform_tools(cfg, "cli", include_default_mcp_servers=False)

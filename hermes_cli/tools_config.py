@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Set
 from hermes_cli.cli_output import print_info as _print_info
 from hermes_cli.colors import Colors, color
 from hermes_cli.config import cfg_get, load_config, save_config, get_env_value
-from hermes_cli.nous_subscription import (
+from hermes_cli.nous_compat import (
     NousSubscriptionFeatures, apply_nous_managed_defaults, get_nous_subscription_features)
 from hermes_cli.platforms import PLATFORMS as _PLATFORMS_REGISTRY
 from hermes_cli.toolset_scope import (
@@ -1086,11 +1086,11 @@ import sys  # noqa: F401,E402
 
 
 _PLUGIN_COMPAT_LAZY = {
-    'MANAGED_FEATURE_COVERAGE_CATEGORY': ('hermes_cli.nous_subscription', 'MANAGED_FEATURE_COVERAGE_CATEGORY'),
+    'MANAGED_FEATURE_COVERAGE_CATEGORY': ('hermes_cli.nous_compat', 'MANAGED_FEATURE_COVERAGE_CATEGORY'),
     'NOUS_MANAGED_PROVIDER': ('tools.tool_backend_helpers', 'NOUS_MANAGED_PROVIDER'),
     'base_url_hostname': ('utils', 'base_url_hostname'),
-    'fal_key_is_configured': ('tools.tool_backend_helpers', 'fal_key_is_configured'),
-    'format_nous_portal_entitlement_message': ('hermes_cli.nous_account', 'format_nous_portal_entitlement_message'),
+    'fal_ke...ured': ('tools.tool_backend_helpers', 'fal_ke...ured'),
+    'format_nous_portal_entitlement_message': ('hermes_cli.nous_compat', 'format_nous_portal_entitlement_message'),
     'is_truthy_value': ('utils', 'is_truthy_value'),
     'save_env_value': ('hermes_cli.config', 'save_env_value'),
 }

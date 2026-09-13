@@ -279,7 +279,7 @@ def run_sign_in(
     from hermes_cli import anon_auth as _core
     from hermes_cli.auth import PROVIDER_REGISTRY, _resolve_verify
     from hermes_cli.auth_device_flow import _request_device_code
-    from hermes_cli.auth_nous import _nous_http_client
+    from hermes_cli.auth import _nous_http_client
 
     is_cancelled = cancelled or (lambda: False)
     # Once the server says "completed" the transfer has happened; a cancel only undoes it where the

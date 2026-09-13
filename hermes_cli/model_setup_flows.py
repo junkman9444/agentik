@@ -185,7 +185,7 @@ def _nous_model_catalog(free_tier: bool, portal_url: str, model_ids: list, prici
     _policy_allowed = nous_policy_allowed_ids()
     if free_tier:
         try:
-            from hermes_cli.nous_account import format_nous_portal_entitlement_message, get_nous_portal_account_info
+            from hermes_cli.nous_compat import format_nous_portal_entitlement_message, get_nous_portal_account_info
             _account_info = get_nous_portal_account_info(force_fresh=True)
             unavailable_message = format_nous_portal_entitlement_message(_account_info, capability="paid Nous models") or ""
         except Exception:
@@ -270,7 +270,7 @@ def _model_flow_nous(config, current_model="", args=None):
     """Nous Portal provider: ensure logged in, then pick model."""
     from hermes_cli.auth import get_provider_auth_state, _prompt_model_selection, _login_nous, PROVIDER_REGISTRY
     from hermes_cli.config import load_config
-    from hermes_cli.nous_subscription import prompt_enable_tool_gateway
+    from hermes_cli.nous_compat import prompt_enable_tool_gateway
     state = get_provider_auth_state("nous")
     if not state or not state.get("access_token"):
         _say("Not logged into Nous Portal. Starting login...", "")
@@ -335,7 +335,7 @@ def _model_flow_nous(config, current_model="", args=None):
         return
     model_ids, pricing, unavailable_models, unavailable_message, _policy_narrowed = catalog
 
-    from hermes_cli.nous_account import nous_policy_notice
+    from hermes_cli.nous_compat import nous_policy_notice
     _policy_notice = nous_policy_notice(removed=_policy_narrowed)
     if _policy_notice:
         print(_policy_notice)

@@ -213,7 +213,7 @@ def exchange_anon_jwt(client: httpx.Client, portal_base_url: str, anon_token: st
 
 def apply_exchange_to_state(state: Dict[str, Any], exchanged: Dict[str, Any]) -> None:
     """Write a fresh exchange result into a guest state in place (token, expiry, routing)."""
-    from hermes_cli.auth_nous import _validate_nous_inference_url_from_network
+    from hermes_cli.auth import _validate_nous_inference_url_from_network
     access_token = exchanged["access_token"]
     claims = _decode_jwt_claims(access_token)
     now = datetime.now(timezone.utc)
@@ -243,7 +243,7 @@ def apply_exchange_to_state(state: Dict[str, Any], exchanged: Dict[str, Any]) ->
 
 
 def _portal_base_url() -> str:
-    from hermes_cli.auth_nous import _nous_portal_env_override
+    from hermes_cli.auth import _nous_portal_env_override
     return (_nous_portal_env_override() or DEFAULT_NOUS_PORTAL_URL).rstrip("/")
 
 
@@ -266,7 +266,7 @@ def _mint_locked(
     bootstrap passes False when its inventory found another usable provider: the identity exists for
     connectors, the user's own provider keeps carrying inference (NS-845 Q1.3)."""
     from hermes_cli.auth import _store_provider_state, _save_auth_store
-    from hermes_cli.auth_nous import _write_shared_nous_state
+    from hermes_cli.auth import _write_shared_nous_state
     minted = mint_guest(client, portal)
     state: Dict[str, Any] = {
         "auth_method": ANON_AUTH_METHOD, "account_tier": ANON_ACCOUNT_TIER,
@@ -301,7 +301,7 @@ def _reconcile_and_provision(*, timeout_seconds: float, carries_inference: bool 
     from hermes_cli.auth import (
         _auth_store_lock, _load_auth_store, _load_provider_state, _save_auth_store,
         _store_provider_state, _resolve_verify)
-    from hermes_cli.auth_nous import (
+    from hermes_cli.auth import (
         _nous_http_client, _nous_shared_store_lock, _read_shared_nous_state, _write_shared_nous_state)
     portal = _portal_base_url()
     with _auth_store_lock():
@@ -383,7 +383,7 @@ def clear_dead_guest(reason: str, *, dead_token: Optional[str] = None) -> None:
     """
     from hermes_cli.auth import (
         _auth_store_lock, _load_auth_store, _load_provider_state, _save_auth_store, _store_section)
-    from hermes_cli.auth_nous import _clear_shared_nous_state, _nous_shared_store_lock, _read_shared_nous_state
+    from hermes_cli.auth import _clear_shared_nous_state, _nous_shared_store_lock, _read_shared_nous_state
     with _auth_store_lock():
         auth_store = _load_auth_store()
         state = _load_provider_state(auth_store, "nous")
@@ -720,7 +720,7 @@ def _account_state_from_token(
 ) -> Dict[str, Any]:
     """The ``providers.nous`` shape for the signed-in account (same fields the device-code login writes)."""
     from hermes_cli.auth import PROVIDER_REGISTRY, _coerce_ttl_seconds, _optional_base_url, _tls_state_from_verify
-    from hermes_cli.auth_nous import _NOUS_EMPTY_AGENT_KEY_FIELDS, _iso_after, refresh_nous_oauth_from_state
+    from hermes_cli.auth import _NOUS_EMPTY_AGENT_KEY_FIELDS, _iso_after, refresh_nous_oauth_from_state
     now = datetime.now(timezone.utc)
     ttl = _coerce_ttl_seconds(token_data.get("expires_in", 0))
     inference_url = (
@@ -799,7 +799,7 @@ def _poll_for_token(*args, **kwargs) -> Dict[str, Any]:
 
 def persist_nous_credentials(*args, **kwargs):
     """Keep the existing auth_nous persistence seam behind the sign-in entry point."""
-    from hermes_cli.auth_nous import persist_nous_credentials as persist
+    from hermes_cli.auth import persist_nous_credentials as persist
     return persist(*args, **kwargs)
 
 

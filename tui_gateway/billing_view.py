@@ -20,16 +20,12 @@ def _wire_str(value):
 
 
 def _serialize_billing_error(exc) -> dict:
-    """Map a BillingError into the result.error envelope the TUI branches on."""
-    from hermes_cli.nous_billing import (
-        BillingRemoteSpendingRevoked, BillingScopeRequired, BillingSessionRevoked, BillingTransient)
-    typed = {BillingRemoteSpendingRevoked: "remote_spending_revoked",
-             BillingSessionRevoked: "session_revoked", BillingScopeRequired: "insufficient_scope"}
-    kind = next((k for cls, k in typed.items() if isinstance(exc, cls)), None)
-    if kind is None:
-        error = getattr(exc, "error", None)
-        fallback = "rate_limited" if isinstance(exc, BillingTransient) else "error"
-        kind = str(error) if error else fallback
+    """Map a BillingError into the result.error envelope the TUI branches on.
+
+    Nous Portal billing removed in this fork — generic fallback envelope only.
+    """
+    error = getattr(exc, "error", None)
+    kind = str(error) if error else "error"
     return {
         "ok": False, "error": kind, "message": str(exc),
         "portal_url": getattr(exc, "portal_url", None),

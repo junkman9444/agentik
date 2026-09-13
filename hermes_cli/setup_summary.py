@@ -3,7 +3,7 @@ resolved through the module object so test patches on ``hermes_cli.setup.<name>`
 
 import logging
 from tools import tool_backend_helpers
-from hermes_cli import nous_subscription
+from hermes_cli import nous_compat as nous_subscription
 
 logger = logging.getLogger("hermes_cli.setup")
 

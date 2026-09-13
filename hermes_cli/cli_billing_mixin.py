@@ -411,71 +411,9 @@ class CLIBillingMixin:
         self._subscription_preview_and_confirm(state, choice)
 
     def _subscription_preview_and_confirm(self, state, tier_id, *, allow_stepup=True):
-        """Preview → effect → confirm+apply. ``allow_stepup=False`` (post-grant replay) never re-prompts a step-up."""
-        from cli import _cprint, _b, _d
-        from agent.subscription_view import is_upgrade, subscription_change_preview_from_payload, subscription_manage_url
-        from hermes_cli.nous_billing import BillingError, BillingScopeRequired, post_subscription_preview
-        self._dim('Checking the change…')
-        try:
-            payload = post_subscription_preview(subscription_type_id=tier_id)
-        except BillingScopeRequired:
-            if allow_stepup:
-                self._subscription_handle_scope_required(state, retry=("preview", tier_id))
-            else:
-                print(_STEPUP_STALE_MSG)
-            return
-        except BillingError as exc:
-            self._subscription_render_error(state, exc)
-            return
-        p = subscription_change_preview_from_payload(payload)
-        effect = p.effect
-        target = p.target_tier_name or "the selected plan"
-        print()
-        if effect == "no_op":
-            self._dim(f"You are already on {target} — nothing to change.")
-            return
-        if effect not in ("charge_now", "scheduled"):
-            # blocked OR unknown effect → fail SAFE (never schedule on an unrecognized string) and
-            # re-offer the portal. plan= rides along only for an UPGRADE hand-off (downgrades stay native).
-            _cprint(f"  🟡 {p.reason or 'This change cannot be confirmed here — manage it on the portal.'}")
-            _plan = tier_id if is_upgrade(state, tier_id) else None
-            _mu = subscription_manage_url(state, tier_id=_plan)
-            if _mu:
-                print(f"  Manage on portal: {_mu}")
-            return
-        _cprint(f"  {_b('Confirm plan change')}  {_d('· charged now' if effect == 'charge_now' else '· scheduled · not today')}")
-        if effect == "charge_now":
-            _amt = f"${p.amount_due_now_cents / 100:.2f}" if p.amount_due_now_cents is not None else None
-            _charged = f"{_amt} now (prorated)" if _amt else "the prorated amount now"
-            _cprint(f"  Upgrade to {target}. You will be charged {_charged}.")
-            # Best-effort: name the exact card, but only when the resolver rung matches what a
-            # subscription charge actually uses (subPin / customerDefault — Stripe's precedence).
-            _card_line = "The card on your subscription will be charged."
-            try:
-                from agent.billing_view import build_billing_state
-                _bs = build_billing_state(timeout=6.0)
-                _c = _bs.card if _bs.logged_in else None
-                if _c is not None and _c.resolved_via in ("subPin", "customerDefault"):
-                    _card_line = f"{_c.masked} — the card on your subscription — will be charged."
-            except Exception:
-                pass
-            self._dim(_card_line)
-            pay_label = f"Pay {_amt} & upgrade now" if _amt else "Upgrade now (prorated charge)"
-            action = ("upgrade", tier_id)
-            # The money-moving row is NOT the default — a bare Enter hits "Go back", so a stray keystroke can't charge.
-            confirm_choices = [("cancel", "Go back", "do not charge"), ("yes", pay_label, "charge + upgrade now")]
-        else:  # scheduled (whitelisted above)
-            _when = p.effective_at[:10] if (p.effective_at and len(p.effective_at) >= 10) else "the end of the billing period"
-            _cprint(f"  Change to {target} — takes effect {_when}. No charge now; you keep your current plan until then.")
-            pay_label = f"Schedule change to {target}"
-            action = ("schedule", tier_id)
-            confirm_choices = [("yes", pay_label, "apply this change"), ("cancel", "Go back", "do not change")]
-        if p.monthly_credits_delta:
-            self._dim(f"Monthly credits change: {p.monthly_credits_delta}.")
-        if self._modal_choice(pay_label, "", confirm_choices) != "yes":
-            print("  🟡 Cancelled. No plan change.")
-            return
-        self._subscription_apply(state, action, allow_stepup=allow_stepup)
+        """Preview → effect → confirm+apply. Nous Portal billing has been removed from this fork."""
+        print("  🔴 Subscription changes are not available in this fork.")
+        self._billing_portal_hint(state)
 
     def _subscription_confirm_cancel(self, state):
         """Confirm, then schedule a cancellation at period end."""
@@ -493,55 +431,10 @@ class CLIBillingMixin:
         self._subscription_apply(state, ("cancel", None))
 
     def _subscription_apply(self, state, action, idempotency_key=None, *, allow_stepup=True):
-        """Run ("upgrade"|"schedule", tier_id) / ("cancel"|"resume", None); scope denial → step-up + ONE replay, same key."""
-        from cli import _cprint
-        from hermes_cli.nous_billing import (
-            BillingError, BillingTransient, BillingRemoteSpendingRevoked, BillingScopeRequired, BillingSessionRevoked,
-            delete_subscription_pending_change, post_subscription_upgrade, put_subscription_pending_change)
-        kind, arg = action
-        key = None
-        if kind == "upgrade":
-            from agent.billing_view import new_idempotency_key
-            key = idempotency_key or new_idempotency_key()
-        try:
-            if kind == "upgrade":
-                res = post_subscription_upgrade(subscription_type_id=arg, idempotency_key=key) or {}
-                status = res.get("status")
-                name = res.get("targetTierName") or "your new plan"
-                if status in _UPGRADE_OK_COPY:
-                    self._ok(_UPGRADE_OK_COPY[status].format(name=name))
-                elif status in _UPGRADE_STATUS_COPY:
-                    line, echo_url = _UPGRADE_STATUS_COPY[status]
-                    _cprint(line)
-                    if echo_url and res.get("recoveryUrl"):
-                        _cprint(f"  Portal: {res.get('recoveryUrl')}")
-                else:  # unknown / absent 2xx status → also ambiguous, not a flat failure
-                    self._subscription_render_upgrade_ambiguous(None)
-                return
-            pending = {
-                "schedule": (put_subscription_pending_change, {"subscription_type_id": arg}),
-                "cancel": (put_subscription_pending_change, {"cancel": True}),
-                "resume": (delete_subscription_pending_change, {})}.get(kind)
-            if pending:
-                pending[0](**pending[1])
-                self._ok(_PENDING_OK_COPY[kind])
-            self._dim('Re-run /subscription anytime to review it.')
-        except BillingScopeRequired:  # rejects BEFORE charging → route to the step-up
-            if allow_stepup:
-                self._subscription_handle_scope_required(state, retry=action, idempotency_key=key)
-            else:
-                print(_STEPUP_STALE_MSG)
-        except BillingError as exc:
-            # Upgrade only: deterministic PRE-charge rejections (Transient/401/403 types, 4xx codes)
-            # never reached Stripe → recovery copy. Transport / 5xx is INDETERMINATE (NAS may have
-            # charged) → steer to a re-check, never a blind retry (a fresh key can't dedup).
-            _pre_charge = (BillingTransient, BillingSessionRevoked, BillingRemoteSpendingRevoked)
-            _ambiguous = (exc.error in ("network_error", "endpoint_unavailable")
-                          or exc.status is None or exc.status >= 500)
-            if kind == "upgrade" and _ambiguous and not isinstance(exc, _pre_charge):
-                self._subscription_render_upgrade_ambiguous(exc)
-            else:
-                self._subscription_render_error(state, exc)
+        """Run ("upgrade"|"schedule", tier_id) / ("cancel"|"resume", None). Nous Portal billing has
+        been removed from this fork."""
+        print("  🔴 Subscription changes are not available in this fork.")
+        self._billing_portal_hint(state)
 
     def _subscription_handle_scope_required(self, state, *, retry, idempotency_key=None):
         """insufficient_scope → step-up, then replay `retry` ONCE so the user never re-runs the command."""
@@ -554,11 +447,7 @@ class CLIBillingMixin:
             return
         self._ok("Remote Spending allowed.")
         # Bust the 30s token cache (it still holds the pre-grant token; _request only busts on 401).
-        try:
-            from hermes_cli import nous_billing as _nb
-            _nb.invalidate_cached_token()
-        except Exception:
-            pass
+        # Token cache busting no longer applicable — Nous Portal billing removed in this fork.
         # Re-fetch fresh state, then replay the held action ONCE (allow_stepup=False).
         from agent.subscription_view import build_subscription_state
         try:
@@ -783,50 +672,14 @@ class CLIBillingMixin:
             on_scope=lambda: self._billing_handle_scope_required(state, amount=amount, idempotency_key=key))
 
     def _billing_submit_and_poll(self, state, amount, key, *, missing_msg, status_msg, on_scope=None):
-        """POST the charge, then poll. ``on_scope`` handles a scope denial (first submit); else it renders."""
-        from cli import _cprint, _d
-        from hermes_cli.nous_billing import BillingError, BillingScopeRequired, post_charge
-        try:
-            result = post_charge(amount_usd=amount, idempotency_key=key)
-        except BillingError as exc:
-            if on_scope is not None and isinstance(exc, BillingScopeRequired):
-                on_scope()
-            else:
-                self._billing_render_charge_error(state, exc)
-            return
-        charge_id = result.get("chargeId")
-        if not charge_id:
-            print(missing_msg)
-            return
-        _cprint(f"  {_d(status_msg)}")
-        self._billing_poll_charge(state, charge_id, amount)
+        """Billing is not available in this fork (Nous Portal removed)."""
+        print("  🔴 Billing is not available in this fork.")
+        return
 
     def _billing_poll_charge(self, state, charge_id, amount):
-        """Poll loop: 2s interval, 5-min cap, cancellable. settled = ledger truth."""
-        import time as _time
-        from agent.billing_view import format_money, parse_money
-        from hermes_cli.nous_billing import BillingError, BillingTransient, get_charge_status
-        deadline = _time.time() + 300
-        while _time.time() < deadline:
-            try:
-                status = get_charge_status(charge_id)
-            except BillingTransient as exc:  # retry-after, NOT a failure — back off and keep polling
-                _time.sleep(min(exc.retry_after or 5, 30))
-                continue
-            except BillingError as exc:
-                print(f"  🔴 Could not check the charge: {exc}")
-                return
-            state_str = status.get("status")
-            if state_str == "settled":
-                amt = status.get("amountUsd")
-                print(f"  ✓ {format_money(parse_money(amt)) if amt else format_money(amount)} added to your balance.")
-                return
-            if state_str == "failed":
-                self._billing_render_charge_failed(state, status.get("reason"))
-                return
-            _time.sleep(2.0)  # pending
-        print("  🟡 Still processing after 5 minutes — this is a timeout, not a failure. Check /billing or the portal shortly.")
-        self._billing_portal_hint(state)
+        """Billing is not available in this fork (Nous Portal removed)."""
+        print("  🔴 Billing is not available in this fork.")
+        return
 
     def _billing_render_charge_failed(self, state, reason):
         """Poll `failed` reasons → the right copy + portal funnel."""
@@ -835,33 +688,8 @@ class CLIBillingMixin:
         self._billing_portal_hint(state)
 
     def _billing_render_charge_error(self, state, exc):
-        """Submit-time BillingError. Order matters: revoked/session before code lookups; Transient before scope."""
-        from hermes_cli.nous_billing import BillingTransient, BillingRemoteSpendingRevoked, BillingSessionRevoked
-        code = exc.error
-        portal_url = exc.portal_url or state.portal_url
-        if isinstance(exc, BillingRemoteSpendingRevoked) or code == "remote_spending_revoked":
-            # This terminal's spend was revoked; recovery is reconnect.
-            who = "An admin stopped this terminal's spending." if exc.actor == "admin" else "You stopped this terminal's spending."
-            print(f"  🔴 {who} Reconnect to restore — run `hermes portal` to re-authorize.")
-        elif isinstance(exc, BillingSessionRevoked) or code == "session_revoked":
-            print("  🔴 Your session was logged out. Run `hermes portal` to log in again.")
-        elif code in _CHARGE_ERROR_COPY or exc.code == "remote_spending_disabled":
-            # Fixed copy by `error`; the gate's dual error/code payload may carry it in `.code` only.
-            print(_CHARGE_ERROR_COPY.get(code) or _CHARGE_ERROR_COPY["cli_billing_disabled"])
-        elif code == "monthly_cap_exceeded":
-            remaining = (exc.payload or {}).get("remainingUsd")
-            print(f"  🔴 Monthly spend cap reached — ${remaining} headroom left." if remaining is not None else "  🔴 Monthly spend cap reached.")
-        elif isinstance(exc, BillingTransient):
-            wait = exc.retry_after
-            mins = f" (try again in ~{max(1, round(wait / 60))} min)" if wait else ""
-            print(f"  🟡 Too many charges right now{mins}. This isn't a payment failure.")
-        elif code == "insufficient_scope":
-            # Never leak the raw billing:manage scope (a raced post-grant replay can re-raise it).
-            print("  🔴 Remote Spending needs approval — run /topup to allow it, then retry.")
-        else:
-            print(f"  🔴 {exc}")
-        if portal_url:
-            print(f"  Portal: {portal_url}")
+        """Billing is not available in this fork (Nous Portal removed)."""
+        print(f"  🔴 {exc}")
 
     def _billing_handle_scope_required(self, state, *, amount=None, idempotency_key=None):
         """403 insufficient_scope → reauth, then resume ``amount`` on explicit confirm, reusing the idempotency key."""
@@ -964,17 +792,9 @@ class CLIBillingMixin:
             print(f"  ✅ Auto-reload on: below {format_money(threshold_amt)} → reload to {format_money(reload_amt)}.")
 
     def _billing_patch_auto_top_up(self, state, **kwargs) -> bool:
-        """PATCH auto-top-up; scope denials → step-up, other errors → renderer. True on success."""
-        from hermes_cli.nous_billing import BillingError, BillingScopeRequired, patch_auto_top_up
-        try:
-            patch_auto_top_up(**kwargs)
-        except BillingScopeRequired:
-            self._billing_handle_scope_required(state)
-            return False
-        except BillingError as exc:
-            self._billing_render_charge_error(state, exc)
-            return False
-        return True
+        """Billing is not available in this fork (Nous Portal removed)."""
+        print("  🔴 Billing is not available in this fork.")
+        return False
 
     def _billing_auto_reload_disable(self, state):
         """PATCH ``enabled:false``; the endpoint still requires threshold/topUpAmount → echo current (or 0)."""

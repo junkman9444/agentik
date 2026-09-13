@@ -20,7 +20,7 @@ def managed_nous_tools_enabled(*, force_fresh: bool = False) -> bool:
     pool). Fails closed on unknown/error — never blocks startup. Callers narrow per category
     via ``tool_gateway_entitled_for``; ``force_fresh`` is for flows needing a just-bought grant."""
     try:
-        from hermes_cli.nous_account import get_nous_portal_account_info
+        from hermes_cli.nous_compat import get_nous_portal_account_info
         account_info = (get_nous_portal_account_info(force_fresh=True) if force_fresh
                         else get_nous_portal_account_info())
         return bool(account_info.logged_in) and account_info.tool_gateway_entitled
@@ -32,7 +32,7 @@ def nous_tool_gateway_unavailable_message(capability: str = "the Nous Tool Gatew
                                           force_fresh: bool = False) -> str:
     """Return account-aware guidance for an unavailable Nous Tool Gateway path."""
     try:
-        from hermes_cli.nous_account import (
+        from hermes_cli.nous_compat import (
             format_nous_portal_entitlement_message, get_nous_portal_account_info)
         message = format_nous_portal_entitlement_message(
             get_nous_portal_account_info(force_fresh=force_fresh), capability=capability,

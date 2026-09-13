@@ -304,7 +304,7 @@ def check_nous_free_tier(*, force_fresh: bool = False, cached_only: bool = False
     if cached_only:
         return False
     try:
-        from hermes_cli.nous_account import get_nous_portal_account_info
+        from hermes_cli.nous_compat import get_nous_portal_account_info
 
         result = get_nous_portal_account_info(force_fresh=force_fresh).is_free_tier
     except Exception:

@@ -50,20 +50,207 @@ from hermes_cli.auth_oauth_grants import (  # noqa: F401  re-exported
     SINGLE_USE_REFRESH_POOL_PROVIDERS, _oauth_heal_clean_marks, _oauth_heal_notices,
     consume_oauth_heal_notices, heal_forked_single_use_oauth_grants,
     strip_cloned_single_use_oauth_grants)
-from hermes_cli.auth_nous import (  # noqa: F401  re-exported
-    NOUS_SESSION_TERMINAL, NOUS_SESSION_UNKNOWN, NOUS_SESSION_VALID, _ALLOWED_NOUS_INFERENCE_HOSTS,
-    _agent_key_is_usable, _apply_nous_refreshed_tokens, _assert_nous_inference_jwt_usable,
-    _compute_nous_auth_status, _format_nous_entitlement_auth_error, _healed_nous_inference_url,
-    _login_nous, _merge_shared_nous_oauth_state, _migrate_stale_nous_portal_url,
-    _nous_device_code_login, _nous_inference_env_override, _nous_invoke_jwt_is_usable,
-    _nous_invoke_jwt_status, _nous_portal_env_override, _nous_shared_store_lock,
-    _nous_shared_store_path, _pool_first_oauth_status, _quarantine_nous_oauth_state,
-    _quarantine_nous_pool_entries, _read_shared_nous_state, _refresh_access_token,
-    _refresh_nous_or_quarantine, _select_nous_invoke_jwt, _sync_nous_pool_from_auth_store,
-    _token_fingerprint, _try_import_shared_nous_state, _validate_nous_inference_url_from_network,
-    _write_shared_nous_state, fetch_nous_models, get_nous_auth_status_local,
-    get_nous_session_validity, persist_nous_credentials, refresh_nous_oauth_from_state,
-    resolve_nous_runtime_credentials, step_up_nous_billing_scope)
+# --- Nous Portal core-path subsystem removed in this fork ---------------------------------------
+# ``hermes_cli.auth_nous`` (device-code login, refresh, shared-store mirroring, JWT selection,
+# status) no longer exists. Every name below is a safe no-op / fail-closed stand-in so the rest of
+# this module (and every consumer that imports these names from ``hermes_cli.auth``) keeps working
+# for every OTHER provider; anything that specifically needs the Nous Portal now degrades to "not
+# logged in" / "unavailable" instead of raising ImportError.
+NOUS_SESSION_TERMINAL = "terminal"
+NOUS_SESSION_UNKNOWN = "unknown"
+NOUS_SESSION_VALID = "valid"
+_ALLOWED_NOUS_INFERENCE_HOSTS: FrozenSet[str] = frozenset()
+
+
+def _agent_key_is_usable(state: Dict[str, Any], min_ttl_seconds: int) -> bool:  # noqa: ARG001
+    return False
+
+
+def _apply_nous_refreshed_tokens(state: Dict[str, Any], refreshed: Dict[str, Any], refresh_token: Optional[str]) -> None:  # noqa: ARG001
+    return None
+
+
+def _assert_nous_inference_jwt_usable(state: Dict[str, Any], *, access_token: Any = None) -> None:  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def _compute_nous_auth_status() -> Dict[str, Any]:
+    return {"logged_in": False, "error": "Nous Portal support has been removed from this fork."}
+
+
+def _format_nous_entitlement_auth_error(error: Exception) -> str:
+    return f"{error} Nous Portal support has been removed from this fork."
+
+
+def _healed_nous_inference_url(refreshed: Dict[str, Any]) -> str:  # noqa: ARG001
+    return ""
+
+
+def _login_nous(args, pconfig) -> None:  # noqa: ARG001
+    raise SystemExit("Nous Portal support has been removed from this fork.")
+
+
+def _merge_shared_nous_oauth_state(state: Dict[str, Any]) -> bool:  # noqa: ARG001
+    return False
+
+
+def _migrate_stale_nous_portal_url(providers: Dict[str, Any]) -> None:  # noqa: ARG001
+    return None
+
+
+def _nous_device_code_login(*args, **kwargs) -> Dict[str, Any]:  # noqa: ARG001
+    raise SystemExit("Nous Portal support has been removed from this fork.")
+
+
+def _nous_inference_env_override() -> Optional[str]:
+    return None
+
+
+def _nous_invoke_jwt_is_usable(token: Any, *, scope: Any = None, expires_at: Any = None, min_ttl_seconds: int = 0) -> bool:  # noqa: ARG001
+    return False
+
+
+def _nous_invoke_jwt_status(token: Any, *, scope: Any = None, expires_at: Any = None) -> Optional[str]:  # noqa: ARG001
+    return "nous_portal_removed"
+
+
+def _nous_portal_env_override() -> Optional[str]:
+    return None
+
+
+@contextmanager
+def _nous_shared_store_lock(timeout_seconds: float = 0.0):  # noqa: ARG001
+    yield
+
+
+def _nous_shared_store_path() -> Path:
+    return get_hermes_home() / "shared" / "nous_auth.json"
+
+
+def _pool_first_oauth_status(
+    provider_id: str, *, is_expiring, auth_mode: str, resolve, on_pool_miss=None) -> Dict[str, Any]:
+    """Status snapshot for a store-backed OAuth provider (Codex, xAI). Kept local: it has no
+    Nous-specific behavior, only lived in auth_nous.py by historical accident."""
+    try:
+        from agent.credential_pool import load_pool
+        pool = load_pool(provider_id)
+        if pool and pool.has_credentials():
+            entry = pool.select()
+            if entry is not None:
+                api_key = (
+                    getattr(entry, "runtime_api_key", None) or getattr(entry, "access_token", ""))
+                if api_key and not is_expiring(api_key, 0):
+                    return {
+                        "logged_in": True, "auth_store": str(_auth_file_path()),
+                        "last_refresh": getattr(entry, "last_refresh", None),
+                        "auth_mode": auth_mode,
+                        "source": f"pool:{getattr(entry, 'label', 'unknown')}", "api_key": api_key}
+            if on_pool_miss is not None and (degraded := on_pool_miss()):
+                return degraded
+    except Exception:
+        pass
+    try:
+        creds = resolve()
+        return {
+            "logged_in": True, "auth_store": str(_auth_file_path()),
+            "last_refresh": creds.get("last_refresh"),
+            "auth_mode": creds.get("auth_mode"), "source": creds.get("source"),
+            "api_key": creds.get("api_key")}
+    except AuthError as exc:
+        return {"logged_in": False, "auth_store": str(_auth_file_path()), "error": str(exc)}
+
+
+def _quarantine_nous_oauth_state(state: Dict[str, Any], error: Exception, *, reason: str) -> None:  # noqa: ARG001
+    return None
+
+
+def _quarantine_nous_pool_entries(auth_store: Dict[str, Any], error: Exception, *, reason: str) -> None:  # noqa: ARG001
+    return None
+
+
+def _read_shared_nous_state() -> Optional[Dict[str, Any]]:
+    return None
+
+
+def _refresh_access_token(*, client, portal_base_url: str, client_id: str, refresh_token: str) -> Dict[str, Any]:  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def _refresh_nous_or_quarantine(*, client, auth_store, state, portal_base_url, client_id, refresh_token, reason, persist):  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def _select_nous_invoke_jwt(state: Dict[str, Any], *, min_ttl_seconds: int = 0):  # noqa: ARG001
+    return None
+
+
+def _sync_nous_pool_from_auth_store() -> None:
+    return None
+
+
+def _token_fingerprint(token: Any) -> Optional[str]:
+    return None
+
+
+def _try_import_shared_nous_state(*, timeout_seconds: float = 15.0) -> Optional[Dict[str, Any]]:  # noqa: ARG001
+    return None
+
+
+def _validate_nous_inference_url_from_network(url: Optional[str]) -> Optional[str]:
+    return None
+
+
+def _write_shared_nous_state(state: Dict[str, Any]) -> None:  # noqa: ARG001
+    return None
+
+
+def fetch_nous_models(*, api_key: str = "", inference_base_url: str = "") -> Optional[list]:  # noqa: ARG001
+    return None
+
+
+def get_nous_auth_status_local() -> Dict[str, Any]:
+    return {"logged_in": False}
+
+
+def get_nous_session_validity() -> str:
+    return NOUS_SESSION_UNKNOWN
+
+
+def persist_nous_credentials(creds: Dict[str, Any], *, label: Optional[str] = None):  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def refresh_nous_oauth_from_state(src: Dict[str, Any], *, timeout_seconds: float = 15.0, force_refresh: bool = False, on_state_update=None) -> Dict[str, Any]:  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def resolve_nous_runtime_credentials(*, timeout_seconds: float = 15.0, insecure: Optional[bool] = None, ca_bundle: Optional[str] = None, force_refresh: bool = False, stale_access_token: Optional[str] = None) -> Dict[str, Any]:  # noqa: ARG001
+    raise _nous_err("Nous Portal support has been removed from this fork.", "nous_portal_removed", relogin=True)
+
+
+def step_up_nous_billing_scope(*, open_browser: bool = True, timeout_seconds: float = 15.0, on_verification=None) -> bool:  # noqa: ARG001
+    return False
+
+
+# Additional names ``hermes_cli.anon_auth`` (kept; free-tier flow, out of scope for deletion) used
+# to import from ``hermes_cli.auth_nous`` directly.
+_NOUS_EMPTY_AGENT_KEY_FIELDS: Dict[str, Any] = {
+    "agent_key": None, "agent_key_id": None, "agent_key_expires_at": None,
+    "agent_key_expires_in": None, "agent_key_reused": None, "agent_key_obtained_at": None}
+
+
+def _iso_after(now: datetime, ttl_seconds: int) -> str:
+    return datetime.fromtimestamp(now.timestamp() + ttl_seconds, tz=timezone.utc).isoformat()
+
+
+def _clear_shared_nous_state(reason: str) -> None:  # noqa: ARG001
+    return None
+
+
+def _nous_http_client(timeout_seconds: float, verify: Any):
+    return httpx.Client(
+        timeout=httpx.Timeout(timeout_seconds), headers={"Accept": "application/json"}, verify=verify)
+# --- end Nous Portal removal stand-ins -----------------------------------------------------------
 from hermes_cli.auth_minimax import (  # noqa: F401  re-exported
     _MINIMAX_OAUTH_ERROR_BODY_LIMIT, _login_minimax_oauth, _minimax_oauth_login, _minimax_pkce_pair,
     _minimax_poll_token, _minimax_post_form, _minimax_request_user_code,
@@ -2279,7 +2466,6 @@ def logout_command(args) -> None:
         return
     if target == "nous":
         # A profile logout must not be re-adopted from the cross-profile store on the next boot.
-        from hermes_cli.auth_nous import _clear_shared_nous_state
         _clear_shared_nous_state("logout")
     if should_reset_config:
         _reset_config_provider()
@@ -2315,7 +2501,7 @@ _PLUGIN_COMPAT_LAZY = {
     'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS': ('hermes_cli.auth_constants', 'DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS'),
     'MINIMAX_OAUTH_GRANT_TYPE': ('hermes_cli.auth_constants', 'MINIMAX_OAUTH_GRANT_TYPE'),
     'NOUS_INFERENCE_INVOKE_SCOPE': ('hermes_cli.auth_constants', 'NOUS_INFERENCE_INVOKE_SCOPE'),
-    'NOUS_SHARED_STORE_FILENAME': ('hermes_cli.auth_nous', 'NOUS_SHARED_STORE_FILENAME'),
+    'NOUS_SHARED_STORE_FILENAME': ('hermes_cli.nous_compat', '_NOUS_SHARED_STORE_FILENAME_STUB'),
     'OAUTH_OVER_SSH_DOCS_URL': ('hermes_cli.auth_constants', 'OAUTH_OVER_SSH_DOCS_URL'),
     'QWEN_OAUTH_CLIENT_ID': ('hermes_cli.auth_constants', 'QWEN_OAUTH_CLIENT_ID'),
     'QWEN_OAUTH_TOKEN_URL': ('hermes_cli.auth_constants', 'QWEN_OAUTH_TOKEN_URL'),
@@ -2325,7 +2511,7 @@ _PLUGIN_COMPAT_LAZY = {
     'XAI_OAUTH_DEVICE_CODE_URL': ('hermes_cli.auth_constants', 'XAI_OAUTH_DEVICE_CODE_URL'),
     'XAI_OAUTH_DISCOVERY_URL': ('hermes_cli.auth_constants', 'XAI_OAUTH_DISCOVERY_URL'),
     'XAI_OAUTH_ISSUER': ('hermes_cli.auth_constants', 'XAI_OAUTH_ISSUER'),
-    'refresh_nous_oauth_pure': ('hermes_cli.auth_nous', 'refresh_nous_oauth_pure'),
+    'refresh_nous_oauth_pure': ('hermes_cli.nous_compat', '_refresh_nous_oauth_pure_stub'),
 }
 
 
