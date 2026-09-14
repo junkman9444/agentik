@@ -16,9 +16,9 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import main as hermes_main
-import hermes_cli.main_install_repair as main_install_repair
-from hermes_cli import update_cmd
+from sage_cli import main as hermes_main
+import sage_cli.main_install_repair as main_install_repair
+from sage_cli import update_cmd
 
 
 def _cpe(cmd, returncode=2, stderr="", stdout="") -> subprocess.CalledProcessError:
@@ -128,7 +128,7 @@ def test_zip_overlay_allowed_without_git(tmp_path):
 def test_zip_overlay_blocked_on_modified_file(tmp_path, monkeypatch):
     (tmp_path / ".git").mkdir()
     monkeypatch.setattr(
-        update_cmd.subprocess, "run", _porcelain_run(" M hermes_cli/update_cmd.py\n")
+        update_cmd.subprocess, "run", _porcelain_run(" M sage_cli/update_cmd.py\n")
     )
     reason = update_cmd._zip_overlay_block_reason(tmp_path)
     assert reason is not None
@@ -221,7 +221,7 @@ def test_staging_artifact_lines_are_recognized():
     # Nested user files under a staging-lookalike directory don't match the
     # top-level test only when the TOP level itself is not an artifact.
     assert not is_artifact("?? agent/scratch/wip.py")
-    assert not is_artifact(" M hermes_cli/update_cmd.py")
+    assert not is_artifact(" M sage_cli/update_cmd.py")
     assert not is_artifact("?? notes.hermes-update-staging.txt")
 
 
@@ -343,7 +343,7 @@ def test_swap_preserve_set_is_the_module_constant():
     truth for the preserved entries (no comment-synced duplicate)."""
     import inspect
 
-    from hermes_cli import update_cmd_zip
+    from sage_cli import update_cmd_zip
 
     # The swap loop lives in the download/swap collaborator the ZIP path calls.
     src = inspect.getsource(update_cmd_zip._download_and_swap_zip)

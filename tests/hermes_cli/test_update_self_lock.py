@@ -31,9 +31,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-import hermes_cli.main as cli_main
-import hermes_cli.update_cmd as update_cmd
-from hermes_cli import _early_recovery
+import sage_cli.main as cli_main
+import sage_cli.update_cmd as update_cmd
+from sage_cli import _early_recovery
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -293,8 +293,8 @@ class TestUpdateEntrypointImportHygiene:
             textwrap.dedent(
                 """
                 import sys
-                import hermes_cli.main
-                from hermes_cli.update_cmd import _SELF_LOCKING_NATIVE_MODULES
+                import sage_cli.main
+                from sage_cli.update_cmd import _SELF_LOCKING_NATIVE_MODULES
                 loaded = [
                     p for p in _SELF_LOCKING_NATIVE_MODULES
                     if p in sys.modules and not p.startswith("yaml")
@@ -318,8 +318,8 @@ class TestUpdateEntrypointImportHygiene:
                 import sys
                 from unittest.mock import patch
                 sys.argv = ["hermes", "update", "--check"]
-                import hermes_cli.main as m
-                with patch("hermes_cli.update_cmd._cmd_update_check", lambda *a, **k: 0):
+                import sage_cli.main as m
+                with patch("sage_cli.update_cmd._cmd_update_check", lambda *a, **k: 0):
                     try:
                         m.main()
                     except SystemExit:

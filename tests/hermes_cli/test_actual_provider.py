@@ -10,8 +10,8 @@ from unittest.mock import patch
 import pytest
 
 from agent.auxiliary_client import _normalize_aux_provider
-from hermes_cli import runtime_provider as rp
-from hermes_cli.auth import (
+from sage_cli import runtime_provider as rp
+from sage_cli.auth import (
     ACTUAL_LOCAL_NOAUTH_PLACEHOLDER,
     DEFAULT_ACTUAL_BASE_URL,
     DEFAULT_ACTUAL_LOCAL_BASE_URL,
@@ -20,11 +20,11 @@ from hermes_cli.auth import (
     resolve_api_key_provider_credentials,
     resolve_provider,
 )
-from hermes_cli.models import normalize_provider as normalize_model_provider
-from hermes_cli.models import provider_model_ids
-from hermes_cli.providers import determine_api_mode
-from hermes_cli.providers import get_label
-from hermes_cli.providers import normalize_provider as normalize_overlay_provider
+from sage_cli.models import normalize_provider as normalize_model_provider
+from sage_cli.models import provider_model_ids
+from sage_cli.providers import determine_api_mode
+from sage_cli.providers import get_label
+from sage_cli.providers import normalize_provider as normalize_overlay_provider
 from providers import get_provider_profile
 
 
@@ -120,7 +120,7 @@ def test_actual_runtime_uses_hosted_default(monkeypatch):
 
 def test_actual_runtime_repairs_stale_responses_mode(monkeypatch, caplog):
     _clear_actual_env(monkeypatch)
-    caplog.set_level(logging.INFO, logger="hermes_cli.auth")
+    caplog.set_level(logging.INFO, logger="sage_cli.auth")
     monkeypatch.setenv("ACTUAL_API_KEY", "actual-test-key")
     monkeypatch.setattr(
         rp,
@@ -160,7 +160,7 @@ def test_actual_runtime_ignores_legacy_mode_environment(monkeypatch):
 
 
 def test_actual_hostname_detection_repairs_custom_responses_route():
-    from hermes_cli.providers import is_actual_route
+    from sage_cli.providers import is_actual_route
 
     base_url = "https://api.actual.inc/v1"
 
@@ -264,7 +264,7 @@ def test_actual_profile_fetch_models_normalizes_env_base_url(monkeypatch):
         seen["timeout"] = timeout
         return _Response()
 
-    monkeypatch.setattr("hermes_cli.urllib_security.open_credentialed_url", _open)
+    monkeypatch.setattr("sage_cli.urllib_security.open_credentialed_url", _open)
 
     assert profile.fetch_models(api_key=None, timeout=1.5) == ["actual/local-model"]
     assert seen["url"] == DEFAULT_ACTUAL_LOCAL_BASE_URL + "/models"
@@ -491,7 +491,7 @@ def test_actual_client_tls_default_does_not_override_explicit_config(monkeypatch
 
 
 def test_actual_oneshot_reasoning_override_reaches_agent(monkeypatch):
-    from hermes_cli import oneshot
+    from sage_cli import oneshot
 
     captured = {}
 
@@ -509,9 +509,9 @@ def test_actual_oneshot_reasoning_override_reaches_agent(monkeypatch):
         def close(self):
             return None
 
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: {})
+    monkeypatch.setattr("sage_cli.config.load_config", lambda: {})
     monkeypatch.setattr(
-        "hermes_cli.runtime_provider.resolve_runtime_provider",
+        "sage_cli.runtime_provider.resolve_runtime_provider",
         lambda **_kwargs: {
             "api_key": "actual-test-key",
             "base_url": DEFAULT_ACTUAL_BASE_URL,
@@ -521,7 +521,7 @@ def test_actual_oneshot_reasoning_override_reaches_agent(monkeypatch):
         },
     )
     monkeypatch.setattr(
-        "hermes_cli.mcp_startup.ensure_mcp_discovery_before_agent_build",
+        "sage_cli.mcp_startup.ensure_mcp_discovery_before_agent_build",
         lambda **_kwargs: None,
     )
     monkeypatch.setattr(oneshot, "_create_session_db_for_oneshot", lambda: None)
@@ -542,8 +542,8 @@ def test_actual_oneshot_reasoning_override_reaches_agent(monkeypatch):
 
 
 def test_oneshot_dispatch_forwards_reasoning_override(monkeypatch):
-    from hermes_cli import main as main_mod
-    from hermes_cli import oneshot
+    from sage_cli import main as main_mod
+    from sage_cli import oneshot
 
     captured = {}
 

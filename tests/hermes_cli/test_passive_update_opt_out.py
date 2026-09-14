@@ -3,11 +3,11 @@ import json
 import subprocess
 import time
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 
 def test_passive_check_obeys_config_before_using_cached_notice(monkeypatch):
-    from hermes_cli import banner
+    from sage_cli import banner
 
     home = get_hermes_home()
     # The cache is keyed on the checkout's HEAD (an update moving HEAD invalidates it).
@@ -26,8 +26,8 @@ def test_passive_check_obeys_config_before_using_cached_notice(monkeypatch):
 
 
 def test_explicit_check_fetches_local_origin_despite_passive_opt_out(tmp_path, monkeypatch, capsys):
-    from hermes_cli import main
-    from hermes_cli.update_cmd import _cmd_update_check
+    from sage_cli import main
+    from sage_cli.update_cmd import _cmd_update_check
 
     remote = tmp_path / "remote"
     local = tmp_path / "checkout"

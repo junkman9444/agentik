@@ -8,7 +8,7 @@ partial-success semantics shared with normal CLI chat.
 
 import pytest
 
-from hermes_cli.oneshot import _build_preloaded_skills_prompt, _normalize_skills
+from sage_cli.oneshot import _build_preloaded_skills_prompt, _normalize_skills
 
 
 class TestNormalizeSkills:

@@ -4,9 +4,9 @@ import base64
 import json
 import time
 
-import hermes_cli.auth as auth
-import hermes_cli.auth_nous as auth_nous
-from hermes_cli.auth import (
+import sage_cli.auth as auth
+import sage_cli.auth_nous as auth_nous
+from sage_cli.auth import (
     NOUS_SESSION_TERMINAL,
     NOUS_SESSION_UNKNOWN,
     NOUS_SESSION_VALID,

@@ -26,7 +26,7 @@ from agent.prompt_builder import (
 )
 from agent import prompt_builder as _pb
 from agent.runtime_cwd import resolve_context_cwd
-from hermes_constants import get_default_hermes_root, get_hermes_home
+from sage_constants import get_default_hermes_root, get_hermes_home
 from utils import is_truthy_value
 
 logger = logging.getLogger(__name__)
@@ -94,7 +94,7 @@ def _plugin_session_info(agent: Any) -> Dict[str, str]:
 
 
 def _ambient_plugin_profile_name() -> str:
-    from hermes_cli.profiles import get_active_profile_name
+    from sage_cli.profiles import get_active_profile_name
     return str(get_active_profile_name() or "default")
 
 
@@ -121,7 +121,7 @@ def _frozen_plugin_prompt_sections(agent: Any) -> tuple:
         rendered = _restore_plugin_prompt_sections(stored_prompt)
     else:
         try:
-            from hermes_cli.plugins import render_system_prompt_sections
+            from sage_cli.plugins import render_system_prompt_sections
             rendered = tuple(render_system_prompt_sections(_plugin_session_info(agent)))
         except Exception as exc:
             rendered = getattr(agent, "_plugin_system_prompt_sections_previous", None)
@@ -138,7 +138,7 @@ def _restore_plugin_prompt_sections(prompt: str) -> tuple:
     """Recover frozen section bytes from the persisted full prompt.  Only the
     exact canonical container emitted by core is accepted — user/project text
     may resemble a frame."""
-    from hermes_cli.plugins import (
+    from sage_cli.plugins import (
         MAX_SYSTEM_PROMPT_SECTION_CHARS, PLUGIN_SECTIONS_END, PLUGIN_SECTIONS_START,
         RenderedPluginSystemPromptSection, format_system_prompt_sections,
     )
@@ -167,7 +167,7 @@ def restore_plugin_prompt_sections(agent: Any, prompt: str) -> None:
 
 
 def _plugin_section_blocks(sections: tuple, position: str) -> List[str]:
-    from hermes_cli.plugins import format_system_prompt_sections
+    from sage_cli.plugins import format_system_prompt_sections
     block = format_system_prompt_sections([s for s in sections if s.position == position])
     return [block] if block else []
 
@@ -237,7 +237,7 @@ def _agent_home(agent: Any) -> Optional[Path]:
     the default profile's skills/identity into a bot prompt.
     """
     try:
-        from hermes_constants import get_hermes_home_override
+        from sage_constants import get_hermes_home_override
         override = get_hermes_home_override()
         if override:
             return Path(override)
@@ -262,7 +262,7 @@ def _profile_name_for_home(home: Path) -> str:
     profile session the ambient home IS the profile dir, so every profile
     would misreport as "default"."""
     try:
-        from hermes_constants import get_default_hermes_root
+        from sage_constants import get_default_hermes_root
         rel = home.resolve().relative_to((get_default_hermes_root() / "profiles").resolve())
         return rel.parts[0] if rel.parts else "default"
     except (ValueError, OSError):
@@ -406,7 +406,7 @@ def _telegram_rich_messages_enabled() -> bool:
     adapter uses (top-level ``platforms.telegram.extra`` overrides
     ``gateway.platforms.telegram.extra`` at the leaf). False on any read failure."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from sage_cli.config import load_config_readonly
         _cfg = load_config_readonly()
         _gw = (((_cfg.get("gateway") or {}).get("platforms") or {}).get("telegram") or {}).get("extra")
         _top = ((_cfg.get("platforms") or {}).get("telegram") or {}).get("extra")
@@ -434,7 +434,7 @@ def _timestamp_line(agent: Any) -> str:
     """Date-only so the prompt is byte-stable for the day; zone + offset so
     tools needn't guess EST vs EDT. Long-lived sessions get an "as of" line on
     rebuild days (the cache prefix is already invalidated at that boundary)."""
-    from hermes_time import get_timezone as _hermes_tz, now as _hermes_now
+    from sage_time import get_timezone as _hermes_tz, now as _hermes_now
     now = _hermes_now()
     _bits = _zone_bits(now, _hermes_tz())
     _zone_suffix = f" ({', '.join(_bits)})" if _bits else ""
@@ -755,7 +755,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

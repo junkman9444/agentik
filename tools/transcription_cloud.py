@@ -328,12 +328,12 @@ def _transcribe_elevenlabs(
 def _transcribe_deepinfra(
     file_path: str, model_name: str, *, language: Optional[str] = None, prompt: Optional[str] = None
 ) -> Dict[str, Any]:
-    """Resolve DeepInfra credentials/model (shared ``hermes_cli.models`` helpers), then delegate to :func:`_transcribe_openai`."""
+    """Resolve DeepInfra credentials/model (shared ``sage_cli.models`` helpers), then delegate to :func:`_transcribe_openai`."""
     from tools.transcription_tools import _load_stt_config, _resolve_provider_key
     api_key = _resolve_provider_key("DEEPINFRA_API_KEY", "deepinfra")
     if not api_key:
         return _error_result("DEEPINFRA_API_KEY not set")
-    from hermes_cli.models import deepinfra_base_url, deepinfra_model_ids
+    from sage_cli.models import deepinfra_base_url, deepinfra_model_ids
     # ``stt.deepinfra: null`` in YAML yields None, not {} — coalesce.
     base_url = deepinfra_base_url(_get_stt_section(_load_stt_config(), "deepinfra"))
     model_name = model_name or next(iter(deepinfra_model_ids("stt")), None)

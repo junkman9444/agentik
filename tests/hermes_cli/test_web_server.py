@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.web_server and related config utilities."""
+"""Tests for sage_cli.web_server and related config utilities."""
 
 import asyncio
 import os
@@ -15,25 +15,25 @@ from unittest.mock import patch, MagicMock
 import pytest
 import yaml
 
-from hermes_cli.config import (
+from sage_cli.config import (
     reload_env,
     redact_key,
     OPTIONAL_ENV_VARS,
     DEFAULT_CONFIG,
 )
 import gateway.status as _gw_status
-import hermes_cli.config as _cfg_mod
-import hermes_cli.web_routers.chat_ws as _rt_chat_ws
-import hermes_cli.web_routers.status as _rt_status
-import hermes_cli.web_server_chat as _web_server_chat
-import hermes_cli.web_server_config as _web_server_config
-import hermes_cli.web_server_dashboard as _web_server_dashboard
-import hermes_cli.web_server_files as _web_server_files
-import hermes_cli.web_server_gateway as _web_server_gateway
-import hermes_cli.web_server_lifecycle as _web_server_lifecycle
-import hermes_cli.web_server_memory as _web_server_memory
-import hermes_cli.web_server_messaging as _web_server_messaging
-import hermes_cli.web_server_sessions as _web_server_sessions
+import sage_cli.config as _cfg_mod
+import sage_cli.web_routers.chat_ws as _rt_chat_ws
+import sage_cli.web_routers.status as _rt_status
+import sage_cli.web_server_chat as _web_server_chat
+import sage_cli.web_server_config as _web_server_config
+import sage_cli.web_server_dashboard as _web_server_dashboard
+import sage_cli.web_server_files as _web_server_files
+import sage_cli.web_server_gateway as _web_server_gateway
+import sage_cli.web_server_lifecycle as _web_server_lifecycle
+import sage_cli.web_server_memory as _web_server_memory
+import sage_cli.web_server_messaging as _web_server_messaging
+import sage_cli.web_server_sessions as _web_server_sessions
 
 
 # ---------------------------------------------------------------------------
@@ -72,8 +72,8 @@ def _install_example_plugin(_isolate_hermes_home):
     all). User plugins are first in the discovery search order, so
     laying down the fixture here is enough.
     """
-    from hermes_constants import get_hermes_home
-    from hermes_cli import web_server
+    from sage_constants import get_hermes_home
+    from sage_cli import web_server
 
     user_plugins_dir = get_hermes_home() / "plugins"
     user_plugins_dir.mkdir(parents=True, exist_ok=True)
@@ -89,7 +89,7 @@ def _install_example_plugin(_isolate_hermes_home):
     # fixtures exist to exercise the *serving* paths, so opt the example
     # plugin in exactly as a real operator would with `hermes plugins
     # enable example`.
-    from hermes_cli.config import load_config, save_config
+    from sage_cli.config import load_config, save_config
     _cfg = load_config()
     _plugins_cfg = _cfg.setdefault("plugins", {})
     _enabled = _plugins_cfg.get("enabled")
@@ -206,7 +206,7 @@ class TestSessionTokenInjection:
     """
 
     def test_honors_injected_token(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         original_app = ws.app
         original_token = ws._SESSION_TOKEN
@@ -217,7 +217,7 @@ class TestSessionTokenInjection:
         assert ws._SESSION_TOKEN == original_token
 
     def test_falls_back_to_random_token(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.delenv("HERMES_DASHBOARD_SESSION_TOKEN", raising=False)
         with patch.object(
@@ -227,7 +227,7 @@ class TestSessionTokenInjection:
         token_urlsafe.assert_called_once_with(32)
 
     def test_session_token_resolution_preserves_loaded_app_auth(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
         from starlette.testclient import TestClient
 
         original_app = ws.app
@@ -263,11 +263,11 @@ class TestWebServerEndpoints:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -277,9 +277,9 @@ class TestWebServerEndpoints:
         """Repeated GET-only polls must not checkpoint another writer's WAL."""
         import sqlite3
 
-        from hermes_cli import web_server
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_cli import web_server
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         _web_server_sessions._last_auto_archive_check.clear()
         db_path = get_hermes_home() / "state.db"
@@ -336,7 +336,7 @@ class TestWebServerEndpoints:
         """Busy store, not a gone store: the desktop keeps the list it has."""
         import sqlite3
 
-        from hermes_cli import web_server
+        from sage_cli import web_server
 
         def boom(*_args, **_kwargs):
             raise sqlite3.OperationalError("disk I/O error")
@@ -347,7 +347,7 @@ class TestWebServerEndpoints:
     def test_get_sessions_non_transient_operational_error_is_500(self, monkeypatch):
         import sqlite3
 
-        from hermes_cli import web_server
+        from sage_cli import web_server
 
         def boom(*_args, **_kwargs):
             raise sqlite3.OperationalError("no such table: sessions")
@@ -364,7 +364,7 @@ class TestWebServerEndpoints:
         handshake time out before ``gateway.ready`` can be sent.
         """
         import gateway.config as gateway_config
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         seen = {}
 
@@ -389,10 +389,10 @@ class TestWebServerEndpoints:
         assert seen["thread"] != event_loop_thread
 
     def test_get_sessions_auto_archive_uses_maintenance_writer(self):
-        from hermes_cli import web_server
-        from hermes_cli.config import load_config, save_config
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_cli import web_server
+        from sage_cli.config import load_config, save_config
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         db_path = get_hermes_home() / "state.db"
         seed = SessionDB(db_path=db_path)
@@ -441,8 +441,8 @@ class TestWebServerEndpoints:
     def test_get_sessions_heals_stale_schema_store(self, missing_column):
         import sqlite3
 
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         db_path = get_hermes_home() / "state.db"
         seed = SessionDB(db_path=db_path)
@@ -487,8 +487,8 @@ class TestWebServerEndpoints:
         """
         import sqlite3
 
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         db_path = get_hermes_home() / "state.db"
         seed = SessionDB(db_path=db_path)
@@ -529,9 +529,9 @@ class TestWebServerEndpoints:
         """
         import sqlite3
 
-        from hermes_cli import web_server
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_cli import web_server
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         db_path = get_hermes_home() / "state.db"
         seed = SessionDB(db_path=db_path)
@@ -570,14 +570,14 @@ class TestWebServerEndpoints:
         """A store the eager reconcile cannot open must not break startup."""
         import sqlite3 as sqlite3_module
 
-        import hermes_state
+        import sage_state
 
-        from hermes_cli import web_server
+        from sage_cli import web_server
 
         def boom(*args, **kwargs):
             raise sqlite3_module.OperationalError("database is locked")
 
-        monkeypatch.setattr(hermes_state, "SessionDB", boom)
+        monkeypatch.setattr(sage_state, "SessionDB", boom)
         # Must swallow — reads fall back to the per-poll probe heal.
         _web_server_lifecycle._eager_reconcile_own_session_db()
 
@@ -590,9 +590,9 @@ class TestWebServerEndpoints:
         would hammer the DB for nothing: serve reads probe-less instead, warn
         once, and never pay the writable open for that store again.
         """
-        from hermes_cli import web_server
-        from hermes_constants import get_hermes_home
-        from hermes_state import SessionDB
+        from sage_cli import web_server
+        from sage_constants import get_hermes_home
+        from sage_state import SessionDB
 
         db_path = get_hermes_home() / "state.db"
         seed = SessionDB(db_path=db_path)
@@ -613,9 +613,9 @@ class TestWebServerEndpoints:
 
         writable_opens = []
 
-        import hermes_state
+        import sage_state
 
-        original_init = hermes_state.SessionDB.__init__
+        original_init = sage_state.SessionDB.__init__
 
         def counting_init(self, *args, **kwargs):
             if not kwargs.get("read_only", False):
@@ -623,8 +623,8 @@ class TestWebServerEndpoints:
             return original_init(self, *args, **kwargs)
 
         # web_server imports SessionDB inside the function body, so patching
-        # the class on hermes_state covers every open the helper makes.
-        monkeypatch.setattr(hermes_state.SessionDB, "__init__", counting_init)
+        # the class on sage_state covers every open the helper makes.
+        monkeypatch.setattr(sage_state.SessionDB, "__init__", counting_init)
 
         # First open: probe fails -> one writable heal -> re-probe fails ->
         # exhausted. Still returns a usable read-only handle.
@@ -650,8 +650,8 @@ class TestWebServerEndpoints:
         """Unscoped SQLITE_CORRUPT must not escalate a dashboard read to writes."""
         import sqlite3
 
-        import hermes_state
-        from hermes_cli import web_server
+        import sage_state
+        from sage_cli import web_server
 
         db_path = tmp_path / "state.db"
         db_path.write_bytes(b"not-empty")
@@ -661,7 +661,7 @@ class TestWebServerEndpoints:
             opens.append(kwargs.get("read_only", False))
             raise sqlite3.DatabaseError("database disk image is malformed")
 
-        monkeypatch.setattr(hermes_state, "SessionDB", corrupt_open)
+        monkeypatch.setattr(sage_state, "SessionDB", corrupt_open)
 
         with pytest.raises(sqlite3.DatabaseError, match="disk image is malformed"):
             _web_server_sessions._open_session_db_at_path(db_path, read_only=True)
@@ -672,8 +672,8 @@ class TestWebServerEndpoints:
         """UnicodeDecodeError — pysqlite failing to decode SQLite's own error
         message over corrupt file bytes (#98924) — must route through the
         same one-writable-open heal as malformed schema."""
-        import hermes_state
-        from hermes_cli import web_server
+        import sage_state
+        from sage_cli import web_server
 
         db_path = tmp_path / "state.db"
         db_path.write_bytes(b"not-empty")
@@ -691,7 +691,7 @@ class TestWebServerEndpoints:
                 raise UnicodeDecodeError("utf-8", b"\x81", 0, 1, "invalid start byte")
             return _OkDB()
 
-        monkeypatch.setattr(hermes_state, "SessionDB", scripted_open)
+        monkeypatch.setattr(sage_state, "SessionDB", scripted_open)
 
         db = _web_server_sessions._open_session_db_at_path(db_path, read_only=True)
 
@@ -699,7 +699,7 @@ class TestWebServerEndpoints:
         assert opens == [True, False, True]
 
     def test_get_sessions_zero_byte_store_returns_empty_list(self):
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         db_path = get_hermes_home() / "state.db"
         db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -740,8 +740,8 @@ class TestWebServerEndpoints:
         DIFFERENT profile's gateway as this profile's, which hides a real
         outage behind a false "connected" (issue #71211).
         """
-        import hermes_cli.web_server as web_server
-        from hermes_cli import profiles as profiles_mod
+        import sage_cli.web_server as web_server
+        from sage_cli import profiles as profiles_mod
 
         worker_home = profiles_mod.get_profile_dir("worker")
         worker_home.mkdir(parents=True)
@@ -800,7 +800,7 @@ class TestWebServerEndpoints:
         assert fields["recall_resources"]["kind"] == "boolean"
 
     def test_openviking_dashboard_persists_typed_recall_values(self):
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
 
         resp = self.client.put(
             "/api/memory/providers/openviking/config",
@@ -843,7 +843,7 @@ class TestWebServerEndpoints:
         assert "must be at most 100" in resp.json()["detail"]
 
     def test_openviking_dashboard_rejects_blocked_endpoint_before_saving(self):
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
 
         resp = self.client.put(
             "/api/memory/providers/openviking/config",
@@ -866,8 +866,8 @@ class TestWebServerEndpoints:
 
 
     def test_declared_surface_put_writes_config_and_secret(self):
-        from hermes_constants import get_hermes_home
-        from hermes_cli.config import load_env
+        from sage_constants import get_hermes_home
+        from sage_cli.config import load_env
 
         resp = self.client.put(
             "/api/memory/providers/hindsight/config?surface=declared",
@@ -901,7 +901,7 @@ class TestWebServerEndpoints:
         images), never a direct `pip install --python sys.executable`."""
         import subprocess as _subprocess
 
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
         from tools import lazy_deps as ld
 
         # honcho declares pip_dependencies: [honcho-ai]; force it missing.
@@ -944,8 +944,8 @@ class TestWebServerEndpoints:
 
 
     def test_put_memory_provider_config_writes_config_and_secret(self):
-        from hermes_constants import get_hermes_home
-        from hermes_cli.config import load_config, load_env
+        from sage_constants import get_hermes_home
+        from sage_cli.config import load_config, load_env
 
         resp = self.client.put(
             "/api/memory/providers/hindsight/config",
@@ -1006,7 +1006,7 @@ class TestWebServerEndpoints:
     def _isolate_honcho_config(self):
         # Honcho tests write the suite-wide HERMES_HOME honcho.json; snapshot and
         # restore it so provider status/config state never leaks across tests.
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         path = get_hermes_home() / "honcho.json"
         before = path.read_bytes() if path.exists() else None
@@ -1018,7 +1018,7 @@ class TestWebServerEndpoints:
 
     @staticmethod
     def _seed_local_honcho(cfg=None):
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         path = get_hermes_home() / "honcho.json"
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -1031,8 +1031,8 @@ class TestWebServerEndpoints:
         monkeypatch.setenv("HONCHO_API_KEY", "guard")
         monkeypatch.delenv("HONCHO_API_KEY")
         self._seed_local_honcho()
-        from hermes_constants import get_hermes_home
-        from hermes_cli.config import load_config, load_env
+        from sage_constants import get_hermes_home
+        from sage_cli.config import load_config, load_env
 
         resp = self.client.put(
             "/api/memory/providers/honcho/config?surface=declared",
@@ -1096,7 +1096,7 @@ class TestWebServerEndpoints:
 
 
     def test_get_media_requires_auth(self):
-        from hermes_cli.web_server import _SESSION_HEADER_NAME
+        from sage_cli.web_server import _SESSION_HEADER_NAME
 
         resp = self.client.get(
             "/api/media",
@@ -1117,7 +1117,7 @@ class TestWebServerEndpoints:
 
 
     def _create_session_with_heavy_fields(self, session_id: str) -> None:
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -1136,7 +1136,7 @@ class TestWebServerEndpoints:
 
 
     def test_import_sessions_endpoint_imports_exported_json(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         payload = {
             "id": "imported-web-session",
@@ -1198,7 +1198,7 @@ class TestWebServerEndpoints:
         """Regression for the #39140 CTE salvage: a corrupted parent chain
         that loops (a -> b -> a) must terminate (UNION dedup) instead of
         recursing forever like UNION ALL would."""
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -1232,7 +1232,7 @@ class TestWebServerEndpoints:
 
 
     def test_update_hermes_returns_docker_guidance_without_spawning(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         spawned = False
 
@@ -1244,9 +1244,9 @@ class TestWebServerEndpoints:
         # Bypass the managed-externally gate so we reach the docker install check.
         monkeypatch.setattr(_web_server_files, "_dashboard_local_update_managed_externally", lambda: False)
         # The shared admission gate (#91277 Phase 3) resolves the install
-        # method through hermes_cli.config directly.
+        # method through sage_cli.config directly.
         monkeypatch.setattr(
-            "hermes_cli.config.detect_install_method", lambda *_a, **_k: "docker"
+            "sage_cli.config.detect_install_method", lambda *_a, **_k: "docker"
         )
         monkeypatch.setattr(_cfg_mod, "detect_install_method", lambda _root: "docker")
         monkeypatch.setattr(_web_server_gateway, "_spawn_hermes_action", fail_spawn)
@@ -1273,7 +1273,7 @@ class TestWebServerEndpoints:
         assert any("docker pull nousresearch/hermes-agent:latest" in line for line in status_data["lines"])
 
     def test_update_hermes_returns_apt_guidance_without_spawning(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         spawned = False
 
@@ -1284,10 +1284,10 @@ class TestWebServerEndpoints:
 
         monkeypatch.setattr(_web_server_files, "_dashboard_local_update_managed_externally", lambda: False)
         # The shared admission gate (#91277 Phase 3) resolves the install
-        # method through hermes_cli.config directly, so patch it there (the
+        # method through sage_cli.config directly, so patch it there (the
         # web_server module alias only feeds the /update/check endpoint).
         monkeypatch.setattr(
-            "hermes_cli.config.detect_install_method", lambda *_a, **_k: "apt"
+            "sage_cli.config.detect_install_method", lambda *_a, **_k: "apt"
         )
         monkeypatch.setattr(_cfg_mod, "detect_install_method", lambda _root: "apt")
         monkeypatch.setattr(_web_server_gateway, "_spawn_hermes_action", fail_spawn)
@@ -1313,7 +1313,7 @@ class TestWebServerEndpoints:
         assert "Termux APT" in check_data["message"]
 
     def test_update_status_recovers_completed_result_after_dashboard_restart(self, monkeypatch, tmp_path):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         action_id = "c" * 32
         (tmp_path / "hermes-update.log").write_text(
@@ -1343,7 +1343,7 @@ class TestWebServerEndpoints:
         assert f"=== hermes-update completed {action_id} ===" in data["lines"]
 
     def test_update_hermes_spawns_with_action_id(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         class Proc:
             pid = 12345
@@ -1375,7 +1375,7 @@ class TestWebServerEndpoints:
         ]
 
     def test_update_hermes_reuses_running_action(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         class Proc:
             pid = 24680
@@ -1433,9 +1433,9 @@ class TestWebServerEndpoints:
         Uses credentials as the example: the self-configuring knobs
         (*_HOME_CHANNEL, *_ALLOW_ALL_USERS, …) were deliberately dropped from
         the setup cards and handed back to Keys — see
-        tests/hermes_cli/test_setup_hidden_env.py.
+        tests/sage_cli/test_setup_hidden_env.py.
         """
-        from hermes_cli.web_server_messaging import _MESSAGING_KEYS_PAGE_KEYS, _build_catalog_entry, _channel_managed_env_keys
+        from sage_cli.web_server_messaging import _MESSAGING_KEYS_PAGE_KEYS, _build_catalog_entry, _channel_managed_env_keys
 
         discord = _build_catalog_entry("discord")
         assert "DISCORD_BOT_TOKEN" in discord["env_vars"]
@@ -1454,10 +1454,10 @@ class TestWebServerEndpoints:
         a Hermes provider — keep the user's aggregator instead of writing a
         provider that can never resolve credentials."""
         monkeypatch.setattr(
-            "hermes_cli.model_cost_guard.expensive_model_warning",
+            "sage_cli.model_cost_guard.expensive_model_warning",
             lambda *_args, **_kwargs: None,
         )
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
         cfg = load_config()
         cfg["model"] = {"provider": "openrouter", "default": "openai/gpt-5.5"}
         save_config(cfg)
@@ -1485,8 +1485,8 @@ class TestWebServerEndpoints:
 
     def test_reveal_env_var(self, tmp_path):
         """POST /api/env/reveal should return the real unredacted value."""
-        from hermes_cli.config import save_env_value
-        from hermes_cli.web_server import _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.config import save_env_value
+        from sage_cli.web_server import _SESSION_HEADER_NAME, _SESSION_TOKEN
         save_env_value("TEST_REVEAL_KEY", "super-secret-value-12345")
         resp = self.client.post(
             "/api/env/reveal",
@@ -1503,8 +1503,8 @@ class TestWebServerEndpoints:
 
     def test_reveal_env_var_custom_session_header_ignores_proxy_authorization(self, tmp_path):
         """A valid dashboard session header should coexist with proxy auth."""
-        from hermes_cli.config import save_env_value
-        from hermes_cli.web_server import _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.config import save_env_value
+        from sage_cli.web_server import _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         save_env_value("TEST_REVEAL_PROXY_AUTH", "secret-value")
         resp = self.client.post(
@@ -1521,8 +1521,8 @@ class TestWebServerEndpoints:
 
     def test_reveal_env_var_legacy_authorization_header_still_works(self, tmp_path):
         """Keep old dashboard bundles working while the new header rolls out."""
-        from hermes_cli.config import save_env_value
-        from hermes_cli.web_server import _SESSION_TOKEN
+        from sage_cli.config import save_env_value
+        from sage_cli.web_server import _SESSION_TOKEN
 
         save_env_value("TEST_REVEAL_LEGACY_AUTH", "secret-value")
         resp = self.client.post(
@@ -1586,8 +1586,8 @@ class TestWebServerEndpoints:
     def test_telegram_onboarding_apply_reports_restart_failure_after_save(
         self, monkeypatch
     ):
-        import hermes_cli.web_server as ws
-        from hermes_cli.config import load_config, load_env
+        import sage_cli.web_server as ws
+        from sage_cli.config import load_config, load_env
 
         with _web_server_messaging._telegram_onboarding_lock:
             _web_server_messaging._telegram_onboarding_pairings.clear()
@@ -1652,7 +1652,7 @@ class TestWebServerEndpoints:
     def test_unauthenticated_api_blocked(self):
         """API requests without the session token should be rejected."""
         from starlette.testclient import TestClient
-        from hermes_cli.web_server import app
+        from sage_cli.web_server import app
         # Create a client WITHOUT the dashboard session header
         unauth_client = TestClient(app)
         resp = unauth_client.get("/api/env")
@@ -1678,7 +1678,7 @@ class TestWebServerEndpoints:
     def test_parse_model_ids_handles_openai_and_bare_shapes(self):
         """Model discovery must tolerate the common /v1/models shapes and
         never raise (so a slightly non-standard local endpoint still works)."""
-        from hermes_cli.web_server_profiles import _parse_model_ids
+        from sage_cli.web_server_profiles import _parse_model_ids
 
         class FakeResp:
             def __init__(self, payload, ok=True):
@@ -1710,7 +1710,7 @@ class TestWebServerEndpoints:
         endpoint reappears as a ready row in the picker — matching the
         ``hermes model`` custom flow. Regression for the desktop loop where a
         keyed custom endpoint could never be configured from the GUI."""
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
 
         resp = self.client.post(
             "/api/model/set",
@@ -1749,7 +1749,7 @@ class TestWebServerEndpoints:
 
 
     def _seed_custom_provider_with_key(self):
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         cfg = load_config()
         cfg["providers"] = {
@@ -1773,7 +1773,7 @@ class TestWebServerEndpoints:
         authenticating to the deleted host, and the credential the operator
         just removed through the dashboard survives the delete.
         """
-        from hermes_cli.config import custom_endpoint_key_env, get_env_value, load_config
+        from sage_cli.config import custom_endpoint_key_env, get_env_value, load_config
 
         self.client.post(
             "/api/providers/custom-endpoints",
@@ -1814,7 +1814,7 @@ class TestWebServerEndpoints:
         PyYAML loads unquoted 2070 as int; string lookup then 404ed, so
         Desktop could list the endpoint but not assign or delete it.
         """
-        from hermes_cli.config import get_config_path, load_config
+        from sage_cli.config import get_config_path, load_config
 
         get_config_path().write_text(
             "model:\n"
@@ -1858,9 +1858,9 @@ class TestWebServerEndpoints:
         so every custom provider silently landed in the default profile and
         never appeared for the profile the user was actually configuring.
         """
-        from hermes_cli import profiles as profiles_mod
-        from hermes_cli.config import custom_endpoint_key_env
-        from hermes_constants import get_hermes_home
+        from sage_cli import profiles as profiles_mod
+        from sage_cli.config import custom_endpoint_key_env
+        from sage_constants import get_hermes_home
 
         default_home = get_hermes_home()
         worker_home = profiles_mod.get_profile_dir("worker")
@@ -1902,7 +1902,7 @@ class TestWebServerEndpoints:
 
     def test_custom_endpoint_save_keeps_the_api_key_out_of_config(self):
         """The key belongs in .env behind key_env, never in config.yaml (#69449)."""
-        from hermes_cli.config import custom_endpoint_key_env, get_env_value, load_config
+        from sage_cli.config import custom_endpoint_key_env, get_env_value, load_config
 
         self.client.post(
             "/api/providers/custom-endpoints",
@@ -1935,7 +1935,7 @@ class TestWebServerEndpoints:
         """
         import yaml
 
-        from hermes_cli.config import custom_endpoint_key_env, get_config_path, get_env_value
+        from sage_cli.config import custom_endpoint_key_env, get_config_path, get_env_value
 
         monkeypatch.setenv("MY_PROXY_KEY", "sk-user-managed")
         get_config_path().write_text(
@@ -1974,7 +1974,7 @@ class TestWebServerEndpoints:
         and ``:8001`` onto one name, so saving the second silently overwrites
         the first's key.
         """
-        from hermes_cli.config import custom_endpoint_key_env, get_env_value
+        from sage_cli.config import custom_endpoint_key_env, get_env_value
 
         for port, key in ((8000, "sk-first"), (8001, "sk-second")):
             self.client.post(
@@ -2014,7 +2014,7 @@ class TestWebServerEndpoints:
 
     def test_activating_an_endpoint_carries_its_credential_either_way(self):
         """Activate must work for both key_env and pre-#69449 plaintext entries."""
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         cfg = load_config()
         cfg["providers"] = {
@@ -2055,7 +2055,7 @@ class TestWebServerEndpoints:
         assert resp.status_code == 422
 
     def test_get_sessions_positive_limit_still_works(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2082,7 +2082,7 @@ class TestWebServerEndpoints:
         assert resp.status_code == 422
 
     def test_profiles_sessions_positive_limit_still_works(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2101,7 +2101,7 @@ class TestWebServerEndpoints:
     def test_get_session_messages_rejects_negative_limit(self):
         """limit=-1 previously bypassed the documented 500-row clamp because
         min(-1, 500) == -1, which SQLite treats as 'no limit'."""
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2117,7 +2117,7 @@ class TestWebServerEndpoints:
         assert resp.status_code == 422
 
     def test_get_session_messages_rejects_negative_offset(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2133,7 +2133,7 @@ class TestWebServerEndpoints:
         """A limit above the documented 500-row cap is silently clamped
         (existing ``min(limit, 500)`` behaviour), not rejected — the request
         still succeeds."""
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2153,7 +2153,7 @@ class TestWebServerEndpoints:
         Guards the #80680 contract — display reads opt into compacted history
         explicitly; the dashboard default view stays as it was.
         """
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2185,7 +2185,7 @@ class TestWebServerEndpoints:
         """include_compacted=true returns the full display history: archived
         (active=0, compacted=1) rows plus live rows, in insertion order.
         """
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2223,7 +2223,7 @@ class TestWebServerEndpoints:
             _MERGED_SUMMARY_DELIMITER,
             _SUMMARY_END_MARKER,
         )
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         handoff = (
             f"{SUMMARY_PREFIX}\n{HISTORICAL_TASK_HEADING}\nold task\n\n"
@@ -2285,7 +2285,7 @@ class TestWebServerEndpoints:
         order=latest + include_compacted=true) pages back from the newest
         message and returns the window in chronological order.
         """
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2321,7 +2321,7 @@ class TestWebServerEndpoints:
 
     def test_get_session_messages_omitted_limit_defaults_to_500(self):
         """The dashboard must never load an entire unbounded transcript."""
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2369,7 +2369,7 @@ class TestWebServerEndpoints:
         ]
 
     def test_export_session_streams_bounded_message_pages(self, monkeypatch):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -2417,7 +2417,7 @@ class TestBuildSchemaFromConfig:
 
 
     def test_overrides_applied(self):
-        from hermes_cli.web_server_config import CONFIG_SCHEMA
+        from sage_cli.web_server_config import CONFIG_SCHEMA
         # terminal.backend should be a select with options
         if "terminal.backend" in CONFIG_SCHEMA:
             entry = CONFIG_SCHEMA["terminal.backend"]
@@ -2442,7 +2442,7 @@ class TestBuildSchemaFromConfig:
         blank entry server-side (the clear item is client-side via
         ``clearable``), and never empty even without tzdata (UTC fallback).
         """
-        from hermes_cli.web_server_config import CONFIG_SCHEMA, _timezone_options
+        from sage_cli.web_server_config import CONFIG_SCHEMA, _timezone_options
 
         entry = CONFIG_SCHEMA["timezone"]
         assert entry["type"] == "select"
@@ -2463,7 +2463,7 @@ class TestBuildSchemaFromConfig:
         _schema_with_dynamic_provider_options must recompute it so a provider
         installed mid-session is selectable without a restart.
         """
-        from hermes_cli import web_server
+        from sage_cli import web_server
 
         monkeypatch.setattr(_cfg_mod, "load_config", lambda: {"memory": {"provider": "honcho"}})
         monkeypatch.setattr(
@@ -2487,7 +2487,7 @@ class TestBuildSchemaFromConfig:
 
     def test_no_single_field_categories(self):
         """After merging, no category should have just 1 field."""
-        from hermes_cli.web_server_config import CONFIG_SCHEMA
+        from sage_cli.web_server_config import CONFIG_SCHEMA
         from collections import Counter
         cats = Counter(e["category"] for e in CONFIG_SCHEMA.values())
         for cat, count in cats.items():
@@ -2508,7 +2508,7 @@ class TestConfigRoundTrip:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
@@ -2522,7 +2522,7 @@ class TestConfigRoundTrip:
         round-trip. Deep-merge is required — a shallow merge would drop
         ``agent.<custom_key>`` when the frontend sends a partial ``agent``
         dict containing only schema-known sub-fields."""
-        from hermes_cli.config import load_config, read_raw_config, save_config
+        from sage_cli.config import load_config, read_raw_config, save_config
 
         # Seed config with a key under `agent` that isn't in the schema.
         # Use a sentinel name to avoid colliding with future schema fields.
@@ -2584,7 +2584,7 @@ class TestConfigRoundTrip:
 
     def test_desktop_terminal_font_round_trip_preserves_terminal_config(self):
         """The Appearance picker persists a font without replacing sibling settings."""
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
 
         web_config = self.client.get("/api/config").json()
         terminal_before = dict(web_config.get("terminal", {}))
@@ -2618,11 +2618,11 @@ class TestNewEndpoints:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -2640,8 +2640,8 @@ class TestNewEndpoints:
     def test_profiles_create_builder_mcp_auth_is_profile_scoped(
         self, monkeypatch
     ):
-        from hermes_constants import get_hermes_home
-        import hermes_cli.profiles as profiles_mod
+        from sage_constants import get_hermes_home
+        import sage_cli.profiles as profiles_mod
 
         monkeypatch.setattr(profiles_mod, "create_wrapper_script", lambda name: None)
 
@@ -2735,7 +2735,7 @@ class TestNewEndpoints:
 
     def test_discord_toolsets_read_and_write_discord_platform(self):
         """Platform-restricted toolsets must not be saved as successful CLI no-ops."""
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
 
         listing = {t["name"]: t for t in self.client.get("/api/tools/toolsets").json()}
         assert listing["discord"]["platform"] == "discord"
@@ -2771,8 +2771,8 @@ class TestNewEndpoints:
         )
 
     def test_toolsets_resolve_subscription_features_once(self, monkeypatch):
-        import hermes_cli.tools_config as tools_config
-        from hermes_cli.nous_subscription import NousSubscriptionFeatures
+        import sage_cli.tools_config as tools_config
+        from sage_cli.nous_subscription import NousSubscriptionFeatures
 
         calls = 0
         features = NousSubscriptionFeatures(
@@ -2841,18 +2841,18 @@ class TestNewEndpoints:
         never-installed KittenTTS/Piper. The endpoint now reports the honest
         state so keyless ≠ ready.
         """
-        import hermes_cli.tools_config as tools_config
-        from hermes_cli.nous_account import NousPortalAccountInfo
+        import sage_cli.tools_config as tools_config
+        from sage_cli.nous_account import NousPortalAccountInfo
 
         # Logged out of Nous Portal → managed subscription rows need sign-in.
         monkeypatch.setattr(
-            "hermes_cli.nous_subscription.get_nous_portal_account_info",
+            "sage_cli.nous_subscription.get_nous_portal_account_info",
             lambda *a, **k: NousPortalAccountInfo(
                 logged_in=False, source="none", fresh=False, paid_service_access=None
             ),
         )
         # No xAI credentials → the Grok OAuth-backed row needs sign-in.
-        import hermes_cli.tools_config_post_setup as tools_config_post_setup
+        import sage_cli.tools_config_post_setup as tools_config_post_setup
 
         monkeypatch.setattr(tools_config, "_xai_credentials_present", lambda: False)
         # Local TTS engines not installed → their rows need setup.
@@ -2890,10 +2890,10 @@ class TestNewEndpoints:
         told the user to sign in. The endpoint now reports the entitlement
         gap so the client can drive the existing Nous OAuth flow.
         """
-        from hermes_cli.nous_account import NousPortalAccountInfo
+        from sage_cli.nous_account import NousPortalAccountInfo
 
         monkeypatch.setattr(
-            "hermes_cli.nous_subscription.get_nous_portal_account_info",
+            "sage_cli.nous_subscription.get_nous_portal_account_info",
             lambda *a, **k: NousPortalAccountInfo(
                 logged_in=False, source="none", fresh=False, paid_service_access=None
             ),
@@ -2911,7 +2911,7 @@ class TestNewEndpoints:
         # The selection is still persisted — activation is what's gated.
         # Managed rows store the single 'nous' provider string (the runtime
         # maps it to the Browser Use cloud through the Nous Tool Gateway).
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         cfg = load_config()
         assert cfg["browser"]["cloud_provider"] == "nous"
         assert "use_gateway" not in cfg["browser"]
@@ -2945,7 +2945,7 @@ class TestNewEndpoints:
         assert body["ok"] is True
         assert body["capability"] == "search"
 
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         cfg = load_config()
         assert cfg["web"]["search_backend"] == "searxng"
         # The shared backend selected first must be preserved for extract.
@@ -2970,8 +2970,8 @@ class TestNewEndpoints:
 
     def test_terminal_ssh_probe_ready_when_configured(self, monkeypatch):
         """SSH host + user in config.yaml -> ready."""
-        import hermes_cli.web_server as web_server
-        from hermes_cli.config import load_config, save_config
+        import sage_cli.web_server as web_server
+        from sage_cli.config import load_config, save_config
 
         monkeypatch.setattr(shutil, "which", lambda name: None)
         config = load_config()
@@ -2994,7 +2994,7 @@ class TestNewEndpoints:
 
 
     def test_analytics_usage_includes_skill_breakdown(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -3053,7 +3053,7 @@ class TestNewEndpoints:
         """get_usage_analytics must call get_usage_breakdown, not generate()."""
         from unittest.mock import patch
         from agent.insights import InsightsEngine
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -3091,7 +3091,7 @@ class TestDesktopLoopbackAuthExemption:
     """``_desktop_loopback_auth_exempt`` decides the #96490 exemption."""
 
     def test_exempt_with_desktop_env_and_session_token_on_loopback(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         monkeypatch.setenv("HERMES_DESKTOP", "1")
         monkeypatch.setenv("HERMES_DASHBOARD_SESSION_TOKEN", "desktop-minted")
@@ -3099,7 +3099,7 @@ class TestDesktopLoopbackAuthExemption:
         assert web_server._desktop_loopback_auth_exempt("::1") is True
 
     def test_exempt_via_ssh_spawn_credentials_without_env_token(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         monkeypatch.setenv("HERMES_DESKTOP", "1")
         monkeypatch.delenv("HERMES_DASHBOARD_SESSION_TOKEN", raising=False)
@@ -3111,14 +3111,14 @@ class TestDesktopLoopbackAuthExemption:
         )
 
     def test_not_exempt_without_desktop_env(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         monkeypatch.delenv("HERMES_DESKTOP", raising=False)
         monkeypatch.setenv("HERMES_DASHBOARD_SESSION_TOKEN", "tok")
         assert web_server._desktop_loopback_auth_exempt("127.0.0.1") is False
 
     def test_not_exempt_without_any_credential(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         # HERMES_DESKTOP=1 alone is not enough: a plain serve with the env var
         # exported must stay gated.
@@ -3127,7 +3127,7 @@ class TestDesktopLoopbackAuthExemption:
         assert web_server._desktop_loopback_auth_exempt("127.0.0.1") is False
 
     def test_not_exempt_on_non_loopback_bind(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         monkeypatch.setenv("HERMES_DESKTOP", "1")
         monkeypatch.setenv("HERMES_DASHBOARD_SESSION_TOKEN", "tok")
@@ -3135,7 +3135,7 @@ class TestDesktopLoopbackAuthExemption:
         assert web_server._desktop_loopback_auth_exempt("192.168.1.10") is False
 
     def test_public_url_engages_gate_for_non_desktop_loopback(self, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         # Sanity: the base behaviour is untouched — a non-Desktop loopback
         # serve with a public_url configured stays ticket-gated.
@@ -3155,7 +3155,7 @@ class TestModelContextLength:
 
     def test_normalize_extracts_context_length_from_dict(self):
         """normalize should surface context_length from model dict."""
-        from hermes_cli.web_server_config import _normalize_config_for_web
+        from sage_cli.web_server_config import _normalize_config_for_web
 
         cfg = {
             "model": {
@@ -3170,7 +3170,7 @@ class TestModelContextLength:
 
     def test_normalize_bare_string_model_yields_zero(self):
         """normalize should set model_context_length=0 for bare string model."""
-        from hermes_cli.web_server_config import _normalize_config_for_web
+        from sage_cli.web_server_config import _normalize_config_for_web
 
         result = _normalize_config_for_web({"model": "anthropic/claude-sonnet-4"})
         assert result["model"] == "anthropic/claude-sonnet-4"
@@ -3179,8 +3179,8 @@ class TestModelContextLength:
 
     def test_denormalize_writes_context_length_into_model_dict(self):
         """denormalize should write model_context_length back into model dict."""
-        from hermes_cli.web_server_config import _denormalize_config_from_web
-        from hermes_cli.config import save_config
+        from sage_cli.web_server_config import _denormalize_config_from_web
+        from sage_cli.config import save_config
 
         # Set up disk config with model as a dict
         save_config({
@@ -3199,8 +3199,8 @@ class TestModelContextLength:
         """The Settings autosave now sends a diff, not the full draft: editing
         only the Context Window control must not omit ``model`` and thereby
         drop the context_length edit on the floor (#89597 review)."""
-        from hermes_cli.web_server_config import _denormalize_config_from_web
-        from hermes_cli.config import save_config
+        from sage_cli.web_server_config import _denormalize_config_from_web
+        from sage_cli.config import save_config
 
         save_config({
             "model": {"default": "anthropic/claude-sonnet-4", "provider": "anthropic",
@@ -3221,8 +3221,8 @@ class TestModelContextLength:
         to the diff-omission bug rather than the separate, pre-existing (and
         intentional, see ``_apply_main_model_assignment``) behavior where a
         real provider switch drops the context_length override."""
-        from hermes_cli.web_server_config import _denormalize_config_from_web
-        from hermes_cli.config import save_config
+        from sage_cli.web_server_config import _denormalize_config_from_web
+        from sage_cli.config import save_config
 
         save_config({
             "model": {"default": "anthropic/claude-sonnet-4", "context_length": 150000}
@@ -3241,9 +3241,9 @@ class TestDenormalizeProviderSwitch:
     def test_vendor_slug_switches_off_non_aggregator_provider(self):
         """ollama-local + a vendor/model slug → switch to openrouter and drop
         the stale local base_url (the issue's exact repro)."""
-        from hermes_cli.web_server_config import _denormalize_config_from_web
+        from sage_cli.web_server_config import _denormalize_config_from_web
         from unittest.mock import patch as _patch
-        from hermes_cli.config import save_config
+        from sage_cli.config import save_config
 
         save_config({
             "model": {
@@ -3254,7 +3254,7 @@ class TestDenormalizeProviderSwitch:
             }
         })
 
-        with _patch("hermes_cli.models_detect.provider_has_credentials", lambda p: p == "openrouter"):
+        with _patch("sage_cli.models_detect.provider_has_credentials", lambda p: p == "openrouter"):
             result = _denormalize_config_from_web({"model": "google/gemini-2.5-flash"})
         model = result["model"]
         assert model["provider"] == "openrouter"
@@ -3266,13 +3266,13 @@ class TestDenormalizeProviderSwitch:
     def test_context_length_override_survives_provider_switch(self):
         """An explicit context-length override must persist alongside a
         provider switch."""
-        from hermes_cli.web_server_config import _denormalize_config_from_web
+        from sage_cli.web_server_config import _denormalize_config_from_web
         from unittest.mock import patch as _patch
-        from hermes_cli.config import save_config
+        from sage_cli.config import save_config
 
         save_config({"model": {"default": "llama3.2", "provider": "ollama-local"}})
 
-        with _patch("hermes_cli.models_detect.provider_has_credentials", lambda p: p == "openrouter"):
+        with _patch("sage_cli.models_detect.provider_has_credentials", lambda p: p == "openrouter"):
             result = _denormalize_config_from_web({
                 "model": "google/gemini-2.5-flash",
                 "model_context_length": 128000,
@@ -3288,13 +3288,13 @@ class TestModelContextLengthSchema:
 
     def test_schema_model_context_length_after_model(self):
         """model_context_length should appear immediately after model in schema."""
-        from hermes_cli.web_server_config import CONFIG_SCHEMA
+        from sage_cli.web_server_config import CONFIG_SCHEMA
         keys = list(CONFIG_SCHEMA.keys())
         model_idx = keys.index("model")
         assert keys[model_idx + 1] == "model_context_length"
 
     def test_schema_model_context_length_is_number(self):
-        from hermes_cli.web_server_config import CONFIG_SCHEMA
+        from sage_cli.web_server_config import CONFIG_SCHEMA
         entry = CONFIG_SCHEMA["model_context_length"]
         assert entry["type"] == "number"
         assert "category" in entry
@@ -3309,12 +3309,12 @@ class TestModelInfoEndpoint:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
-        from hermes_cli.web_server import app
+        from sage_cli.web_server import app
         self.client = TestClient(app)
 
 
     def test_model_info_with_dict_config(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_cfg_mod, "load_config", lambda: {
             "model": {
@@ -3337,7 +3337,7 @@ class TestModelInfoEndpoint:
 
     def test_model_info_graceful_on_metadata_error(self, monkeypatch):
         """Endpoint should return zeros on import/resolution errors, not 500."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_cfg_mod, "load_config", lambda: {
             "model": "some/obscure-model"
@@ -3362,7 +3362,7 @@ class TestProbeGatewayHealth:
 
     def test_probe_uses_configured_short_timeout(self, monkeypatch):
         """The HTTP probe must not fall through to the OS TCP timeout."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(ws, "_GATEWAY_HEALTH_URL", "http://gw:8642")
         monkeypatch.setattr(ws, "_GATEWAY_HEALTH_TIMEOUT", 0.75)
@@ -3385,7 +3385,7 @@ class TestProbeGatewayHealth:
 
     def test_detailed_fails_falls_back_to_simple_health(self, monkeypatch):
         """If /health/detailed fails, falls back to /health."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
         monkeypatch.setattr(ws, "_GATEWAY_HEALTH_URL", "http://gw:8642")
         monkeypatch.setattr(ws, "_GATEWAY_HEALTH_TIMEOUT", 1)
 
@@ -3419,13 +3419,13 @@ class TestStatusRemoteGateway:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
     def test_status_falls_back_to_remote_probe(self, monkeypatch):
         """When local PID check fails and remote probe succeeds, gateway shows running."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: None)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: None)
@@ -3448,7 +3448,7 @@ class TestStatusRemoteGateway:
 
     def test_status_remote_probe_not_attempted_when_local_pid_found(self, monkeypatch):
         """When local PID check succeeds, the remote probe is never called."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: 1234)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: {
@@ -3472,7 +3472,7 @@ class TestStatusRemoteGateway:
 
     def test_status_remote_running_null_pid(self, monkeypatch):
         """Remote gateway running but PID not in response — pid should be None."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: None)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: None)
@@ -3506,8 +3506,8 @@ class TestStatusInstallId:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_cli.web_server as ws
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_cli.web_server as ws
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         # Fresh process cache per test: the cache is process-global by design
         # (stability), so tests must not observe a previous test's id.
@@ -3516,8 +3516,8 @@ class TestStatusInstallId:
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
     def test_status_reports_persistent_install_id(self, monkeypatch):
-        import hermes_cli.web_server as ws
-        from hermes_constants import get_default_hermes_root
+        import sage_cli.web_server as ws
+        from sage_constants import get_default_hermes_root
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: None)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: None)
@@ -3539,7 +3539,7 @@ class TestStatusInstallId:
 
     def test_install_id_survives_process_cache_reset(self, monkeypatch):
         """A restart (fresh cache) re-reads the SAME persisted id."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         first = ws.get_install_id()
         assert first
@@ -3549,7 +3549,7 @@ class TestStatusInstallId:
     def test_all_profiles_of_one_install_share_the_id(self, monkeypatch, tmp_path):
         """HERMES_HOME=<root> and HERMES_HOME=<root>/profiles/<name> resolve to
         the same id file — profiles share one physical install identity."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         root = tmp_path / "hermes-root"
         profile_home = root / "profiles" / "research"
@@ -3568,7 +3568,7 @@ class TestStatusInstallId:
         assert not (profile_home / "install_id").exists()
 
     def test_corrupt_id_file_is_replaced_not_propagated(self, monkeypatch, tmp_path):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         root = tmp_path / "hermes-root"
         root.mkdir()
@@ -3597,7 +3597,7 @@ class TestGatewayBusyReadout:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
@@ -3606,7 +3606,7 @@ class TestGatewayBusyReadout:
         """While draining, the gateway is not a fresh begin-drain target, and
         busy is False even with a stale active_agents>0 in the file — the state
         gate dominates."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: 1234)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: {
@@ -3623,7 +3623,7 @@ class TestGatewayBusyReadout:
     def test_active_agents_unparseable_in_file_degrades_to_zero(self, monkeypatch):
         """A corrupt active_agents value in the status file must not 500 or
         produce a spurious busy — it degrades to 0/not-busy."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: 1234)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: {
@@ -3647,7 +3647,7 @@ class TestStatusMemoryBlock:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
@@ -3708,7 +3708,7 @@ class TestGatewayUpdatedAtContract:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
@@ -3728,7 +3728,7 @@ class TestGatewayUpdatedAtContract:
     def test_local_runtime_valid_epoch_becomes_iso_string(self, monkeypatch):
         """A plausible legacy epoch value is converted, not dropped."""
         from datetime import datetime, timezone
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         epoch = 1750000000
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: 1234)
@@ -3750,7 +3750,7 @@ class TestGatewayUpdatedAtContract:
         """Cross-container path: the remote /health/detailed body is the
         runtime source, and a numeric updated_at from an older gateway build
         must still come out as string|null."""
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_gw_status, "get_running_pid_cached", lambda: None)
         monkeypatch.setattr(_gw_status, "read_runtime_status", lambda: None)
@@ -3782,14 +3782,14 @@ class TestNormaliseThemeDefinition:
 
 
     def test_rejects_non_dict(self):
-        from hermes_cli.web_server_dashboard import _normalise_theme_definition
+        from sage_cli.web_server_dashboard import _normalise_theme_definition
         assert _normalise_theme_definition("string") is None
         assert _normalise_theme_definition(None) is None
         assert _normalise_theme_definition([1, 2, 3]) is None
 
     def test_loose_colors_shorthand(self):
         """Bare hex strings under `colors` parse as {hex, alpha=1.0}."""
-        from hermes_cli.web_server_dashboard import _normalise_theme_definition
+        from sage_cli.web_server_dashboard import _normalise_theme_definition
         result = _normalise_theme_definition({
             "name": "loose",
             "colors": {"background": "#000000", "midground": "#ffffff"},
@@ -3810,7 +3810,7 @@ class TestDiscoverUserThemes:
 
     def test_returns_empty_when_dir_missing(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-        from hermes_cli import web_server
+        from sage_cli import web_server
         assert _web_server_dashboard._discover_user_themes() == []
 
     def test_loads_and_normalises_yaml(self, tmp_path, monkeypatch):
@@ -3827,7 +3827,7 @@ class TestDiscoverUserThemes:
             "layout:\n"
             "  density: spacious\n"
         )
-        from hermes_cli import web_server
+        from sage_cli import web_server
         results = _web_server_dashboard._discover_user_themes()
         assert len(results) == 1
         assert results[0]["name"] == "ocean"
@@ -3847,11 +3847,11 @@ class TestDiscoverUserThemes:
         other = tmp_path / "other-profile"
         other.mkdir()
 
-        from hermes_constants import (
+        from sage_constants import (
             reset_hermes_home_override,
             set_hermes_home_override,
         )
-        from hermes_cli import web_server
+        from sage_cli import web_server
 
         token = set_hermes_home_override(str(other))
         try:
@@ -3890,7 +3890,7 @@ class TestThemeBootstrapCSS:
         bundle actually consumes (layerVars/typographyVars tokens)."""
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         self._write_theme(tmp_path)
-        from hermes_cli import web_server
+        from sage_cli import web_server
         monkeypatch.setattr(
             _cfg_mod, "load_config", lambda: {"dashboard": {"theme": "ocean"}}
         )
@@ -3923,7 +3923,7 @@ class TestThemeBootstrapCSS:
     def _mount_spa_client(tmp_path, monkeypatch):
         from fastapi import FastAPI
         from starlette.testclient import TestClient
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         dist = tmp_path / "web_dist"
         (dist / "assets").mkdir(parents=True)
@@ -3939,7 +3939,7 @@ class TestThemeBootstrapCSS:
     def test_serve_index_injects_bootstrap_for_user_theme(self, tmp_path, monkeypatch):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         self._write_theme(tmp_path)
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
         monkeypatch.setattr(
             _cfg_mod, "load_config", lambda: {"dashboard": {"theme": "ocean"}}
         )
@@ -3965,7 +3965,7 @@ class TestNormaliseThemeExtensions:
 
 
     def test_custom_css_passthrough_and_capped(self):
-        from hermes_cli.web_server_dashboard import _normalise_theme_definition
+        from sage_cli.web_server_dashboard import _normalise_theme_definition
         # Small CSS passes through verbatim.
         r = _normalise_theme_definition({
             "name": "t",
@@ -3980,7 +3980,7 @@ class TestNormaliseThemeExtensions:
 
 
     def test_component_styles_per_bucket(self):
-        from hermes_cli.web_server_dashboard import _normalise_theme_definition
+        from sage_cli.web_server_dashboard import _normalise_theme_definition
         r = _normalise_theme_definition({
             "name": "t",
             "componentStyles": {
@@ -4022,19 +4022,19 @@ class TestDeleteSessionEndpoint:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         monkeypatch.setattr(
-            hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
         )
 
         self.auth_client = TestClient(app)
         self.auth_client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
     def _seed(self, ids):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -4044,7 +4044,7 @@ class TestDeleteSessionEndpoint:
             db.close()
 
     def _exists(self, sid) -> bool:
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -4070,7 +4070,7 @@ class TestBulkDeleteSessionsEndpoint:
 
     1. Route-ordering: ``/api/sessions/bulk-delete`` must shadow the
        templated ``/api/sessions/{session_id}`` route below it (see
-       the block comment in ``hermes_cli/web_server.py``).
+       the block comment in ``sage_cli/web_server.py``).
     2. Behaviour parity with :meth:`SessionDB.delete_sessions` — real
        deleted count, archive/active sessions deleted on explicit
        selection.
@@ -4085,12 +4085,12 @@ class TestBulkDeleteSessionsEndpoint:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         monkeypatch.setattr(
-            hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
         )
 
         self.client = TestClient(app)
@@ -4098,7 +4098,7 @@ class TestBulkDeleteSessionsEndpoint:
         self.auth_client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
     def _seed(self, ids):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -4109,7 +4109,7 @@ class TestBulkDeleteSessionsEndpoint:
 
 
     def test_deletes_listed_sessions_only(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         self._seed(["a", "b", "c"])
         resp = self.auth_client.post(
@@ -4143,7 +4143,7 @@ class TestBulkDeleteSessionsEndpoint:
         assert "deleted" in body, (
             "If this assertion fails, /api/sessions/bulk-delete is "
             "being shadowed by /api/sessions/{session_id} — check "
-            "registration order in hermes_cli/web_server.py."
+            "registration order in sage_cli/web_server.py."
         )
 
 
@@ -4172,14 +4172,14 @@ class TestDeleteEmptySessionsEndpoint:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         # Pin the SessionDB to the isolated HERMES_HOME so each test
         # starts with a clean state.db.
         monkeypatch.setattr(
-            hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
         )
 
         self.client = TestClient(app)
@@ -4194,7 +4194,7 @@ class TestDeleteEmptySessionsEndpoint:
         * ``live``    — un-ended, empty → must survive (active)
         * ``archived``— ended, empty, archived → must survive
         """
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -4230,7 +4230,7 @@ class TestDeleteEmptySessionsEndpoint:
         """DELETE returns the deleted count and removes only the
         empty-ended-unarchived rows — same shape contract as the
         DB-level method's unit tests."""
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         self._seed()
         resp = self.auth_client.delete("/api/sessions/empty")
@@ -4268,7 +4268,7 @@ class TestDeleteEmptySessionsEndpoint:
             "If this assertion fails, the literal /api/sessions/empty "
             "route is being shadowed by the templated /api/sessions/"
             "{session_id} route — check registration order in "
-            "hermes_cli/web_server.py."
+            "sage_cli/web_server.py."
         )
 
 
@@ -4289,11 +4289,11 @@ class TestPluginAPIAuth:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
 
         self.client = TestClient(app)
         self.auth_client = TestClient(app)
@@ -4397,7 +4397,7 @@ class TestDashboardPluginManifestExtensions:
             "slots": ["sidebar", "header-left"],
             "entry": "dist/index.js",
         })
-        from hermes_cli import web_server
+        from sage_cli import web_server
         # Bust the process-level cache so the test plugin is picked up.
         web_server._dashboard_plugins_cache = None
         plugins = web_server._get_dashboard_plugins(force_rescan=True)
@@ -4410,7 +4410,7 @@ class TestDashboardPluginManifestExtensions:
         """Regression: user dashboard extensions are a dashboard-owned asset
         (like theme YAML), so they must stay visible after a context-local
         HERMES_HOME override scopes a request to another profile."""
-        from hermes_constants import (
+        from sage_constants import (
             reset_hermes_home_override,
             set_hermes_home_override,
         )
@@ -4426,7 +4426,7 @@ class TestDashboardPluginManifestExtensions:
         other.mkdir()
 
         monkeypatch.setenv("HERMES_HOME", str(launch_home))
-        from hermes_cli import web_server
+        from sage_cli import web_server
         token = set_hermes_home_override(str(other))
         try:
             plugins = _web_server_dashboard._discover_dashboard_plugins()
@@ -4449,7 +4449,7 @@ class TestDashboardPluginManifestExtensions:
         })
 
         monkeypatch.setenv("HERMES_HOME", str(profile_home))
-        from hermes_cli import web_server
+        from sage_cli import web_server
         plugins = _web_server_dashboard._discover_dashboard_plugins()
         assert any(p["name"] == "meeting-intelligence" for p in plugins)
 
@@ -4473,7 +4473,7 @@ class TestDashboardPluginManifestExtensions:
         })
 
         monkeypatch.setenv("HERMES_HOME", str(profile_home))
-        from hermes_cli import web_server
+        from sage_cli import web_server
         plugins = _web_server_dashboard._discover_dashboard_plugins()
         entries = [p for p in plugins if p["name"] == "dupe"]
         assert len(entries) == 1
@@ -4492,7 +4492,7 @@ class TestDashboardPluginManifestExtensions:
 # ---------------------------------------------------------------------------
 
 import sys
-from hermes_cli import main_tui_launch
+from sage_cli import main_tui_launch
 
 
 skip_on_windows = pytest.mark.skipif(
@@ -4506,7 +4506,7 @@ class TestPtyWebSocket:
     def _setup(self, monkeypatch, _isolate_hermes_home):
         from starlette.testclient import TestClient
 
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         # Avoid exec'ing the actual TUI in tests: every test below installs
         # its own fake argv via ``web_server_chat._resolve_chat_argv``.
@@ -4529,7 +4529,7 @@ class TestPtyWebSocket:
 
     def test_tui_python_command_uses_child_path(self, tmp_path):
         """Bare Python commands are resolved from the TUI child's PATH."""
-        import hermes_cli.main as main_mod
+        import sage_cli.main as main_mod
 
         command = f"hermes-review-python{Path(sys.executable).suffix}"
         bin_dir = tmp_path / "bin"
@@ -4620,7 +4620,7 @@ class TestPtyWebSocket:
 
 
     def test_unavailable_platform_closes_with_message(self, monkeypatch):
-        from hermes_cli.pty_bridge import PtyUnavailableError
+        from sage_cli.pty_bridge import PtyUnavailableError
 
         def _raise(argv, **kwargs):
             raise PtyUnavailableError("pty missing for tests")
@@ -4655,7 +4655,7 @@ class TestPtyWebSocket:
         asserting the exact fan-out contract.
         """
         import asyncio
-        from hermes_cli import web_server as ws_mod
+        from sage_cli import web_server as ws_mod
 
         class _FakeSub:
             def __init__(self):
@@ -4699,8 +4699,8 @@ class TestPtyWebSocket:
 
 
 def test_resolve_chat_argv_injects_gateway_ws_url(monkeypatch):
-    import hermes_cli.main_tui_launch as tui_launch
-    import hermes_cli.web_server as ws
+    import sage_cli.main_tui_launch as tui_launch
+    import sage_cli.web_server as ws
 
     monkeypatch.setattr(
         tui_launch,
@@ -4747,7 +4747,7 @@ class TestDashboardPluginStaticAssetAllowlist:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app
+        from sage_cli.web_server import app
 
         self.client = TestClient(app)
 
@@ -4821,7 +4821,7 @@ class TestValidateProviderCredential:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         self.client = TestClient(app)
         self.client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -5001,7 +5001,7 @@ class TestDesktopCronTicker:
             from starlette.testclient import TestClient
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
-        from hermes_cli.web_server import app
+        from sage_cli.web_server import app
 
         return TestClient(app)
 
@@ -5027,7 +5027,7 @@ class TestServeIndexMissingIndex:
     def _client_with_dist(tmp_path, monkeypatch, *, write_index: bool):
         from fastapi import FastAPI
         from starlette.testclient import TestClient
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         dist = tmp_path / "web_dist"
         (dist / "assets").mkdir(parents=True)
@@ -5072,7 +5072,7 @@ class TestServeIndexMissingIndex:
     def test_index_uses_ssh_token_applied_after_spa_mount(
         self, tmp_path, monkeypatch
     ):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(ws, "_SESSION_TOKEN", "before-mount")
         client, _dist = self._client_with_dist(
@@ -5102,7 +5102,7 @@ class TestHeadlessServeTokenPage:
     def _headless_client(monkeypatch, *, gated: bool):
         from fastapi import FastAPI
         from starlette.testclient import TestClient
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setenv("HERMES_SERVE_HEADLESS", "1")
         spa_app = FastAPI()
@@ -5134,7 +5134,7 @@ class TestHeadlessServeTokenPage:
         import json
         import re
 
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(ws, "_SESSION_TOKEN", "before-mount")
         client, ws = self._headless_client(monkeypatch, gated=False)
@@ -5176,7 +5176,7 @@ class TestHashedAssetCacheHeaders:
     def _client(tmp_path, monkeypatch):
         from fastapi import FastAPI
         from starlette.testclient import TestClient
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         dist = tmp_path / "web_dist"
         (dist / "assets").mkdir(parents=True)
@@ -5250,11 +5250,11 @@ class TestDashboardComponentHealth:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        import hermes_cli.web_server as ws
+        import sage_state
+        from sage_constants import get_hermes_home
+        import sage_cli.web_server as ws
 
-        monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+        monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
         # Fresh state holder per test so counters don't leak across tests.
         monkeypatch.setattr(ws, "DASHBOARD_HEALTH", ws.DashboardHealth())
         self.ws = ws
@@ -5321,19 +5321,19 @@ class TestSessionPatchUnread:
         except ImportError:
             pytest.skip("fastapi/starlette not installed")
 
-        import hermes_state
-        from hermes_constants import get_hermes_home
-        from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+        import sage_state
+        from sage_constants import get_hermes_home
+        from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
         monkeypatch.setattr(
-            hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
+            sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db"
         )
 
         self.client = TestClient(app)
         self.auth_client = TestClient(app)
         self.auth_client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
 
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         try:
@@ -5394,7 +5394,7 @@ class TestSessionPatchUnread:
 def test_mount_spa_dynamic_web_dist_recheck(tmp_path, monkeypatch):
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     app = FastAPI()
     dist = tmp_path / "web_dist"

@@ -10,10 +10,10 @@ from __future__ import annotations
 import logging
 import threading
 
-import hermes_cli.mcp_startup as mcp_startup
-import hermes_cli.web_server as web_server
-import hermes_cli.web_server_lifecycle as web_server_lifecycle
-from tests.hermes_cli.test_dashboard_auth_gate import _stub_uvicorn_run
+import sage_cli.mcp_startup as mcp_startup
+import sage_cli.web_server as web_server
+import sage_cli.web_server_lifecycle as web_server_lifecycle
+from tests.sage_cli.test_dashboard_auth_gate import _stub_uvicorn_run
 
 
 def _reset_discovery_state(monkeypatch):

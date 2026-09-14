@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli.model_switch import list_authenticated_providers
-from hermes_cli import model_switch_providers
+from sage_cli.model_switch import list_authenticated_providers
+from sage_cli import model_switch_providers
 
 
 @patch.dict(os.environ, {"GH_TOKEN": "test-key"}, clear=False)
@@ -14,8 +14,8 @@ def test_copilot_picker_uses_live_catalog_when_available():
     live_models = ["gpt-5.4", "claude-sonnet-4.6", "gemini-3.1-pro-preview"]
 
     with patch("agent.models_dev.fetch_models_dev", return_value={}), \
-         patch("hermes_cli.models._resolve_copilot_catalog_api_key", return_value="gh-token"), \
-         patch("hermes_cli.models._fetch_github_models", return_value=live_models):
+         patch("sage_cli.models._resolve_copilot_catalog_api_key", return_value="gh-token"), \
+         patch("sage_cli.models._fetch_github_models", return_value=live_models):
         providers = list_authenticated_providers(current_provider="openrouter", max_models=50)
 
     copilot = next((p for p in providers if p["slug"] == "copilot"), None)
@@ -40,13 +40,13 @@ def _no_other_copilot_creds(monkeypatch):
     no env tokens, no configured ACP endpoint, no auth-store entry, no seeded
     credential pool."""
     # COPILOT_ACP_BASE_URL is not a credential, but an `acp+tcp://` value marks
-    # the provider configured with no executable at all (hermes_cli/auth.py), so
+    # the provider configured with no executable at all (sage_cli/auth.py), so
     # a host that sets it would decide the outcome instead of the test.
     for var in ("GH_TOKEN", "GITHUB_TOKEN", "HERMES_COPILOT_ACP_COMMAND",
                 "COPILOT_CLI_PATH", "COPILOT_ACP_BASE_URL"):
         monkeypatch.delenv(var, raising=False)
-    import hermes_cli.auth as auth
-    import hermes_cli.model_switch as model_switch
+    import sage_cli.auth as auth
+    import sage_cli.model_switch as model_switch
 
     monkeypatch.setattr(auth, "_load_auth_store", lambda: {})
     monkeypatch.setattr(model_switch_providers, "_credential_pool_is_usable", lambda *a, **k: False)
@@ -59,8 +59,8 @@ def test_copilot_acp_listed_when_executable_resolves(tmp_path, monkeypatch, _no_
     monkeypatch.setenv("HERMES_COPILOT_ACP_COMMAND", str(fake))
 
     with patch("agent.models_dev.fetch_models_dev", return_value={}), \
-         patch("hermes_cli.models._resolve_copilot_catalog_api_key", return_value=None), \
-         patch("hermes_cli.models._fetch_github_models", return_value=[]):
+         patch("sage_cli.models._resolve_copilot_catalog_api_key", return_value=None), \
+         patch("sage_cli.models._fetch_github_models", return_value=[]):
         providers = list_authenticated_providers(current_provider="openrouter", max_models=50)
 
     acp = next((p for p in providers if p["slug"] == "copilot-acp"), None)
@@ -72,13 +72,13 @@ def test_copilot_acp_listed_when_executable_resolves(tmp_path, monkeypatch, _no_
 def test_copilot_acp_hidden_when_executable_missing(monkeypatch, _no_other_copilot_creds):
     # `copilot` may genuinely be installed on a dev machine — force the
     # resolution miss so the test pins behaviour, not the host's PATH.
-    import hermes_cli.auth as auth
+    import sage_cli.auth as auth
 
     monkeypatch.setattr(auth.shutil, "which", lambda *_a, **_k: None)
 
     with patch("agent.models_dev.fetch_models_dev", return_value={}), \
-         patch("hermes_cli.models._resolve_copilot_catalog_api_key", return_value=None), \
-         patch("hermes_cli.models._fetch_github_models", return_value=[]):
+         patch("sage_cli.models._resolve_copilot_catalog_api_key", return_value=None), \
+         patch("sage_cli.models._fetch_github_models", return_value=[]):
         providers = list_authenticated_providers(current_provider="openrouter", max_models=50)
 
     assert all(p["slug"] != "copilot-acp" for p in providers), \

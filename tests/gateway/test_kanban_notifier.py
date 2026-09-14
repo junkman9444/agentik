@@ -9,9 +9,9 @@ from gateway.kanban_watchers_common import (
     _release_singleton_lock,
 )
 from gateway.run import GatewayRunner
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
-from hermes_cli import kanban_db_notify as kbn
+from sage_cli import kanban_db as kb
+from sage_cli import kanban_db_connect as kbc
+from sage_cli import kanban_db_notify as kbn
 
 
 class RecordingAdapter:

@@ -7,7 +7,7 @@ import textwrap
 import types
 
 import pytest
-from hermes_cli import main_tui_launch
+from sage_cli import main_tui_launch
 
 
 def _args(**overrides):
@@ -30,7 +30,7 @@ def _raise_exit(rc):
 
 @pytest.fixture
 def main_mod(monkeypatch):
-    import hermes_cli.main as mod
+    import sage_cli.main as mod
 
     monkeypatch.setattr(mod, "_has_any_provider_configured", lambda: True)
     # Reset the idempotency guard so each test starts fresh.
@@ -110,8 +110,8 @@ def test_exit_after_oneshot_flushes_stdio_and_calls_os_exit(
 def test_oneshot_subprocess_exits_without_teardown_abort():
     program = textwrap.dedent(
         """
-        import hermes_cli.oneshot as oneshot
-        from hermes_cli.main import _exit_after_oneshot
+        import sage_cli.oneshot as oneshot
+        from sage_cli.main import _exit_after_oneshot
 
         oneshot._run_agent = lambda *args, **kwargs: ("ok", {"final_response": "ok"})
         _exit_after_oneshot(oneshot.run_oneshot("hello"))
@@ -142,7 +142,7 @@ def test_oneshot_subprocess_exits_without_teardown_abort():
 def _stub_plugin_discovery(monkeypatch):
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.plugins",
+        "sage_cli.plugins",
         types.SimpleNamespace(discover_plugins=lambda: None),
     )
 
@@ -151,7 +151,7 @@ def _stub_plugin_discovery(monkeypatch):
 
 def test_oneshot_wires_session_db_for_recall(monkeypatch):
     """hermes -z bypasses HermesCLI, but recall still needs SessionDB."""
-    from hermes_cli.oneshot import _run_agent
+    from sage_cli.oneshot import _run_agent
 
     captured = {}
     sentinel_db = object()
@@ -178,22 +178,22 @@ def test_oneshot_wires_session_db_for_recall(monkeypatch):
         return module
 
     monkeypatch.setitem(sys.modules, "run_agent", mod("run_agent", AIAgent=FakeAgent))
-    monkeypatch.setitem(sys.modules, "hermes_state", mod("hermes_state", SessionDB=FakeSessionDB))
+    monkeypatch.setitem(sys.modules, "sage_state", mod("sage_state", SessionDB=FakeSessionDB))
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.config",
-        mod("hermes_cli.config", load_config=lambda: {"model": {"default": "m"}}),
+        "sage_cli.config",
+        mod("sage_cli.config", load_config=lambda: {"model": {"default": "m"}}),
     )
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.models",
-        mod("hermes_cli.models", detect_provider_for_model=lambda *_args, **_kwargs: None),
+        "sage_cli.models",
+        mod("sage_cli.models", detect_provider_for_model=lambda *_args, **_kwargs: None),
     )
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.runtime_provider",
+        "sage_cli.runtime_provider",
         mod(
-            "hermes_cli.runtime_provider",
+            "sage_cli.runtime_provider",
             resolve_runtime_provider=lambda **_kwargs: {
                 "api_key": "k",
                 "base_url": "u",
@@ -205,8 +205,8 @@ def test_oneshot_wires_session_db_for_recall(monkeypatch):
     )
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.tools_config",
-        mod("hermes_cli.tools_config", _get_platform_tools=lambda *_args, **_kwargs: {"session_search"}),
+        "sage_cli.tools_config",
+        mod("sage_cli.tools_config", _get_platform_tools=lambda *_args, **_kwargs: {"session_search"}),
     )
 
     text, result = _run_agent("recall this")

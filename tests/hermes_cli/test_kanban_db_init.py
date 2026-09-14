@@ -5,9 +5,9 @@ import sqlite3
 import threading
 from pathlib import Path
 
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
-from hermes_cli import kanban_db_notify as kbn
+from sage_cli import kanban_db as kb
+from sage_cli import kanban_db_connect as kbc
+from sage_cli import kanban_db_notify as kbn
 
 
 def _make_legacy_db(path: Path) -> None:

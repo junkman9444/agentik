@@ -35,7 +35,7 @@ def _install_fake_tag(home, tag: str, backend: str = "cuda") -> None:
 
 
 def test_installed_tags_newest_first(hermes_home):
-    from hermes_cli.local_runtime.binaries import installed_tags
+    from sage_cli.local_runtime.binaries import installed_tags
 
     assert installed_tags() == []
     _install_fake_tag(hermes_home, "b10290")
@@ -46,8 +46,8 @@ def test_installed_tags_newest_first(hermes_home):
 def test_default_tag_flows_from_default_config(hermes_home):
     """Unpinned users inherit the Hermes-release default (deep-merge);
     the shipped default must be a plausible rolling tag."""
-    from hermes_cli.config import load_config
-    from hermes_cli.config_defaults import DEFAULT_CONFIG
+    from sage_cli.config import load_config
+    from sage_cli.config_defaults import DEFAULT_CONFIG
 
     default_tag = DEFAULT_CONFIG["local_runtime"]["tag"]
     assert default_tag.startswith("b") and default_tag.lstrip("b").isdigit()
@@ -58,7 +58,7 @@ def test_update_available_requires_enabled_and_installed(hermes_home, monkeypatc
     """The flag's truth table: enabled+installed+configured-missing only."""
     from fastapi.testclient import TestClient
 
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     client = TestClient(web_server.app)
     # Same auth pattern as the other local-models route tests.
@@ -69,7 +69,7 @@ def test_update_available_requires_enabled_and_installed(hermes_home, monkeypatc
         assert r.status_code == 200, r.text
         return r.json()
 
-    import hermes_cli.web_routers.local_models as lm
+    import sage_cli.web_routers.local_models as lm
 
     # Case 1: enabled, configured newer than installed -> update available.
     monkeypatch.setattr(lm, "_runtime_section",
@@ -95,11 +95,11 @@ def test_update_available_requires_enabled_and_installed(hermes_home, monkeypatc
 def test_boot_never_downloads_missing_tag(hermes_home, monkeypatch):
     """The ladder: configured-but-not-installed serves the newest installed
     tag; nothing installed means no boot (and NO download either way)."""
-    from hermes_cli.local_runtime import bootstrap
+    from sage_cli.local_runtime import bootstrap
 
     calls = []
     monkeypatch.setattr(
-        "hermes_cli.local_runtime.binaries.ensure_runtime_installed",
+        "sage_cli.local_runtime.binaries.ensure_runtime_installed",
         lambda tag, backend, **kw: calls.append(tag) or (_ for _ in ()).throw(
             AssertionError("boot must not reach install for missing tags")))
 
@@ -110,7 +110,7 @@ def test_boot_never_downloads_missing_tag(hermes_home, monkeypatch):
 
 
 def test_prune_keeps_n_minus_one(hermes_home):
-    from hermes_cli.local_runtime.binaries import installed_tags, prune_old_tags
+    from sage_cli.local_runtime.binaries import installed_tags, prune_old_tags
 
     for tag in ("b10100", "b10200", "b10290"):
         _install_fake_tag(hermes_home, tag)

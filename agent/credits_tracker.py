@@ -123,7 +123,7 @@ def _is_nous_welcome_route(base_url: str) -> bool:
     False wherever the free tier is not built in. The host is the evidence, not the model name: the paid
     inference host can serve ``nous/welcome`` to a named account, and that account's depletion is real."""
     try:
-        from hermes_cli.anon_auth import route_is_welcome_host
+        from sage_cli.anon_auth import route_is_welcome_host
     except ImportError:
         return False
     return route_is_welcome_host(base_url)
@@ -133,7 +133,7 @@ def is_free_tier_model(model: str, base_url: str = "") -> bool:
     """True when *model* is a Nous free-tier model, using ONLY local data: (1) ``:free`` suffix — canonical
     Nous free SKU marker; (2) ``stealth/`` prefix — stealth-preview SKUs are free without the suffix
     (naming-convention trust: a PAID ``stealth/`` model would wrongly suppress the banner); (3) a PEEK into
-    ``hermes_cli.models``' pricing cache (filled by the model picker; a miss never fetches). Fail-open to
+    ``sage_cli.models``' pricing cache (filled by the model picker; a miss never fetches). Fail-open to
     False (depleted notice still shows): a wrong warning is recoverable noise; hiding it masks a real block."""
     if not model:
         return False
@@ -147,8 +147,8 @@ def is_free_tier_model(model: str, base_url: str = "") -> bool:
     if _is_nous_welcome_route(base_url):
         return True
     try:
-        from hermes_cli.models import _is_model_free
-        from hermes_cli.models_pricing import peek_cached_pricing
+        from sage_cli.models import _is_model_free
+        from sage_cli.models_pricing import peek_cached_pricing
 
         pricing = peek_cached_pricing(base_url)  # owns the /v1-suffix and auth-state key details
         return bool(pricing) and _is_model_free(model, pricing)
@@ -410,7 +410,7 @@ def seed_credits_at_session_start(agent) -> bool:
 
         def _bg_seed() -> None:  # FIRE-AND-FORGET: a slow portal must never delay "ready"
             try:
-                from hermes_cli.nous_compat import get_nous_portal_account_info
+                from sage_cli.nous_compat import get_nous_portal_account_info
                 info = get_nous_portal_account_info(force_fresh=True)
                 if getattr(agent, "_credits_state", None) is not None:
                     return  # a live inference header beat us — don't clobber it

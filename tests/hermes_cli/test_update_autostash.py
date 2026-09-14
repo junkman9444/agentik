@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import config as hermes_config
-from hermes_cli import main as hermes_main
-from hermes_cli import update_cmd
+from sage_cli import config as hermes_config
+from sage_cli import main as hermes_main
+from sage_cli import update_cmd
 
 
 # ---------------------------------------------------------------------------
@@ -35,9 +35,9 @@ def _patch_managed_uv(request):
     def _fake_update_managed_uv(**kwargs):
         return None  # never actually self-update in tests
 
-    with patch("hermes_cli.managed_uv.resolve_uv", side_effect=_fake_resolve_uv), \
-         patch("hermes_cli.managed_uv.ensure_uv", side_effect=_fake_ensure_uv), \
-         patch("hermes_cli.managed_uv.update_managed_uv", side_effect=_fake_update_managed_uv):
+    with patch("sage_cli.managed_uv.resolve_uv", side_effect=_fake_resolve_uv), \
+         patch("sage_cli.managed_uv.ensure_uv", side_effect=_fake_ensure_uv), \
+         patch("sage_cli.managed_uv.update_managed_uv", side_effect=_fake_update_managed_uv):
         yield
 
 
@@ -53,19 +53,19 @@ def _patch_gateway_discovery():
     clean no-op — none of the tests here assert on gateway restarts.
 
     ``_purge_stale_hermes_modules`` must also be stubbed: it evicts
-    ``hermes_cli.gateway`` from ``sys.modules`` mid-update, and the restart
-    phase's fresh ``from hermes_cli.gateway import ...`` then loads an
+    ``sage_cli.gateway`` from ``sys.modules`` mid-update, and the restart
+    phase's fresh ``from sage_cli.gateway import ...`` then loads an
     UNPATCHED copy of the module — silently discarding every mock here and
     letting real gateway discovery (and real ``os.kill``) run on the dev box.
     """
-    with patch("hermes_cli.gateway.find_gateway_pids", return_value=[]), \
-         patch("hermes_cli.gateway.supports_systemd_services", return_value=False), \
-         patch("hermes_cli.gateway.find_profile_gateway_processes", return_value=[]), \
-         patch("hermes_cli.update_inventory.collect_runtime_inventory", return_value=None), \
-         patch("hermes_cli.update_inventory.report_unaccounted_runtimes", return_value=False), \
+    with patch("sage_cli.gateway.find_gateway_pids", return_value=[]), \
+         patch("sage_cli.gateway.supports_systemd_services", return_value=False), \
+         patch("sage_cli.gateway.find_profile_gateway_processes", return_value=[]), \
+         patch("sage_cli.update_inventory.collect_runtime_inventory", return_value=None), \
+         patch("sage_cli.update_inventory.report_unaccounted_runtimes", return_value=False), \
          patch.object(hermes_main, "_fleet_probe_expected_runtimes", lambda *a, **kw: False), \
          patch.object(hermes_main, "_purge_stale_hermes_modules", lambda *a, **kw: None), \
-         patch("hermes_cli.update_receipt.collect_fleet_versions", return_value=[]):
+         patch("sage_cli.update_receipt.collect_fleet_versions", return_value=[]):
         yield
 
 
@@ -105,11 +105,11 @@ def test_refresh_active_memory_provider_dependencies_reinstalls_active_provider(
     recorded = []
 
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "sage_cli.config.load_config",
         lambda: {"memory": {"provider": "mem0"}},
     )
     monkeypatch.setattr(
-        "hermes_cli.memory_setup._install_dependencies",
+        "sage_cli.memory_setup._install_dependencies",
         lambda provider_name, force=False: recorded.append((provider_name, force)),
     )
 
@@ -122,14 +122,14 @@ def test_refresh_active_memory_provider_dependencies_reinstalls_active_provider(
 
 def test_reload_updated_runtime_modules_restores_new_hermes_constants_symbol(monkeypatch):
     """A pre-pull module object missing a new helper is repaired by reload."""
-    import hermes_constants
+    import sage_constants
 
-    monkeypatch.delattr(hermes_constants, "apply_subprocess_home_env", raising=False)
-    assert not hasattr(hermes_constants, "apply_subprocess_home_env")
+    monkeypatch.delattr(sage_constants, "apply_subprocess_home_env", raising=False)
+    assert not hasattr(sage_constants, "apply_subprocess_home_env")
 
     hermes_main._reload_updated_runtime_modules()
 
-    assert callable(hermes_constants.apply_subprocess_home_env)
+    assert callable(sage_constants.apply_subprocess_home_env)
 
 
 
@@ -582,7 +582,7 @@ def _setup_keep_stash_test(monkeypatch, tmp_path):
     # a live gateway PID would trip the test-suite kill guard and turn the
     # run into exit 1 (gateway_fleet_restart_incomplete).
     monkeypatch.setattr(
-        "hermes_cli.gateway.find_gateway_pids", lambda **kw: [], raising=False
+        "sage_cli.gateway.find_gateway_pids", lambda **kw: [], raising=False
     )
     return restore_calls, discard_calls, park_calls
 
@@ -636,7 +636,7 @@ def test_update_parser_accepts_keep_stash():
     """The flag parses and defaults off."""
     import argparse
 
-    from hermes_cli.subcommands.update import build_update_parser
+    from sage_cli.subcommands.update import build_update_parser
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -685,7 +685,7 @@ def test_bootstrap_marker_not_autostashed_by_update(tmp_path):
     marker = tmp_path / ".hermes-bootstrap-complete"
     marker.write_text("")
 
-    # Exact flags used by hermes update (hermes_cli/main.py).
+    # Exact flags used by hermes update (sage_cli/main.py).
     git("stash", "push", "--include-untracked", "-m", "hermes-update-autostash")
 
     assert marker.exists(), (
@@ -763,8 +763,8 @@ def test_restore_rejects_invalid_python_and_keeps_clean_updated_tree(
 ):
     """A cleanly-applied stash must not be allowed to brick every agent turn."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -810,8 +810,8 @@ def test_restore_rejects_new_import_time_failure_and_preserves_stash(
 ):
     """A valid-Python stash must not introduce a critical import failure."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -854,8 +854,8 @@ def test_restore_rejects_new_import_time_failure_and_preserves_stash(
 def test_restore_allows_preexisting_import_time_failure(monkeypatch, tmp_path):
     """A restore may proceed when it does not worsen an environment failure."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -895,8 +895,8 @@ def test_restore_rejects_later_failure_masked_by_preexisting_failure(
 ):
     """Every critical module must be compared, not only the first failure."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -944,8 +944,8 @@ def test_restore_rejects_system_exit_masked_by_preexisting_failure(
 ):
     """A terminating import must be compared instead of hiding the marker."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -991,8 +991,8 @@ def test_restore_rejects_system_exit_masked_by_preexisting_failure(
 def test_restore_rejects_probe_termination(monkeypatch, tmp_path, capsys):
     """A stash cannot bypass import validation by terminating the probe."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(
@@ -1036,8 +1036,8 @@ def test_restore_stays_parked_when_untracked_baseline_is_unknown(
     monkeypatch, tmp_path, capsys
 ):
     """Unknown cleanup scope must not turn into a destructive empty baseline."""
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_stash as update_cmd_stash
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_stash as update_cmd_stash
 
     monkeypatch.setattr(update_cmd, "_git_untracked_paths", lambda *_args: None)
     monkeypatch.setattr(update_cmd_stash, "_git_untracked_paths", lambda *_args: None)
@@ -1056,8 +1056,8 @@ def test_reject_does_not_claim_cleanup_when_git_state_is_unknown(
     monkeypatch, tmp_path, capsys
 ):
     """Cleanup failures must not be reported as a restored clean tree."""
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_stash as update_cmd_stash
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_stash as update_cmd_stash
 
     monkeypatch.setattr(update_cmd, "_git_untracked_paths", lambda *_args: None)
     monkeypatch.setattr(update_cmd_stash, "_git_untracked_paths", lambda *_args: None)
@@ -1077,9 +1077,9 @@ def test_restore_rejects_unknown_restored_python_paths(
 ):
     """A failed post-apply path query cannot skip restored syntax validation."""
     import subprocess
-    from hermes_cli import update_cmd
-    import hermes_cli.update_cmd_stash as update_cmd_stash
-    import hermes_cli.update_cmd_deps as update_cmd_deps
+    from sage_cli import update_cmd
+    import sage_cli.update_cmd_stash as update_cmd_stash
+    import sage_cli.update_cmd_deps as update_cmd_deps
 
     def git(*args, check=True):
         return subprocess.run(

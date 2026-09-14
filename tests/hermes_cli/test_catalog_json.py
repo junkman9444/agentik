@@ -13,7 +13,7 @@ import urllib.request
 
 import pytest
 
-import hermes_cli.local_runtime.catalog as cat
+import sage_cli.local_runtime.catalog as cat
 
 
 @pytest.fixture(autouse=True)
@@ -29,7 +29,7 @@ def _doc_from(entries):
     """A fetchable catalog document built by mutating the packaged JSON."""
     from importlib.resources import files
 
-    doc = json.loads(files("hermes_cli.local_runtime")
+    doc = json.loads(files("sage_cli.local_runtime")
                      .joinpath("catalog.json").read_text(encoding="utf-8"))
     doc["models"] = entries(doc["models"])
     return doc
@@ -66,7 +66,7 @@ def test_refresh_swaps_in_memory_only(monkeypatch, tmp_path):
     disk is untouched (checkout stays clean)."""
     from importlib.resources import files
 
-    packaged_path = files("hermes_cli.local_runtime").joinpath("catalog.json")
+    packaged_path = files("sage_cli.local_runtime").joinpath("catalog.json")
     before = packaged_path.read_text(encoding="utf-8")
 
     def add_day0(models):
@@ -109,9 +109,9 @@ def test_loader_ignores_unknown_fields():
 
 
 def test_min_engine_gate(monkeypatch):
-    from hermes_cli.web_routers.local_models import _engine_too_old
+    from sage_cli.web_routers.local_models import _engine_too_old
 
-    monkeypatch.setattr("hermes_cli.local_runtime.binaries.installed_tags",
+    monkeypatch.setattr("sage_cli.local_runtime.binaries.installed_tags",
                         lambda: ["b10362"])
     assert _engine_too_old("") is False, "no requirement, no gate"
     assert _engine_too_old("b10000") is False, "installed engine suffices"

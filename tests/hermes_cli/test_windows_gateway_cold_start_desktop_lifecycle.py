@@ -11,13 +11,13 @@ predicate.
 
 from __future__ import annotations
 
-from hermes_cli import gateway as hermes_gateway
-from hermes_cli import gateway_windows
-from hermes_cli import main as cli_main
-import hermes_cli.main_install_repair as main_install_repair
-from hermes_cli import process_identity
-from hermes_cli import update_cmd
-import hermes_cli.update_cmd_windows as update_cmd_windows
+from sage_cli import gateway as hermes_gateway
+from sage_cli import gateway_windows
+from sage_cli import main as cli_main
+import sage_cli.main_install_repair as main_install_repair
+from sage_cli import process_identity
+from sage_cli import update_cmd
+import sage_cli.update_cmd_windows as update_cmd_windows
 
 
 def _live_serve_ledger_entry() -> dict:
@@ -34,8 +34,8 @@ def _live_serve_ledger_entry() -> dict:
 def test_control_plane_argv_is_not_a_gateway():
     from gateway.status import looks_like_gateway_command_line
 
-    serve = "C:\\Hermes\\.venv\\Scripts\\python.exe -m hermes_cli.main serve --host 127.0.0.1"
-    run = "C:\\Hermes\\.venv\\Scripts\\python.exe -m hermes_cli.main gateway run"
+    serve = "C:\\Hermes\\.venv\\Scripts\\python.exe -m sage_cli.main serve --host 127.0.0.1"
+    run = "C:\\Hermes\\.venv\\Scripts\\python.exe -m sage_cli.main gateway run"
 
     assert update_cmd._looks_like_desktop_control_plane(serve) is True
     assert looks_like_gateway_command_line(serve) is False
@@ -47,7 +47,7 @@ def test_control_plane_classifier_is_token_based_not_substring():
     """#90778/#91869 class: flag values and lookalike tokens must not read
     as a control plane. The salvage swapped the original substring check
     for the parser-derived subcommand classifier."""
-    py = "C:\\Hermes\\.venv\\Scripts\\python.exe -m hermes_cli.main"
+    py = "C:\\Hermes\\.venv\\Scripts\\python.exe -m sage_cli.main"
     # "dashboard" as a FLAG VALUE, real subcommand is chat
     assert update_cmd._looks_like_desktop_control_plane(f"{py} -m dashboard chat") is False
     # "--preserve-cache" contains "serve"; real subcommand is kanban

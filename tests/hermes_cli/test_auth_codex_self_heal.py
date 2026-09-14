@@ -14,9 +14,9 @@ import json
 
 import pytest
 
-import hermes_cli.auth as auth
-import hermes_cli.auth_codex as auth_codex
-from hermes_cli.auth import AuthError, _refresh_codex_auth_tokens, resolve_codex_runtime_credentials
+import sage_cli.auth as auth
+import sage_cli.auth_codex as auth_codex
+from sage_cli.auth import AuthError, _refresh_codex_auth_tokens, resolve_codex_runtime_credentials
 
 STALE = {"access_token": "stale-access", "refresh_token": "stale-refresh"}
 

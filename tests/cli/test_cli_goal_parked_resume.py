@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import goals
-from hermes_cli.cli_loops_mixin import CLILoopsMixin
+from sage_cli import goals
+from sage_cli.cli_loops_mixin import CLILoopsMixin
 
 
 @pytest.fixture

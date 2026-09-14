@@ -862,7 +862,7 @@ class TestContractAutoRepair:
                  "cua_driver_runtime_contract_status",
                  side_effect=[self._incompatible(), {"ready": True}],
              ), \
-             patch("hermes_cli.tools_config.install_cua_driver",
+             patch("sage_cli.tools_config.install_cua_driver",
                    return_value=True) as installer, \
              patch.object(cua_backend, "_maybe_nudge_update"), \
              patch("tools.lazy_deps.ensure"):
@@ -883,7 +883,7 @@ class TestContractAutoRepair:
                  "cua_driver_runtime_contract_status",
                  return_value=self._incompatible(),
              ), \
-             patch("hermes_cli.tools_config.install_cua_driver",
+             patch("sage_cli.tools_config.install_cua_driver",
                    return_value=False), \
              patch("tools.lazy_deps.ensure") as mock_ensure:
             with pytest.raises(RuntimeError, match="0.20.0 or newer"):
@@ -900,7 +900,7 @@ class TestContractAutoRepair:
                  "cua_driver_runtime_contract_status",
                  return_value=self._incompatible(),
              ), \
-             patch("hermes_cli.tools_config.install_cua_driver",
+             patch("sage_cli.tools_config.install_cua_driver",
                    return_value=False) as installer, \
              patch("tools.lazy_deps.ensure"):
             for _ in range(2):
@@ -919,7 +919,7 @@ class TestContractAutoRepair:
                  "cua_driver_runtime_contract_status",
                  return_value=self._incompatible(),
              ), \
-             patch("hermes_cli.tools_config.install_cua_driver") as installer, \
+             patch("sage_cli.tools_config.install_cua_driver") as installer, \
              patch("tools.lazy_deps.ensure"):
             with pytest.raises(RuntimeError, match="HERMES_CUA_DRIVER_CMD"):
                 cua_backend.CuaDriverBackend().start()
@@ -941,7 +941,7 @@ class TestContractAutoRepair:
                  "cua_driver_runtime_contract_status",
                  return_value=state,
              ), \
-             patch("hermes_cli.tools_config.install_cua_driver") as installer, \
+             patch("sage_cli.tools_config.install_cua_driver") as installer, \
              patch("tools.lazy_deps.ensure"):
             with pytest.raises(RuntimeError, match="not installed"):
                 cua_backend.CuaDriverBackend().start()

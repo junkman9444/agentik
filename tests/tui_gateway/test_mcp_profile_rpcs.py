@@ -33,7 +33,7 @@ def hermes_root(tmp_path, monkeypatch):
     (root / "profiles" / "other").mkdir(parents=True)
     monkeypatch.setenv("HERMES_HOME", str(root))
     # Make sure no stale process-wide home override leaks in from another test.
-    from hermes_constants import get_hermes_home_override
+    from sage_constants import get_hermes_home_override
 
     assert get_hermes_home_override() is None
     return root
@@ -177,7 +177,7 @@ def test_status_does_not_mix_launch_runtime_into_another_profile(hermes_root):
 
 def test_status_includes_named_profile_runtime_in_multiplex(hermes_root):
     from agent.secret_scope import is_multiplex_active, set_multiplex_active
-    from hermes_constants import (
+    from sage_constants import (
         hermes_home_key,
         reset_hermes_home_override,
         set_hermes_home_override,

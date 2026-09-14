@@ -210,7 +210,7 @@ def _do_upload(jsonl: str, *, token: str, session_id: str, dataset_name: str = D
 def load_session_messages(session_id: str, db_path=None) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     """``(messages, meta)`` from SQLite; ``meta`` is ``{}`` when the session row is missing (a live, untitled
     session may still have messages)."""
-    from hermes_state_registry import acquire, release_or_close
+    from sage_state_registry import acquire, release_or_close
     db = acquire(db_path or None)
     try:
         resolved = db.resolve_session_id(session_id) or session_id

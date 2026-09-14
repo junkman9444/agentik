@@ -10,8 +10,8 @@ import time
 import pytest
 
 import tui_gateway.server as srv
-from hermes_cli import anon_auth
-from hermes_cli.auth import _auth_store_lock, _load_auth_store, _save_auth_store
+from sage_cli import anon_auth
+from sage_cli.auth import _auth_store_lock, _load_auth_store, _save_auth_store
 
 
 def _jwt(**claims) -> str:
@@ -41,7 +41,7 @@ def guest(tmp_path, monkeypatch):
 
 
 def _set_guest_off(monkeypatch):
-    from hermes_cli import config as cfg_mod
+    from sage_cli import config as cfg_mod
     monkeypatch.setattr(anon_auth, "guest_enabled", lambda: False)
     return cfg_mod
 

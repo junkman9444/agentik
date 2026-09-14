@@ -93,8 +93,8 @@ _MACHINE_PREFIXES = (
 
 
 def _title_config() -> dict:
-    """``auxiliary.title_generation`` (lazy read-only import: no hermes_cli cycle, no migration writes)."""
-    from hermes_cli.config import load_config_readonly
+    """``auxiliary.title_generation`` (lazy read-only import: no sage_cli cycle, no migration writes)."""
+    from sage_cli.config import load_config_readonly
     return ((load_config_readonly() or {}).get("auxiliary") or {}).get("title_generation") or {}
 
 

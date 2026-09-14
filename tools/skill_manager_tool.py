@@ -19,9 +19,9 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from hermes_constants import get_hermes_home, display_hermes_home
+from sage_constants import get_hermes_home, display_hermes_home
 from utils import atomic_write_text, is_truthy_value
-from hermes_cli.config import cfg_get
+from sage_cli.config import cfg_get
 from agent.skill_utils import (
     extract_skill_description,
     is_skill_description_truncated_for_prompt,
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 def _guard_agent_created_enabled() -> bool:
     """skills.guard_agent_created (default False): opt-in — terminal() runs the same code ungated."""
     try:
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         return is_truthy_value(cfg_get(load_config(), "skills", "guard_agent_created"), default=False)
     except Exception:
         return False
@@ -234,7 +234,7 @@ def _find_skill_in_other_profiles(name: str) -> List[Tuple[str, Path]]:
     error can explain a wrong-profile mistake). Fail-quiet."""
     matches: List[Tuple[str, Path]] = []
     try:
-        from hermes_constants import get_default_hermes_root
+        from sage_constants import get_default_hermes_root
         root = get_default_hermes_root()
     except Exception:
         return matches
@@ -900,7 +900,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

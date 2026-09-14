@@ -6,8 +6,8 @@ import sys
 
 import pytest
 
-from hermes_cli import git_credentials, plugins_cmd
-from hermes_cli._subprocess_compat import noninteractive_git_env
+from sage_cli import git_credentials, plugins_cmd
+from sage_cli._subprocess_compat import noninteractive_git_env
 
 
 def test_private_clone_authenticates_without_writing_credentials_to_checkout(tmp_path, monkeypatch):

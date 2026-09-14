@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 def _process_hermes_home() -> Path:
     """HERMES_HOME for process-level identity files (ignore task overrides)."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     val = os.environ.get("SAGE_HOME", "").strip()
     return Path(val) if val else get_hermes_home()

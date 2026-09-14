@@ -14,11 +14,11 @@ from typing import Optional
 
 
 def _constants_path(getter_name: str) -> Path:
-    """Call ``hermes_constants.<getter_name>()`` (local import avoids cycles); ``~/.sage`` on any failure."""
+    """Call ``sage_constants.<getter_name>()`` (local import avoids cycles); ``~/.sage`` on any failure."""
     try:
-        import hermes_constants
+        import sage_constants
 
-        return getattr(hermes_constants, getter_name)()
+        return getattr(sage_constants, getter_name)()
     except Exception:
         return Path(os.path.expanduser("~/.sage"))
 

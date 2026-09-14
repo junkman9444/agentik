@@ -17,7 +17,7 @@ from tools.registry import tool_error
 from utils import is_truthy_value
 from .store import MemoryStore
 from .retrieval import FactRetriever
-from hermes_cli.config import cfg_get
+from sage_cli.config import cfg_get
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ _EXTRACT_CATEGORIES = (
 
 def _load_plugin_config() -> dict:
     try:
-        from hermes_cli.config import load_config_readonly  # canonical: managed-scope overlay + ${VAR} expansion
+        from sage_cli.config import load_config_readonly  # canonical: managed-scope overlay + ${VAR} expansion
         return cfg_get(load_config_readonly(), "plugins", "hermes-memory-store", default={}) or {}
     except Exception:
         return {}
@@ -116,7 +116,7 @@ class HolographicMemoryProvider(MemoryProvider):
         config_path = Path(hermes_home) / "config.yaml"
         try:
             import yaml
-            from hermes_cli.config import read_user_config_raw  # raw read: merged defaults must not be persisted
+            from sage_cli.config import read_user_config_raw  # raw read: merged defaults must not be persisted
             existing = read_user_config_raw(config_path)
             existing.setdefault("plugins", {})["hermes-memory-store"] = values
             with open(config_path, "w", encoding="utf-8") as f:
@@ -125,7 +125,7 @@ class HolographicMemoryProvider(MemoryProvider):
             pass
 
     def get_config_schema(self):
-        from hermes_constants import display_hermes_home
+        from sage_constants import display_hermes_home
         return [
             {"key": "db_path", "description": "SQLite database path", "default": f"{display_hermes_home()}/memory_store.db"},
             {"key": "auto_extract", "description": "Auto-extract facts at session end", "default": "false", "choices": ["true", "false"]},
@@ -134,7 +134,7 @@ class HolographicMemoryProvider(MemoryProvider):
         ]
 
     def initialize(self, session_id: str, **kwargs) -> None:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         _hermes_home = str(get_hermes_home())
         db_path = self._config.get("db_path", _hermes_home + "/memory_store.db")
         if isinstance(db_path, str):  # expand $HERMES_HOME so paths resolve to the active profile

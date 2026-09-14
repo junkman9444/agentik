@@ -21,9 +21,9 @@ def isolated_kanban_home(monkeypatch):
     monkeypatch.setenv("HERMES_HOME", test_home)
     # Force-reimport so the fresh HERMES_HOME is picked up.
     for mod in list(sys.modules.keys()):
-        if mod.startswith("hermes_cli") or mod.startswith("hermes_state") or mod == "hermes_constants":
+        if mod.startswith("sage_cli") or mod.startswith("sage_state") or mod == "sage_constants":
             del sys.modules[mod]
-    from hermes_cli import kanban_db
+    from sage_cli import kanban_db
     yield kanban_db, test_home
     # Cleanup is best-effort; tempfile dir survives but pytest isolation
     # gives each test its own monkeypatched HERMES_HOME so no cross-test
@@ -42,8 +42,8 @@ def test_unassigned_task_auto_assigned_with_default_assignee(isolated_kanban_hom
     task gets the assignment applied and dispatched on the same tick. The
     DB row is mutated (assignee column + an 'assigned' event)."""
     kb, _home = isolated_kanban_home
-    from hermes_cli import kanban_db_connect as kbc
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db_connect as kbc
+    from sage_cli import kanban_db_dispatch as kbd
     with kbc.connect_closing() as conn:
         kb.create_board(slug="default", name="Test")
         task_id = kb.create_task(conn, title="t1", assignee=None)
@@ -83,8 +83,8 @@ def test_explicitly_assigned_task_untouched_by_default_assignee(isolated_kanban_
     default_assignee logic — that fallback only applies to genuinely
     unassigned rows."""
     kb, _home = isolated_kanban_home
-    from hermes_cli import kanban_db_connect as kbc
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db_connect as kbc
+    from sage_cli import kanban_db_dispatch as kbd
     with kbc.connect_closing() as conn:
         kb.create_board(slug="default", name="Test")
         task_id = kb.create_task(conn, title="t1", assignee="default")

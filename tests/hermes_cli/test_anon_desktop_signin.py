@@ -14,10 +14,10 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from hermes_cli import anon_auth
-from hermes_cli.auth import _load_auth_store
-from hermes_cli.web_server import _SESSION_TOKEN, app
-from tests.hermes_cli.test_anon_upgrade import (
+from sage_cli import anon_auth
+from sage_cli.auth import _load_auth_store
+from sage_cli.web_server import _SESSION_TOKEN, app
+from tests.sage_cli.test_anon_upgrade import (
     EMAIL, FREE_PICK, INFERENCE, PORTAL, WELCOME, _model_config, _write_model_config, free_account, portal)
 
 client = TestClient(app)
@@ -88,7 +88,7 @@ def test_a_sign_in_cancelled_while_waiting_never_persists_the_account(portal, fr
     """The poller is blocked on the transfer when the user cancels; when the wait returns completed,
     nothing may reach the auth store."""
     import threading
-    from hermes_cli import web_server_oauth
+    from sage_cli import web_server_oauth
     guest = anon_auth.ensure_portal_identity(explicit=True)
     release = threading.Event()
 

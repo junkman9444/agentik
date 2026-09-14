@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli.local_runtime.context_policy import (
+from sage_cli.local_runtime.context_policy import (
     FLOOR,
     SPEED_FLOOR_TOK_S,
     GrowthDecision,
@@ -22,7 +22,7 @@ from hermes_cli.local_runtime.context_policy import (
     spill_overrides,
     ub_logits_bytes,
 )
-from hermes_cli.local_runtime.estimator import (
+from sage_cli.local_runtime.estimator import (
     HardwareBudget,
     LayerKind,
     ModelProfile,

@@ -56,7 +56,7 @@ def _run_apply_profile_override(
     for key, value in (extra_env or {}).items():
         monkeypatch.setenv(key, value)
 
-    from hermes_cli.main import _apply_profile_override
+    from sage_cli.main import _apply_profile_override
     _apply_profile_override()
 
     return os.environ.get("HERMES_HOME")
@@ -117,7 +117,7 @@ class TestApplyProfileOverrideHermesHomeGuard:
 
         monkeypatch.setattr(pwd, "getpwnam", lambda name: SimpleNamespace(pw_dir=str(user_home)))
 
-        from hermes_cli.main import _apply_profile_override
+        from sage_cli.main import _apply_profile_override
         _apply_profile_override()
 
         assert os.environ.get("HERMES_HOME") == str(profile_dir)
@@ -170,7 +170,7 @@ class TestSupervisedChildIgnoresStickyProfile:
         monkeypatch.setenv("HERMES_S6_SUPERVISED_CHILD", "1")
         monkeypatch.setattr(sys, "argv", ["hermes", "-p", "coder", "gateway", "run"])
 
-        from hermes_cli.main import _apply_profile_override
+        from sage_cli.main import _apply_profile_override
         _apply_profile_override()
 
         result = os.environ.get("HERMES_HOME")
@@ -287,7 +287,7 @@ class TestGeneralizedSupervisorMarkers:
         are protected without relying on the INVOCATION_ID heuristic."""
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / "home"))
         (tmp_path / "home").mkdir()
-        from hermes_cli.gateway import generate_systemd_unit
+        from sage_cli.gateway import generate_systemd_unit
 
         unit = generate_systemd_unit()
         assert 'Environment="HERMES_SUPERVISED_CHILD=1"' in unit
@@ -297,7 +297,7 @@ class TestGeneralizedSupervisorMarkers:
     ):
         monkeypatch.setenv("HERMES_HOME", str(tmp_path / "home"))
         (tmp_path / "home").mkdir()
-        from hermes_cli.gateway import generate_launchd_plist
+        from sage_cli.gateway import generate_launchd_plist
 
         plist = generate_launchd_plist()
         assert "<key>HERMES_SUPERVISED_CHILD</key>" in plist

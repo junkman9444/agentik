@@ -769,8 +769,8 @@ class GatewayNotificationsMixin:
             # is only consulted when a free-tier identity already exists and its own free-tier rung
             # (which may mint on a fresh install, NS-829) answers from that identity without a network
             # call. No token refresh at boot either way.
-            from hermes_cli.auth import resolve_provider
-            from hermes_cli.anon_auth import guest_carries_inference
+            from sage_cli.auth import resolve_provider
+            from sage_cli.anon_auth import guest_carries_inference
             if not guest_carries_inference():
                 return None
             if resolve_provider("auto") != "nous":
@@ -823,8 +823,8 @@ class GatewayNotificationsMixin:
         error = getattr(self, "_session_db_init_error", None)
         if not error:
             return
-        from hermes_constants import get_default_hermes_root
-        from hermes_state import _default_db_path, classify_persistence_error, format_session_db_unavailable
+        from sage_constants import get_default_hermes_root
+        from sage_state import _default_db_path, classify_persistence_error, format_session_db_unavailable
         if classify_persistence_error(error) == "corrupt":
             # Copy-pasteable, so name the real store (profiles / HERMES_HOME do not live under ~/.hermes).
             db_path = _default_db_path()

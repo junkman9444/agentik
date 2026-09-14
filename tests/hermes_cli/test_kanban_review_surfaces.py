@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import kanban as kc
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
+from sage_cli import kanban as kc
+from sage_cli import kanban_db as kb
+from sage_cli import kanban_db_connect as kbc
 
 
 @pytest.fixture
@@ -235,7 +235,7 @@ def test_domain_and_cli_review_handoffs_redact_before_persistence(
 
 def test_worker_guidance_distinguishes_same_card_and_downstream_review() -> None:
     from agent.prompt_builder import KANBAN_GUIDANCE
-    from hermes_cli.config_defaults import DEFAULT_CONFIG
+    from sage_cli.config_defaults import DEFAULT_CONFIG
 
     assert "lists child IDs" in KANBAN_GUIDANCE
     assert "inspect those cards" in KANBAN_GUIDANCE
@@ -349,7 +349,7 @@ def test_goal_mode_review_handoff_cannot_bypass_judge(
     monkeypatch.setenv("HERMES_KANBAN_RUN_ID", str(cli_claimed.current_run_id))
 
     import agent.auxiliary_client as auxiliary_client
-    from hermes_cli import goals
+    from sage_cli import goals
 
     monkeypatch.setattr(
         auxiliary_client,
@@ -372,7 +372,7 @@ def test_goal_mode_review_handoff_cannot_bypass_judge(
 def test_goal_loop_stops_after_reviewer_requests_changes(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from hermes_cli import goals
+    from sage_cli import goals
 
     monkeypatch.setattr(
         goals,

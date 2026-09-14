@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field, fields, is_dataclass
 from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
 
-from hermes_cli.config import get_hermes_home
+from sage_cli.config import get_hermes_home
 from agent.secret_scope import current_secret_scope, get_secret as _get_secret
 from gateway.shutdown_watchdog import (
     DEFAULT_LOOP_WATCHDOG_INTERVAL_S,
@@ -55,7 +55,7 @@ def _normalize_multiplex_profile_allowlist(value: Any) -> Optional[List[str]]:
         )
         return []
 
-    from hermes_cli.profiles import normalize_profile_name, validate_profile_name
+    from sage_cli.profiles import normalize_profile_name, validate_profile_name
 
     normalized: List[str] = []
     for entry in value:
@@ -270,7 +270,7 @@ _BUILTIN_PLATFORM_VALUES = frozenset(m.value for m in Platform.__members__.value
 
 # Platforms that bind a host TCP port. In a multiplexer only the default profile owns the
 # shared listener, so a SECONDARY profile enabling one is a misconfiguration (single source
-# of truth for gateway/run.py and hermes_cli/web_server.py validation).
+# of truth for gateway/run.py and sage_cli/web_server.py validation).
 PORT_BINDING_PLATFORM_VALUES = frozenset({
     "webhook", "api_server", "msgraph_webhook", "feishu", "wecom_callback",
     "bluebubbles", "sms", "whatsapp_cloud", "line", "teams",
@@ -311,7 +311,7 @@ class HomeChannel:
 
 def persist_home_channel(home: HomeChannel, *, enabled_if_new: bool = False) -> None:
     """Persist a logical home without falsely enabling a Relay-fronted adapter."""
-    from hermes_cli.config import load_config, save_config
+    from sage_cli.config import load_config, save_config
     config = load_config()
     platform_config = _dict_slot(_dict_slot(config, "platforms"), home.platform.value)
     if enabled_if_new:
@@ -501,7 +501,7 @@ def _has_usable_api_server_key(key: object) -> bool:
     if not key:
         return False
     try:
-        from hermes_cli.auth import has_usable_secret
+        from sage_cli.auth import has_usable_secret
         return has_usable_secret(key, min_length=16)
     except ImportError:
         return len(str(key).strip()) >= 16
@@ -633,7 +633,7 @@ class GatewayConfig:
                 # into, and the gateway then tries to connect to Discord / Teams / Google Chat with no token
                 # and emits noisy retry-forever errors. ``_platform_status`` was already fixed for the same
                 # bug class in commit 7849a3d73; this is the runtime counterpart.
-                from hermes_cli.plugins import discover_plugins
+                from sage_cli.plugins import discover_plugins
                 discover_plugins()
             entry = platform_registry.get(platform.value)
             if entry:
@@ -801,7 +801,7 @@ def _validate_gateway_config(config: "GatewayConfig") -> None:
         # Reject known-weak placeholder tokens. Ported from openclaw/openclaw#64586: users who copy
         # .env.example without changing placeholder values get a clear startup error instead of a confusing
         # "auth failed" from the platform API.
-        from hermes_cli.auth import has_usable_secret
+        from sage_cli.auth import has_usable_secret
     except ImportError:
         has_usable_secret = None
 

@@ -7,7 +7,7 @@ Applies on top of the root `AGENTS.md`. Authoring guide + canonical compat contr
 ## Plugins never touch core (Teknium, May 2026)
 
 Plugins live in their own directory and work within the ABCs / hooks / `ctx` surface we provide.
-A plugin MUST NOT modify `run_agent.py`, `cli.py`, `gateway/run.py`, `hermes_cli/main.py`, etc.
+A plugin MUST NOT modify `run_agent.py`, `cli.py`, `gateway/run.py`, `sage_cli/main.py`, etc.
 If it needs a capability the framework lacks, widen the **generic** plugin surface (new hook, new
 ctx method) and have the plugin use it — never hardcode plugin-specific logic into core (PR #5295
 removed 95 lines of hardcoded honcho argparse from `main.py`). Plugin setup goes through
@@ -36,9 +36,9 @@ The ONLY discovery system for out-of-tree plugins. One YAML per entry, 40-hex SH
 human-merged via PR (`plugin-catalog/README.md` = admission policy; `plugin-catalog-ci.yml` clones
 each changed entry at its pin and runs `hermes plugins validate`). `removed.yaml` is the kill list —
 every install path (CLI, dashboard, TUI) refuses matches; only the CLI has a loud `--allow-removed`.
-Code: `hermes_cli/plugin_catalog.py` (loader, live refresh from
+Code: `sage_cli/plugin_catalog.py` (loader, live refresh from
 `/docs/api/plugin-catalog.json` published by the docs build, in-tree fallback),
-`hermes_cli/plugins_cmd_catalog.py` (resolution, `.hermes-catalog.json` provenance sidecar,
+`sage_cli/plugins_cmd_catalog.py` (resolution, `.hermes-catalog.json` provenance sidecar,
 search/info/validate, re-pin on `update`, dashboard/TUI payloads). Never add a second name index:
 bare names resolve through the catalog or error.
 
@@ -46,7 +46,7 @@ bare names resolve through the catalog or error.
 
 | Kind | Where | Discovery | Notes |
 |---|---|---|---|
-| General | `plugins/<name>/`, `~/.hermes/plugins/`, `./.hermes/plugins/`, pip entry points | `PluginManager` (`hermes_cli/plugins.py`), later-wins | `register(ctx)` registers hooks (`pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_start`, `on_session_end`), tools (`ctx.register_tool`), CLI subcommands (`ctx.register_cli_command` — argparse tree wired into `hermes` at startup, no `main.py` change) |
+| General | `plugins/<name>/`, `~/.hermes/plugins/`, `./.hermes/plugins/`, pip entry points | `PluginManager` (`sage_cli/plugins.py`), later-wins | `register(ctx)` registers hooks (`pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_start`, `on_session_end`), tools (`ctx.register_tool`), CLI subcommands (`ctx.register_cli_command` — argparse tree wired into `hermes` at startup, no `main.py` change) |
 | Memory provider | `plugins/memory/<name>/` | `plugins/memory/__init__.py`: bundled → `$HERMES_HOME/plugins/` → `./.hermes/plugins/` (opt-in `HERMES_ENABLE_PROJECT_PLUGINS`) → `hermes_agent.memory_providers` entry points; **bundled-first** | Activated by name via `memory.provider`, so a dropped-in dir must not shadow a shipped one (reverse of general later-wins). Enumerates without importing. Implements `MemoryProvider` ABC (`agent/memory_provider.py`), orchestrated by `agent/memory_manager.py`: `sync_turn`, `prefetch`, `shutdown`, optional `post_setup`. `cli.py` with `register_cli(subparser)` is wired by `discover_plugin_cli_commands()` — only for the ACTIVE provider, so `hermes --help` stays clean |
 | Model provider | `plugins/model-providers/<name>/` | `providers/__init__.py._discover_providers()`, **lazy**, on first `get_provider_profile()`/`list_providers()`; bundled → `$HERMES_HOME/plugins/model-providers/` → legacy `providers/<name>.py` | `__init__.py` calls `providers.register_provider(ProviderProfile(...))` at load; **last-writer-wins** so a user plugin overrides a bundled profile. `PluginManager` records `kind: model-provider` manifests but does NOT import them (would double-instantiate); manifests without `kind:` are auto-coerced by source heuristic (`register_provider` + `ProviderProfile`) |
 | Context engine / image-gen / others | `plugins/context_engine/`, `plugins/image_gen/`, ... | ABC + orchestrator + per-plugin directory | Plug into `agent/context_engine.py`, `agent/image_gen_provider.py` |
@@ -81,14 +81,14 @@ native `api:` match, or version literals on unrelated payloads. Documented surfa
 
 PR #102117 moved internals into `<stem>_<topic>` siblings. Old import paths resolve through
 `PLUGIN-COMPAT` `__getattr__` blocks (listed in `COMPAT_MANIFEST.md` / `compat_manifest.json`)
-until `hermes_cli.plugin_compat.COMPAT_REMOVAL_DATE`, when the commit that added them is reverted.
-`hermes_cli/plugin_compat.py` is the single source: `scan_plugin` (AST scan), `compat_report`
+until `sage_cli.plugin_compat.COMPAT_REMOVAL_DATE`, when the commit that added them is reverted.
+`sage_cli/plugin_compat.py` is the single source: `scan_plugin` (AST scan), `compat_report`
 (hits across enabled external plugins, cached to `HERMES_HOME/.plugin-compat-report.json`,
 refreshed by discovery), `removal_in_effect`, `warn_once`. Surfaces: CLI banner notice,
 `hermes plugins compat` (shows affected user plugins), `hermes doctor`, post-update notices, the
 TUI/Desktop `plugins.compat_report` RPC. After the date `PluginManager` skips a hitting plugin
 unless `plugins.allow_deprecated_imports: true`. **In-tree code and tests never use compat paths**
-(`scripts/check_compat_pointers.py` in CI; `-W error::hermes_cli.plugin_compat.HermesPluginCompatWarning`).
+(`scripts/check_compat_pointers.py` in CI; `-W error::sage_cli.plugin_compat.HermesPluginCompatWarning`).
 External-plugin compat is handled ONCE here — never add per-PR re-export shims.
 
 ## Tests

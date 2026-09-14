@@ -9,9 +9,9 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import kanban_db as kb
-from hermes_cli import kanban_db_connect as kbc
-from hermes_cli import kanban_db_dispatch as kbd
+from sage_cli import kanban_db as kb
+from sage_cli import kanban_db_connect as kbc
+from sage_cli import kanban_db_dispatch as kbd
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +106,7 @@ def test_connect_auto_repairs_index_only_corruption(tmp_path, caplog):
     assert any(m.startswith("wrong # of entries in index") for m in messages)
     assert kbc._repairable_index_names(messages) == ["idx_tasks_status"]
 
-    with caplog.at_level(logging.WARNING, logger="hermes_cli.kanban_db"):
+    with caplog.at_level(logging.WARNING, logger="sage_cli.kanban_db"):
         conn = kbc.connect(db_path=db_path)
     try:
         # DB is clean again and data survived.
@@ -250,7 +250,7 @@ def _run_kanban_cli(argv: list[str]) -> int:
     """Drive the real argparse surface exactly like `hermes kanban …`."""
     import argparse
 
-    from hermes_cli import kanban as kc
+    from sage_cli import kanban as kc
 
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command")

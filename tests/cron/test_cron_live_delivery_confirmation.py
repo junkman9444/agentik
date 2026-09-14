@@ -362,7 +362,7 @@ class TestNotifyIsConfigurable:
         assert router_calls[0]["metadata"]["notify"] is True
 
     def test_default_config_ships_notify_true(self):
-        from hermes_cli.config_defaults import DEFAULT_CONFIG
+        from sage_cli.config_defaults import DEFAULT_CONFIG
 
         assert DEFAULT_CONFIG["cron"]["delivery"]["notify"] is True
 

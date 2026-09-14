@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.process_identity — spawn tags, the machine spawn
+"""Tests for sage_cli.process_identity — spawn tags, the machine spawn
 ledger, and the updater's ledger-identified reap rung.
 
 Layer context (Aug 2026, after the 12-minute Windows update hang): reapers
@@ -22,8 +22,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hermes_cli import process_identity as pi
-from hermes_cli import update_cmd
+from sage_cli import process_identity as pi
+from sage_cli import update_cmd
 
 
 class _FakeNoSuchProcess(Exception):
@@ -213,11 +213,11 @@ def test_spawner_is_dead_tristate():
 # ---------------------------------------------------------------------------
 
 def _holders(*pids):
-    return [(p, "python.exe", f"python.exe -m hermes_cli.main --profile p{p} serve") for p in pids]
+    return [(p, "python.exe", f"python.exe -m sage_cli.main --profile p{p} serve") for p in pids]
 
 
 def test_updater_reaps_ledger_proven_orphans():
-    from hermes_cli import main as cli_main
+    from sage_cli import main as cli_main
 
     entries = [
         _entry(200, 2.0, spawner_pid=700, spawner_create=7.0),   # spawner dead → reap
@@ -232,14 +232,14 @@ def test_updater_reaps_ledger_proven_orphans():
 
 
 def test_updater_ledger_rung_empty_without_ledger():
-    from hermes_cli import main as cli_main
+    from sage_cli import main as cli_main
 
     with patch.object(pi, "ledger_entries", return_value=[]):
         assert cli_main._ledger_reapable_backend_pids(_holders(200)) == []
 
 
 def test_updater_ledger_rung_never_raises():
-    from hermes_cli import main as cli_main
+    from sage_cli import main as cli_main
 
     with patch.object(pi, "ledger_entries", side_effect=RuntimeError("boom")):
         assert cli_main._ledger_reapable_backend_pids(_holders(200)) == []

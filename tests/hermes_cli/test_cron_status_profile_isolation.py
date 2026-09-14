@@ -46,10 +46,10 @@ class TestCronStatusHeartbeatGuard:
     """
 
     def test_no_heartbeat_triggers_yellow_warning(self, monkeypatch, capsys):
-        from hermes_cli import cron as cron_mod
+        from sage_cli import cron as cron_mod
 
         with (
-            patch("hermes_cli.gateway.find_gateway_pids", return_value={789}),
+            patch("sage_cli.gateway.find_gateway_pids", return_value={789}),
             patch("cron.jobs.get_ticker_heartbeat_age", return_value=None),
             patch("cron.jobs.get_ticker_success_age", return_value=None),
             patch("cron.jobs.get_ticker_last_error", return_value=None),
@@ -64,10 +64,10 @@ class TestCronStatusHeartbeatGuard:
         assert "✓ Gateway is running" not in stdout
 
     def test_fresh_heartbeat_shows_green_checkmark(self, monkeypatch, capsys):
-        from hermes_cli import cron as cron_mod
+        from sage_cli import cron as cron_mod
 
         with (
-            patch("hermes_cli.gateway.find_gateway_pids", return_value={999}),
+            patch("sage_cli.gateway.find_gateway_pids", return_value={999}),
             patch("cron.jobs.get_ticker_heartbeat_age", return_value=10),
             patch("cron.jobs.get_ticker_success_age", return_value=8),
             patch("cron.jobs.TICKER_INTERVAL_SECONDS", 60),
@@ -83,7 +83,7 @@ class TestGetServicePidsProfileScope:
     """systemd branch must honor ``all_profiles`` and filter by profile."""
 
     def test_default_scope_filters_current_profile_systemd_unit(self, monkeypatch):
-        from hermes_cli import gateway as gateway_mod
+        from sage_cli import gateway as gateway_mod
 
         def _run_side_effect(args, **kwargs):
             cmd_str = " ".join(str(a) for a in args)
@@ -109,9 +109,9 @@ class TestGetServicePidsProfileScope:
             return MagicMock(returncode=0, stdout="", stderr="")
 
         with (
-            patch("hermes_cli.gateway.is_macos", return_value=False),
-            patch("hermes_cli.gateway.supports_systemd_services", return_value=True),
-            patch("hermes_cli.gateway.get_service_name", return_value="hermes-gateway-jarvis"),
+            patch("sage_cli.gateway.is_macos", return_value=False),
+            patch("sage_cli.gateway.supports_systemd_services", return_value=True),
+            patch("sage_cli.gateway.get_service_name", return_value="hermes-gateway-jarvis"),
             patch("subprocess.run", side_effect=_run_side_effect),
         ):
             pids = gateway_mod._get_service_pids()
@@ -119,7 +119,7 @@ class TestGetServicePidsProfileScope:
         assert pids == {123}, "default scope must filter to current profile's unit"
 
     def test_all_profiles_true_enumerates_fleet(self, monkeypatch):
-        from hermes_cli import gateway as gateway_mod
+        from sage_cli import gateway as gateway_mod
 
         def _run_side_effect(args, **kwargs):
             cmd_str = " ".join(str(a) for a in (args[:4] if args else []))
@@ -140,9 +140,9 @@ class TestGetServicePidsProfileScope:
             return MagicMock(returncode=0, stdout="", stderr="")
 
         with (
-            patch("hermes_cli.gateway.is_macos", return_value=False),
-            patch("hermes_cli.gateway.supports_systemd_services", return_value=True),
-            patch("hermes_cli.gateway.get_service_name", return_value="hermes-gateway"),
+            patch("sage_cli.gateway.is_macos", return_value=False),
+            patch("sage_cli.gateway.supports_systemd_services", return_value=True),
+            patch("sage_cli.gateway.get_service_name", return_value="hermes-gateway"),
             patch("subprocess.run", side_effect=_run_side_effect),
         ):
             pids = gateway_mod._get_service_pids(all_profiles=True)
@@ -156,15 +156,15 @@ class TestCronStatusMissingHeartbeat:
     def test_missing_heartbeat_warns_when_gateway_old(self, tmp_cron_dir, capsys, monkeypatch):
         import io
         from contextlib import redirect_stdout
-        import hermes_cli.cron as cron_cli
+        import sage_cli.cron as cron_cli
         from cron.jobs import create_job
 
         create_job(prompt="Test", schedule="every 1h")
 
         out = io.StringIO()
         with (
-            patch("hermes_cli.cron._active_cron_provider_name", return_value="builtin"),
-            patch("hermes_cli.gateway.find_gateway_pids", return_value=[4242]),
+            patch("sage_cli.cron._active_cron_provider_name", return_value="builtin"),
+            patch("sage_cli.gateway.find_gateway_pids", return_value=[4242]),
             patch("gateway.status.is_gateway_runtime_lock_active", return_value=True),
             patch("gateway.status.get_running_pid", return_value=4242),
             patch("cron.jobs.get_ticker_heartbeat_age", return_value=None),
@@ -184,7 +184,7 @@ class TestCronStatusMissingHeartbeat:
     def test_missing_heartbeat_green_when_gateway_just_started(self, tmp_cron_dir, capsys, monkeypatch):
         import io
         from contextlib import redirect_stdout
-        import hermes_cli.cron as cron_cli
+        import sage_cli.cron as cron_cli
         from cron.jobs import create_job
 
         create_job(prompt="Test", schedule="every 1h")
@@ -192,8 +192,8 @@ class TestCronStatusMissingHeartbeat:
         now = time.time()
         out = io.StringIO()
         with (
-            patch("hermes_cli.cron._active_cron_provider_name", return_value="builtin"),
-            patch("hermes_cli.gateway.find_gateway_pids", return_value=[4242]),
+            patch("sage_cli.cron._active_cron_provider_name", return_value="builtin"),
+            patch("sage_cli.gateway.find_gateway_pids", return_value=[4242]),
             patch("gateway.status.is_gateway_runtime_lock_active", return_value=True),
             patch("gateway.status.get_running_pid", return_value=4242),
             patch("cron.jobs.get_ticker_heartbeat_age", return_value=None),

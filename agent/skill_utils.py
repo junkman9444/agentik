@@ -9,7 +9,7 @@ import sys
 from pathlib import Path, PurePath
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from hermes_constants import get_config_path, get_skills_dir, is_termux
+from sage_constants import get_config_path, get_skills_dir, is_termux
 
 logger = logging.getLogger(__name__)
 
@@ -168,7 +168,7 @@ def _detect_kanban() -> bool:
 
 def _detect_docker() -> bool:
     try:
-        from hermes_constants import is_container
+        from sage_constants import is_container
         return is_container()
     except Exception:
         return False
@@ -221,7 +221,7 @@ def _config_cache_key(config_path: Path) -> Optional[Tuple[str, int, int]]:
 
 
 def _load_raw_config() -> Dict[str, Any]:
-    """Read config.yaml with an mtime+size keyed cache (no hermes_cli.config import)."""
+    """Read config.yaml with an mtime+size keyed cache (no sage_cli.config import)."""
     config_path = get_config_path()
     if not config_path.exists():
         return {}
@@ -261,7 +261,7 @@ def _expand_path(entry: str) -> Path:
 
 def _home_relative(p: Path) -> Path:
     """Anchor a relative config path at HERMES_HOME; absolute paths pass through."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return p if p.is_absolute() else get_hermes_home() / p
 
 
@@ -381,7 +381,7 @@ def get_skill_create_dir() -> Optional[Path]:
 def display_skill_create_dir() -> str:
     """User-facing path where new skills are created (``~/`` shorthand when
     possible); tool schema descriptions and prompts follow ``skills.create_dir``."""
-    from hermes_constants import display_hermes_home
+    from sage_constants import display_hermes_home
     create_dir = get_skill_create_dir()
     if create_dir is None:
         return f"{display_hermes_home()}/skills/"
@@ -538,7 +538,7 @@ def is_quarantined_project_skill(skill_md) -> bool:
         return _PROJECT_QUARANTINE_CACHE[key]
     try:
         from tools.skills_guard import scan_skill_cached
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         cache_dir = get_hermes_home() / "cache" / "project_skill_scans"
         result, _prov = scan_skill_cached(skill_dir, source=_PROJECT_SCAN_SOURCE, cache_dir=cache_dir)
         quarantined = result.verdict == "dangerous"

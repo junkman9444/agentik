@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
 
@@ -230,7 +230,7 @@ def _pairing_cmd(args: list) -> int:
 
 def _main() -> int:
     try:
-        __import__("hermes_cli.env_loader", fromlist=["load_hermes_dotenv"]).load_hermes_dotenv()
+        __import__("sage_cli.env_loader", fromlist=["load_hermes_dotenv"]).load_hermes_dotenv()
     except Exception:
         pass
     usage = f"""Usage: python -m gateway.platforms.feishu_comment_rules <command> [args]

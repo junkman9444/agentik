@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import update_cmd
+from sage_cli import update_cmd
 
 
 def _write_pyproject(root: Path, version: str) -> None:

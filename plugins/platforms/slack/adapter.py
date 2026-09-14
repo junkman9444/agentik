@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 
 # User-Agent prefix (``HermesAgent/<version>``) for platform-partner attribution of API calls.
 try:
-    from hermes_cli import __version__ as _HERMES_VERSION
+    from sage_cli import __version__ as _HERMES_VERSION
 except Exception:
     _HERMES_VERSION = "unknown"
 _HERMES_SLACK_USER_AGENT_PREFIX = f"HermesAgent/{_HERMES_VERSION}"
@@ -341,7 +341,7 @@ def _rewrite_known_bang_command(text: str) -> str:
     if not text.startswith("!"):
         return text
     try:
-        from hermes_cli.commands import is_gateway_known_command
+        from sage_cli.commands import is_gateway_known_command
         first_token = text[1:].split(maxsplit=1)[0]
         cmd_name = first_token.split("@", 1)[0].lower()
         if cmd_name and "/" not in cmd_name and is_gateway_known_command(cmd_name):
@@ -1507,7 +1507,7 @@ class SlackAdapter(BasePlatformAdapter):
         # Every COMMAND_REGISTRY command is a native slash via one regex matcher. Commands must
         # ALSO be declared in the app manifest (`hermes slack manifest`): Socket Mode won't
         # deliver undeclared commands at all.
-        from hermes_cli.commands_platforms import slack_native_slashes
+        from sage_cli.commands_platforms import slack_native_slashes
         _slash_names = [name for name, _d, _h in slack_native_slashes()]
         if _slash_names:
             _slash_pattern = re.compile(
@@ -1544,7 +1544,7 @@ class SlackAdapter(BasePlatformAdapter):
         """Wire ``ctx.register_slack_action_handler`` callbacks; each is wrapped so a plugin
         exception is logged and slack_bolt still sees a clean ack."""
         try:
-            from hermes_cli.plugins import get_plugin_manager
+            from sage_cli.plugins import get_plugin_manager
             _plugin_handlers = get_plugin_manager().get_slack_action_handlers()
         except Exception as e:  # pragma: no cover - defensive
             logger.warning("[Slack] Could not load plugin action handlers: %s", e)
@@ -4775,7 +4775,7 @@ class SlackAdapter(BasePlatformAdapter):
             thread_ts = self._resolve_thread_ts(None, metadata)
 
             try:
-                from hermes_cli.providers import get_label
+                from sage_cli.providers import get_label
                 provider_label = get_label(current_provider)
             except Exception:
                 provider_label = current_provider
@@ -4954,7 +4954,7 @@ class SlackAdapter(BasePlatformAdapter):
             state["stage"] = "provider"
             state["selected_provider_slug"] = ""
             try:
-                from hermes_cli.providers import get_label
+                from sage_cli.providers import get_label
                 provider_label = get_label(
                     state.get("current_provider", "")
                 )
@@ -5686,7 +5686,7 @@ class SlackAdapter(BasePlatformAdapter):
         if slash_name not in {"hermes", ""}:
             return f"/{slash_name}" if not raw_text else f"/{slash_name} {raw_text}"
         legacy_text = raw_text.strip()
-        from hermes_cli.commands_platforms import slack_subcommand_map
+        from sage_cli.commands_platforms import slack_subcommand_map
         subcommand_map = slack_subcommand_map()
         subcommand_map["compact"] = "/compress"
         first_word = legacy_text.split()[0] if legacy_text.split() else ""
@@ -6041,7 +6041,7 @@ class SlackAdapter(BasePlatformAdapter):
 # ``interactive_setup``, ``_apply_yaml_config``, ``_is_connected``, ``_build_adapter``) that replace the
 # per-platform core touchpoints (the ``Platform.SLACK`` elif in ``gateway/run.py``, the ``slack_cfg``
 # YAML→env block in ``gateway/config.py``, the ``_setup_slack`` wizard + ``_PLATFORMS["slack"]`` static dict
-# in ``hermes_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in ``tools/send_message_tool.py``).
+# in ``sage_cli/{setup,gateway}.py``, and the ``_send_slack`` dispatch in ``tools/send_message_tool.py``).
 # ──────────────────────────────────────────────────────────────────────────
 _slack_dm_cache: Dict[str, str] = {}
 _SLACK_DM_CACHE_MAX = 5000
@@ -6065,7 +6065,7 @@ def _load_slack_bot_tokens(raw_token: str, *, quiet: bool) -> List[str]:
     order). ``quiet`` (standalone): no permission warning / per-token INFO; failures swallowed."""
     tokens = [t.strip() for t in raw_token.split(",") if t.strip()]
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         tokens_file = get_hermes_home() / "slack_tokens.json"
         present = tokens_file.exists()
     except Exception:
@@ -6354,10 +6354,10 @@ _SETUP_HOME_CHANNEL_HELP = (
 
 def _write_slack_manifest_and_instruct() -> None:
     """Write the manifest under HERMES_HOME and print paste instructions; non-fatal."""
-    from hermes_cli.cli_output import print_info, print_success, print_warning
+    from sage_cli.cli_output import print_info, print_success, print_warning
     try:
-        from hermes_cli.slack_cli import _build_full_manifest
-        from hermes_constants import get_hermes_home
+        from sage_cli.slack_cli import _build_full_manifest
+        from sage_constants import get_hermes_home
         manifest = _build_full_manifest(
             bot_name="Hermes", bot_description="Your Hermes agent on Slack")
         target = _Path(get_hermes_home()) / "slack-manifest.json"
@@ -6379,8 +6379,8 @@ def _write_slack_manifest_and_instruct() -> None:
 def interactive_setup() -> None:
     """Guide the user through Slack bot setup (manifest, tokens, allowlist, home channel).
     CLI helpers are lazy-imported to keep the plugin's import surface small."""
-    from hermes_cli.config import get_env_value, remove_env_value, save_env_value
-    from hermes_cli.cli_output import (
+    from sage_cli.config import get_env_value, remove_env_value, save_env_value
+    from sage_cli.cli_output import (
         prompt, prompt_yes_no, print_header, print_info, print_success, print_warning)
 
     print_header("Slack")
@@ -6471,7 +6471,7 @@ def _apply_yaml_config(yaml_cfg: dict, slack_cfg: dict) -> dict | None:
 def _is_connected(config) -> bool:
     """Connected when SLACK_BOT_TOKEN is set. Resolved through ``gateway_mod`` at call
     time (not a bound import) so tests patching ``get_env_value`` take effect."""
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
     return bool((gateway_mod.get_env_value("SLACK_BOT_TOKEN") or "").strip())
 
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import config
+from sage_cli import config
 
 
 @pytest.mark.linux_only

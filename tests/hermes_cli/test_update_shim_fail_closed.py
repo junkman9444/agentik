@@ -23,9 +23,9 @@ from unittest import mock
 
 import pytest
 
-from hermes_cli import main_install_repair
-import hermes_cli._install_repair as ir
-import hermes_cli.update_cmd as update_cmd
+from sage_cli import main_install_repair
+import sage_cli._install_repair as ir
+import sage_cli.update_cmd as update_cmd
 
 
 def _make_shims(scripts_dir: Path, names=("hermes", "hermes-gateway")) -> list[Path]:

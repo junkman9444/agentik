@@ -475,7 +475,7 @@ def _read_gemini_persona_prompt(gemini_config: Dict[str, Any]) -> str:
     path = Path(os.path.expandvars(raw.strip())).expanduser()
     if not path.is_absolute():
         try:
-            from hermes_constants import get_hermes_home
+            from sage_constants import get_hermes_home
             path = get_hermes_home() / path
         except Exception:
             path = Path.cwd() / path
@@ -590,8 +590,8 @@ def _generate_gemini_tts(text: str, output_path: str, tts_config: Dict[str, Any]
     headers = {"Content-Type": "application/json"}
     if urlparse(base_url).hostname == "generativelanguage.googleapis.com":
         try:
-            import hermes_cli
-            version = str(hermes_cli.__version__)
+            import sage_cli
+            version = str(sage_cli.__version__)
         except Exception:
             version = "0.0.0"
         headers["X-Goog-Api-Client"] = f"hermes-agent/{version}"  # partner-integration guidance

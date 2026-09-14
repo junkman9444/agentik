@@ -23,12 +23,12 @@ from unittest.mock import patch
 
 import pytest
 
-import hermes_cli.gateway as gateway
-import hermes_cli.gateway_windows as gateway_windows
-import hermes_cli.main as hm
-import hermes_cli.main_install_repair as main_install_repair
-from hermes_cli.update_cmd import _resume_windows_gateways_after_update
-from hermes_cli.update_inventory import (
+import sage_cli.gateway as gateway
+import sage_cli.gateway_windows as gateway_windows
+import sage_cli.main as hm
+import sage_cli.main_install_repair as main_install_repair
+from sage_cli.update_cmd import _resume_windows_gateways_after_update
+from sage_cli.update_inventory import (
     RuntimeRecord,
     UpdatePlan,
     match_runtime_outcomes,
@@ -175,7 +175,7 @@ def test_merge_helper_reads_token_keys_into_restart_outcome(monkeypatch):
     """Drive the real merge helper (not a mirror): the Windows resume token's
     ``relaunched_profiles`` / ``restarted_services`` / ``service_profiles`` /
     ``services`` keys must land in the shared restart bookkeeping."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     monkeypatch.setattr(hm, "_resume_windows_gateways_after_update", lambda token: None)
     outcome = update_cmd._GatewayRestartOutcome(
@@ -195,7 +195,7 @@ def test_merge_helper_reads_token_keys_into_restart_outcome(monkeypatch):
         "service_profiles": {"svc": "p2", "pending": "p3"},
         "services": ["pending"],
     }
-    with patch("hermes_cli.update_receipt.record_gateway_restart", lambda **kw: None):
+    with patch("sage_cli.update_receipt.record_gateway_restart", lambda **kw: None):
         update_cmd._resume_windows_gateways_and_merge_outcome(outcome, token, False)
 
     assert outcome.relaunched_profiles == ["p1", "p2"]

@@ -132,7 +132,7 @@ def test_external_worker_adopts_execution_and_runs_payload_once(
         }),
         encoding="utf-8",
     )
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     observed_homes = []
     adopted = Mock(

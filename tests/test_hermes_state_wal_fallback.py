@@ -18,10 +18,10 @@ from unittest.mock import patch
 
 import pytest
 
-import hermes_state
-import hermes_state_wal
-from hermes_state import SessionDB, format_session_db_unavailable, get_last_init_error
-from hermes_state_wal import WalUnsupportedError, apply_wal_with_fallback
+import sage_state
+import sage_state_wal
+from sage_state import SessionDB, format_session_db_unavailable, get_last_init_error
+from sage_state_wal import WalUnsupportedError, apply_wal_with_fallback
 
 
 # ``sqlite3.Connection.execute`` is a C-level slot and can't be monkeypatched
@@ -76,28 +76,28 @@ def _make_silent_noop_factory(returned_mode: str = "delete"):
 @pytest.fixture(autouse=True)
 def _reset_last_init_error():
     """Reset the module-global last-error before and after each test."""
-    hermes_state._set_last_init_error(None)
+    sage_state._set_last_init_error(None)
     yield
-    hermes_state._set_last_init_error(None)
+    sage_state._set_last_init_error(None)
 
 
 @pytest.fixture(autouse=True)
 def _reset_wal_fallback_warned_paths():
     """Reset the WAL-fallback warned-paths set so dedup doesn't leak between tests."""
-    hermes_state_wal._wal_fallback_warned_paths.clear()
+    sage_state_wal._wal_fallback_warned_paths.clear()
     yield
-    hermes_state_wal._wal_fallback_warned_paths.clear()
+    sage_state_wal._wal_fallback_warned_paths.clear()
 
 
 @pytest.fixture(autouse=True)
 def _assume_fixed_sqlite(monkeypatch):
     """NFS-fallback tests assume a SQLite build without the WAL-reset bug."""
     monkeypatch.setattr(
-        hermes_state_wal, "is_sqlite_wal_reset_vulnerable", lambda version_info=None: False
+        sage_state_wal, "is_sqlite_wal_reset_vulnerable", lambda version_info=None: False
     )
-    hermes_state_wal._wal_reset_bug_warned_paths.clear()
+    sage_state_wal._wal_reset_bug_warned_paths.clear()
     yield
-    hermes_state_wal._wal_reset_bug_warned_paths.clear()
+    sage_state_wal._wal_reset_bug_warned_paths.clear()
 
 
 class TestApplyWalWithFallback:
@@ -113,7 +113,7 @@ class TestApplyWalWithFallback:
     def test_falls_back_to_delete_on_locking_protocol(self, tmp_path, caplog):
         """NFS-style ``locking protocol`` error → DELETE mode + one ERROR."""
         conn, _ = _open_blocking(tmp_path / "nfs.db", isolation_level=None)
-        with caplog.at_level("ERROR", logger="hermes_state"):
+        with caplog.at_level("ERROR", logger="sage_state"):
             mode = apply_wal_with_fallback(conn, db_label="test.db")
 
         assert mode == "delete"
@@ -154,7 +154,7 @@ class TestApplyWalWithFallback:
         conn = sqlite3.connect(
             str(tmp_path / "macnfs.db"), factory=factory, isolation_level=None
         )
-        with caplog.at_level("ERROR", logger="hermes_state"):
+        with caplog.at_level("ERROR", logger="sage_state"):
             mode = apply_wal_with_fallback(conn, db_label="kanban.db")
 
         assert mode == "delete", "must report the true mode, not a false 'wal'"
@@ -206,7 +206,7 @@ class TestApplyWalWithFallback:
         conn, attempts = _open_blocking(
             tmp_path / "zfs.db", reason="disk I/O error", isolation_level=None
         )
-        with caplog.at_level("ERROR", logger="hermes_state"):
+        with caplog.at_level("ERROR", logger="sage_state"):
             mode = apply_wal_with_fallback(conn, db_label="zfs.db")
         assert mode == "delete"
         assert attempts[0] >= 3, "must retry before concluding EIO is persistent"
@@ -326,12 +326,12 @@ class TestApplyWalWithFallback:
         """Repeated calls with the same db_label log exactly ONE error.
 
         Prevents log spam when NFS users run kanban (which opens a fresh
-        connection on every operation — see hermes_cli/kanban_db.py).
+        connection on every operation — see sage_cli/kanban_db.py).
         Regression guard: the fix for #22032 ran apply_wal_with_fallback()
         on every kb.connect() call; without dedup, errors.log fills with
         hundreds of identical errors per hour.
         """
-        with caplog.at_level("ERROR", logger="hermes_state"):
+        with caplog.at_level("ERROR", logger="sage_state"):
             # Three separate connections to "the same DB" via the same label
             for i in range(3):
                 conn, _ = _open_blocking(tmp_path / f"dup-{i}.db", isolation_level=None)
@@ -352,7 +352,7 @@ class TestApplyWalWithFallback:
 
     def test_error_fires_independently_per_db_label(self, tmp_path, caplog):
         """Different db_labels each get their own one error (not globally dedup'd)."""
-        with caplog.at_level("ERROR", logger="hermes_state"):
+        with caplog.at_level("ERROR", logger="sage_state"):
             conn1, _ = _open_blocking(tmp_path / "a.db", isolation_level=None)
             apply_wal_with_fallback(conn1, db_label="state.db")
             conn1.close()
@@ -450,7 +450,7 @@ class TestGetLastInitError:
             kwargs.pop("factory", None)
             return real_connect(str(target), factory=_BothPragmasFailConnection, **kwargs)
 
-        with patch("hermes_state.sqlite3.connect", side_effect=gated_connect):
+        with patch("sage_state.sqlite3.connect", side_effect=gated_connect):
             with pytest.raises(sqlite3.OperationalError):
                 SessionDB(db_path=target)
 
@@ -463,13 +463,13 @@ class TestGetLastInitError:
 class TestFormatSessionDbUnavailable:
     def test_bare_message_when_no_cause(self):
         """No init error recorded → generic message."""
-        hermes_state._set_last_init_error(None)
+        sage_state._set_last_init_error(None)
         assert format_session_db_unavailable() == "Session database not available."
 
 
     def test_adds_nfs_hint_for_locking_protocol(self):
         """Locking-protocol cause gets an NFS/SMB pointer for the user."""
-        hermes_state._set_last_init_error("OperationalError: locking protocol")
+        sage_state._set_last_init_error("OperationalError: locking protocol")
         msg = format_session_db_unavailable()
         assert "locking protocol" in msg
         assert "NFS/SMB" in msg
@@ -477,7 +477,7 @@ class TestFormatSessionDbUnavailable:
 
     def test_custom_prefix(self):
         """Callers can customize the prefix for context-specific messages."""
-        hermes_state._set_last_init_error("OperationalError: locking protocol")
+        sage_state._set_last_init_error("OperationalError: locking protocol")
         msg = format_session_db_unavailable(prefix="Cannot /resume")
         assert msg.startswith("Cannot /resume:")
 
@@ -498,7 +498,7 @@ class TestSessionDbUsesWalFallback:
             kwargs.pop("factory", None)
             return real_connect(str(target), factory=factory, **kwargs)
 
-        with patch("hermes_state.sqlite3.connect", side_effect=gated_connect):
+        with patch("sage_state.sqlite3.connect", side_effect=gated_connect):
             db = SessionDB(db_path=target)
 
         try:
@@ -530,8 +530,8 @@ class TestSessionDbUsesWalFallback:
             kwargs.pop("factory", None)
             return real_connect(str(target), factory=factory, **kwargs)
 
-        with patch("hermes_state.sqlite3.connect", side_effect=gated_connect):
-            with caplog.at_level("ERROR", logger="hermes_state"):
+        with patch("sage_state.sqlite3.connect", side_effect=gated_connect):
+            with caplog.at_level("ERROR", logger="sage_state"):
                 db = SessionDB(db_path=target)
 
         try:

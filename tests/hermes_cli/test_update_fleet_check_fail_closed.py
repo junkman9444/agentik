@@ -26,8 +26,8 @@ from __future__ import annotations
 import inspect
 import types
 
-from hermes_cli.main import _fleet_probe_expected_runtimes
-from hermes_cli.update_inventory import RuntimeRecord
+from sage_cli.main import _fleet_probe_expected_runtimes
+from sage_cli.update_inventory import RuntimeRecord
 
 
 def _plan(runtimes):
@@ -140,7 +140,7 @@ class TestCallSiteWiring:
     """
 
     def _impl_source(self):
-        from hermes_cli import update_cmd
+        from sage_cli import update_cmd
 
         # The fleet-version probe lives in the post-restart verifier that
         # _cmd_update_impl calls; guard the wiring there.
@@ -153,7 +153,7 @@ class TestCallSiteWiring:
         # resumed Windows gateway gets its settle window too (#93406). The
         # settle loop lives in _collect_fleet_snapshot, gated on that signal.
         assert "_fleet_snapshot = _collect_fleet_snapshot(restart, _fleet_rows_expected)" in src
-        from hermes_cli import update_cmd_fleet
+        from sage_cli import update_cmd_fleet
 
         snap_src = inspect.getsource(update_cmd_fleet._collect_fleet_snapshot)
         assert "if not rows_expected:\n" in snap_src
@@ -174,7 +174,7 @@ def test_unmapped_stops_are_not_expected_rows():
     # A gateway stopped WITHOUT a successor is listed under "Restart manually" and never
     # publishes a row; counting it made the probe demand rows that cannot exist and the
     # update exited 1 after correctly stopping every unmapped gateway.
-    from hermes_cli.update_cmd_fleet import _GatewayRestartOutcome
+    from sage_cli.update_cmd_fleet import _GatewayRestartOutcome
 
     out = _GatewayRestartOutcome(
         incomplete=False, phase_errors=[], pre_restart_gateway_pids=[101, 102], restarted_services=[],

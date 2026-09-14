@@ -49,7 +49,7 @@ class DurableTurnLease:
         """Create (not schedule) the liveness watchdog when configured: lease renewal is NOT
         evidence of progress; a silently stalled turn would renew forever."""
         try:
-            from hermes_cli.config import load_config_readonly
+            from sage_cli.config import load_config_readonly
 
             liveness_config = load_config_readonly() or {}
         except Exception:

@@ -1,6 +1,6 @@
 """``hermes lsp`` CLI subcommand: status / list / install / install-all / restart / which.
 
-Handlers live here (not in ``hermes_cli/main.py``) so the LSP module ships self-contained.
+Handlers live here (not in ``sage_cli/main.py``) so the LSP module ships self-contained.
 """
 from __future__ import annotations
 

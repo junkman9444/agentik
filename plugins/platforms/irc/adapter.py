@@ -346,8 +346,8 @@ def validate_config(config) -> bool:
 
 
 def interactive_setup() -> None:
-    """`hermes gateway setup` flow (lazy hermes_cli imports keep the plugin importable outside the CLI)."""
-    from hermes_cli.setup import (
+    """`hermes gateway setup` flow (lazy sage_cli imports keep the plugin importable outside the CLI)."""
+    from sage_cli.setup import (
         prompt, prompt_yes_no, save_env_value, get_env_value, print_header, print_info, print_warning, print_success)
 
     def info(*lines: str) -> None:

@@ -3,8 +3,8 @@
 import shutil
 import sys
 
-from hermes_cli.nous_account import NousPortalAccountInfo, NousToolAccessInfo
-from hermes_cli import nous_subscription as ns
+from sage_cli.nous_account import NousPortalAccountInfo, NousToolAccessInfo
+from sage_cli import nous_subscription as ns
 from tools import tool_backend_helpers
 from tools import browser_tool_install as bt_install
 
@@ -179,11 +179,11 @@ def _capture_checklist(monkeypatch, *, selected_idx):
         captured["pre_selected"] = list(pre_selected or [])
         return list(selected_idx)
 
-    import hermes_cli.setup as setup_mod
+    import sage_cli.setup as setup_mod
 
     monkeypatch.setattr(setup_mod, "prompt_checklist", _fake_checklist, raising=False)
     monkeypatch.setattr(
-        "hermes_cli.config.save_config", lambda cfg: None, raising=False
+        "sage_cli.config.save_config", lambda cfg: None, raising=False
     )
     return captured
 
@@ -347,7 +347,7 @@ def test_prompt_enable_tool_gateway_persists_decline(monkeypatch):
     saved = []
     captured = _capture_checklist(monkeypatch, selected_idx=[])
     monkeypatch.setattr(
-        "hermes_cli.config.save_config", lambda cfg: saved.append(dict(cfg)), raising=False
+        "sage_cli.config.save_config", lambda cfg: saved.append(dict(cfg)), raising=False
     )
 
     config = {"model": {"provider": "nous"}}
@@ -362,7 +362,7 @@ def test_prompt_enable_tool_gateway_persists_decline(monkeypatch):
     # Second offer with the recorded declines: nothing is pre-checked.
     captured2 = _capture_checklist(monkeypatch, selected_idx=[])
     monkeypatch.setattr(
-        "hermes_cli.config.save_config", lambda cfg: saved.append(dict(cfg)), raising=False
+        "sage_cli.config.save_config", lambda cfg: saved.append(dict(cfg)), raising=False
     )
     ns.prompt_enable_tool_gateway(config)
     assert captured2["pre_selected"] == []
@@ -465,7 +465,7 @@ def _block_legacy_agent_browser_checks(monkeypatch):
             None if cmd == "agent-browser" else real_which(cmd, *args, **kwargs)
         ),
     )
-    monkeypatch.setattr("hermes_constants.agent_browser_runnable", lambda path: False)
+    monkeypatch.setattr("sage_constants.agent_browser_runnable", lambda path: False)
 
 
 def test_has_agent_browser_true_for_npx_only_resolution(monkeypatch):
@@ -532,7 +532,7 @@ def test_has_agent_browser_import_failure_falls_back_to_path_check(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        "hermes_constants.agent_browser_runnable",
+        "sage_constants.agent_browser_runnable",
         lambda path: path == "/fake/bin/agent-browser",
     )
 
@@ -564,10 +564,10 @@ def test_has_agent_browser_import_failure_falls_back_to_hermes_managed_node_path
         ),
     )
     monkeypatch.setattr(
-        "hermes_constants.with_hermes_node_path", lambda: {"PATH": str(managed_dir)}
+        "sage_constants.with_hermes_node_path", lambda: {"PATH": str(managed_dir)}
     )
     monkeypatch.setattr(
-        "hermes_constants.agent_browser_runnable",
+        "sage_constants.agent_browser_runnable",
         lambda p: bool(p) and str(p) == str(managed_bin),
     )
 

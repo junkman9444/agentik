@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from hermes_cli import web_server
-import hermes_cli.web_server_chat as _web_server_chat
+from sage_cli import web_server
+import sage_cli.web_server_chat as _web_server_chat
 
 
 class FakeBridge:

@@ -500,7 +500,7 @@ def _plugin_verdict(c: _Ctx) -> Optional[Verdict]:
     provider plugin can add or correct verdicts). invoke_hook isolates callback
     failures; this guard only covers import/dispatch failure."""
     try:
-        from hermes_cli.plugins import get_plugin_error_classification
+        from sage_cli.plugins import get_plugin_error_classification
         verdict = get_plugin_error_classification(
             provider=c.provider, model=c.model, status_code=c.status_code, error_type=c.error_type,
             error_code=c.error_code, error_message=c.msg, error_body=c.body, error=c.error,
@@ -525,7 +525,7 @@ def _nous_welcome_tier(c: _Ctx) -> Optional[Verdict]:
     400/403 whose message names the wrong host or a dark tier is deterministic for the request.
     The parsed refusal rides ``error_context`` so the terminal copy can say what happened.
     """
-    from hermes_cli.anon_auth import (
+    from sage_cli.anon_auth import (
         WELCOME_TIER_GATE_REASONS, parse_welcome_refusal, welcome_route_refusal)
     status = c.status_code
     if status == 429:
@@ -844,7 +844,7 @@ def _model_id_missing_known_prefix(model: str, provider: str) -> bool:
     if not name or "/" in name:
         return False
     try:
-        from hermes_cli.model_normalize import suggest_prefixed_model_id
+        from sage_cli.model_normalize import suggest_prefixed_model_id
         return bool(suggest_prefixed_model_id((provider or "").strip(), name))
     except Exception:
         return False

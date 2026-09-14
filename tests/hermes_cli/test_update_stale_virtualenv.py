@@ -9,8 +9,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import hermes_cli.main as main_mod
-from hermes_cli import main_install_repair
+import sage_cli.main as main_mod
+from sage_cli import main_install_repair
 
 
 class StaleVirtualEnvTest(unittest.TestCase):

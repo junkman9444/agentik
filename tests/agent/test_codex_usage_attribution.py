@@ -12,8 +12,8 @@ import httpx
 import pytest
 import yaml
 
-from hermes_cli import __version__
-from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+from sage_cli import __version__
+from sage_constants import reset_hermes_home_override, set_hermes_home_override
 
 
 CODEX_URL = "https://chatgpt.com/backend-api/codex"

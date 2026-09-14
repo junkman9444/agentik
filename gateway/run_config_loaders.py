@@ -25,8 +25,8 @@ from gateway.restart import (
 )
 from gateway.session import SessionSource
 from gateway.session_state import SERVICE_TIER_UNSET as _SERVICE_TIER_UNSET
-from hermes_cli.config import cfg_get, resolve_ephemeral_system_prompt_from_config
-from hermes_cli.fallback_config import get_fallback_chain
+from sage_cli.config import cfg_get, resolve_ephemeral_system_prompt_from_config
+from sage_cli.fallback_config import get_fallback_chain
 from utils import is_truthy_value
 
 if TYPE_CHECKING:  # string annotations only; never imported at runtime (cycle)
@@ -109,12 +109,12 @@ class GatewayConfigLoadersMixin:
     ) -> str:
         """Resolve model for this channel: channel_overrides else global default.
 
-        Precedence lives in :func:`hermes_cli.model_switch.resolve_effective_model` (shared with the
+        Precedence lives in :func:`sage_cli.model_switch.resolve_effective_model` (shared with the
         API server so the surfaces cannot diverge). No session tier here: session /model overrides
         are applied later by ``_apply_session_model_override``.
         """
         from gateway.run import _resolve_gateway_model
-        from hermes_cli.model_switch import resolve_effective_model
+        from sage_cli.model_switch import resolve_effective_model
         return resolve_effective_model(
             None,  # session tier applied downstream (_apply_session_model_override)
             self._channel_override(platform, chat_id, thread_id, parent_id),
@@ -144,7 +144,7 @@ class GatewayConfigLoadersMixin:
 
     @staticmethod
     def _load_reasoning_config(model: str = "") -> dict | None:
-        """Reasoning effort from config.yaml via :func:`hermes_constants.resolve_reasoning_config`.
+        """Reasoning effort from config.yaml via :func:`sage_constants.resolve_reasoning_config`.
 
         Per-model override > global ``agent.reasoning_effort``; YAML False = disabled. Empty
         ``model`` uses ``model.default``.
@@ -152,7 +152,7 @@ class GatewayConfigLoadersMixin:
         Closes #21256.
         """
         from gateway.run import _load_gateway_runtime_config
-        from hermes_constants import resolve_reasoning_config
+        from sage_constants import resolve_reasoning_config
         return resolve_reasoning_config(_load_gateway_runtime_config(), model)
 
     @staticmethod
@@ -429,7 +429,7 @@ class GatewayConfigLoadersMixin:
         """
         from gateway.run import _hermes_home
         try:
-            from hermes_cli.config import read_user_config_raw
+            from sage_cli.config import read_user_config_raw
             cfg_path = _hermes_home / "config.yaml"
             if not cfg_path.exists():
                 self._fallback_model = None
@@ -439,10 +439,10 @@ class GatewayConfigLoadersMixin:
             # The overlay/expansion below fixes the managed-scope/${VAR} drift without losing that.
             cfg = read_user_config_raw(cfg_path)
             with suppress(Exception):
-                from hermes_cli import managed_scope
+                from sage_cli import managed_scope
                 cfg = managed_scope.apply_managed_overlay(cfg)
             with suppress(Exception):
-                from hermes_cli.config import _expand_env_vars
+                from sage_cli.config import _expand_env_vars
                 expanded = _expand_env_vars(cfg)
                 if isinstance(expanded, dict):
                     cfg = expanded

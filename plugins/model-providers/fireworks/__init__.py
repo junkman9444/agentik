@@ -1,7 +1,7 @@
 """Fireworks AI provider profile. Models are addressed by full catalog ID
 (``accounts/fireworks/models/<slug>``), tracking fw-ai/fireconnect ``setup-cli``."""
 
-from hermes_cli import __version__ as _HERMES_VERSION
+from sage_cli import __version__ as _HERMES_VERSION
 from providers import register_provider
 from providers.base import ProviderProfile
 

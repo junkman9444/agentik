@@ -15,14 +15,14 @@ from pathlib import Path
 
 import pytest
 
-import hermes_state
-import hermes_state_wal
-from hermes_state import (
+import sage_state
+import sage_state_wal
+from sage_state import (
     DeletedWalGenerationError, SessionDB, _close_time_checkpoint_configurable, classify_persistence_error,
     refuse_deleted_wal_generation,
 )
-from hermes_state_dbfile import _pread_db_header, iter_deleted_sqlite_sidecar_holders
-from tests.hermes_state._wal_generation_harness import (
+from sage_state_dbfile import _pread_db_header, iter_deleted_sqlite_sidecar_holders
+from tests.sage_state._wal_generation_harness import (
     gateway_writer, integrity_ok_path, lose_sidecars, make_db, message_count, pin_wal, require_wal,
     write_second_generation,
 )
@@ -43,7 +43,7 @@ def test_classify_deleted_wal_is_replaced_not_disk():
 
 
 def test_iter_holders_empty_on_non_linux(monkeypatch, tmp_path):
-    monkeypatch.setattr(hermes_state.sys, "platform", "win32")
+    monkeypatch.setattr(sage_state.sys, "platform", "win32")
     assert iter_deleted_sqlite_sidecar_holders(tmp_path / "state.db") == []
 
 
@@ -62,9 +62,9 @@ def test_clean_open_and_second_open_still_work(tmp_path, force_wal):
 
 
 def test_delete_journal_two_writers_still_work(tmp_path, monkeypatch):
-    monkeypatch.setattr(hermes_state_wal, "resolve_journal_mode", lambda: "delete")
+    monkeypatch.setattr(sage_state_wal, "resolve_journal_mode", lambda: "delete")
     monkeypatch.setattr(
-        hermes_state_wal, "is_sqlite_wal_reset_vulnerable", lambda version_info=None: False
+        sage_state_wal, "is_sqlite_wal_reset_vulnerable", lambda version_info=None: False
     )
     path = tmp_path / "state.db"
     a = make_db(path, "s", "from-a")

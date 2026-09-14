@@ -12,7 +12,7 @@ import pytest
 from gateway.config import GatewayConfig, Platform
 from gateway.platforms.event import MessageEvent
 from gateway.session import SessionSource
-from hermes_constants import get_hermes_home, hermes_home_key
+from sage_constants import get_hermes_home, hermes_home_key
 
 
 @pytest.mark.asyncio
@@ -32,7 +32,7 @@ async def test_gateway_boot_discovers_mcp_under_every_profile_home(
         return []
 
     monkeypatch.setattr(
-        "hermes_cli.profiles.profiles_to_serve",
+        "sage_cli.profiles.profiles_to_serve",
         lambda multiplex, profile_allowlist=None: homes,
     )
     monkeypatch.setattr(_mcp_discovery, "discover_mcp_tools", fake_discover)
@@ -188,7 +188,7 @@ def test_shared_server_tools_are_callable_and_removed_on_non_owner_reload(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from agent.secret_scope import set_multiplex_active
-    from hermes_constants import (
+    from sage_constants import (
         hermes_home_key,
         reset_hermes_home_override,
         set_hermes_home_override,

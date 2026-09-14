@@ -7,14 +7,14 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-from hermes_cli.config import (
+from sage_cli.config import (
     check_config_version,
     get_config_path,
     get_env_path,
     migrate_config,
 )
-from hermes_cli.config_backups import backup_config, list_config_backups
-from hermes_cli.config_migrations import (
+from sage_cli.config_backups import backup_config, list_config_backups
+from sage_cli.config_migrations import (
     SUPPORT_FLOOR_VERSION,
     support_floor_message,
 )

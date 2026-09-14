@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from hermes_cli import update_cmd
+from sage_cli import update_cmd
 
 
 def test_repair_node_deps_runs_config_migration_on_version_bump(capsys):
@@ -22,8 +22,8 @@ def test_repair_node_deps_runs_config_migration_on_version_bump(capsys):
         patch.object(update_cmd, "_m") as m,
         patch.object(update_cmd, "_reload_config_modules"),
         patch.object(update_cmd, "_run_config_check_fresh", return_value=(37, 38)),
-        patch("hermes_cli.config.get_missing_env_vars", return_value=[]),
-        patch("hermes_cli.config.get_missing_config_fields", return_value=[]),
+        patch("sage_cli.config.get_missing_env_vars", return_value=[]),
+        patch("sage_cli.config.get_missing_config_fields", return_value=[]),
         patch.object(
             update_cmd,
             "_run_migrate_config_fresh",
@@ -50,8 +50,8 @@ def test_repair_node_deps_up_to_date_config(capsys):
         patch.object(update_cmd, "_m") as m,
         patch.object(update_cmd, "_reload_config_modules"),
         patch.object(update_cmd, "_run_config_check_fresh", return_value=(38, 38)),
-        patch("hermes_cli.config.get_missing_env_vars", return_value=[]),
-        patch("hermes_cli.config.get_missing_config_fields", return_value=[]),
+        patch("sage_cli.config.get_missing_env_vars", return_value=[]),
+        patch("sage_cli.config.get_missing_config_fields", return_value=[]),
         patch.object(update_cmd, "_run_migrate_config_fresh") as mock_migrate,
         patch.object(update_cmd, "_rebuild_desktop_after_update", return_value=True),
     ):
@@ -70,8 +70,8 @@ def test_check_and_apply_config_migration_interactive_prompt():
     with (
         patch.object(update_cmd, "_reload_config_modules"),
         patch.object(update_cmd, "_run_config_check_fresh", return_value=(37, 38)),
-        patch("hermes_cli.config.get_missing_env_vars", return_value=[{"name": "NEW_KEY", "description": "desc"}]),
-        patch("hermes_cli.config.get_missing_config_fields", return_value=[]),
+        patch("sage_cli.config.get_missing_env_vars", return_value=[{"name": "NEW_KEY", "description": "desc"}]),
+        patch("sage_cli.config.get_missing_config_fields", return_value=[]),
         patch("sys.stdin.isatty", return_value=True),
         patch("sys.stdout.isatty", return_value=True),
         patch("builtins.input", return_value="y"),
@@ -91,8 +91,8 @@ def test_check_and_apply_config_migration_assume_yes():
     with (
         patch.object(update_cmd, "_reload_config_modules"),
         patch.object(update_cmd, "_run_config_check_fresh", return_value=(37, 38)),
-        patch("hermes_cli.config.get_missing_env_vars", return_value=[{"name": "NEW_KEY"}]),
-        patch("hermes_cli.config.get_missing_config_fields", return_value=[]),
+        patch("sage_cli.config.get_missing_env_vars", return_value=[{"name": "NEW_KEY"}]),
+        patch("sage_cli.config.get_missing_config_fields", return_value=[]),
         patch.object(
             update_cmd,
             "_run_migrate_config_fresh",
@@ -109,8 +109,8 @@ def test_check_and_apply_config_migration_non_interactive():
     with (
         patch.object(update_cmd, "_reload_config_modules"),
         patch.object(update_cmd, "_run_config_check_fresh", return_value=(37, 38)),
-        patch("hermes_cli.config.get_missing_env_vars", return_value=[]),
-        patch("hermes_cli.config.get_missing_config_fields", return_value=[{"key": "new_setting"}]),
+        patch("sage_cli.config.get_missing_env_vars", return_value=[]),
+        patch("sage_cli.config.get_missing_config_fields", return_value=[{"key": "new_setting"}]),
         patch("sys.stdin.isatty", return_value=False),
         patch("sys.stdout.isatty", return_value=False),
         patch.object(

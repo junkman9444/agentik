@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli.models_validate import validate_requested_model
+from sage_cli.models_validate import validate_requested_model
 
 
 @pytest.mark.parametrize(
@@ -19,7 +19,7 @@ from hermes_cli.models_validate import validate_requested_model
 def test_direct_openrouter_preset_reference_skips_model_listing(model_name):
     """An account-scoped direct preset has no public model row to probe."""
     with patch(
-        "hermes_cli.models.fetch_api_models",
+        "sage_cli.models.fetch_api_models",
         side_effect=AssertionError("direct preset references must not probe /models"),
     ):
         result = validate_requested_model(
@@ -40,7 +40,7 @@ def test_direct_openrouter_preset_reference_skips_model_listing(model_name):
 def test_combined_openrouter_preset_reference_validates_base_model():
     """Combined references validate the base model, not the preset-decorated ID."""
     with patch(
-        "hermes_cli.models.fetch_api_models",
+        "sage_cli.models.fetch_api_models",
         return_value=["openai/gpt-5.4"],
     ) as mock_fetch:
         result = validate_requested_model(
@@ -60,7 +60,7 @@ def test_combined_openrouter_preset_reference_validates_base_model():
 
 
 def test_combined_openrouter_preset_reference_rejects_unknown_base_model():
-    with patch("hermes_cli.models.fetch_api_models", return_value=["openai/gpt-5.4"]):
+    with patch("sage_cli.models.fetch_api_models", return_value=["openai/gpt-5.4"]):
         result = validate_requested_model(
             "openai/gpt-5.4-preview@preset/email-copywriter",
             "openrouter",
@@ -76,7 +76,7 @@ def test_combined_openrouter_preset_reference_rejects_unknown_base_model():
 
 
 def test_combined_openrouter_preset_reference_preserves_suffix_on_autocorrect():
-    with patch("hermes_cli.models.fetch_api_models", return_value=["openai/gpt-5.4"]):
+    with patch("sage_cli.models.fetch_api_models", return_value=["openai/gpt-5.4"]):
         result = validate_requested_model(
             "openai/gpt-5.44@preset/email-copywriter",
             "openrouter",
@@ -92,9 +92,9 @@ def test_combined_openrouter_preset_reference_preserves_suffix_on_autocorrect():
 
 def test_combined_preset_preserves_suffix_on_catalog_autocorrect():
     with (
-        patch("hermes_cli.models.fetch_api_models", return_value=None),
+        patch("sage_cli.models.fetch_api_models", return_value=None),
         patch(
-            "hermes_cli.models.provider_model_ids",
+            "sage_cli.models.provider_model_ids",
             return_value=["openai/gpt-5.4"],
         ),
     ):
@@ -126,7 +126,7 @@ def test_combined_preset_preserves_suffix_on_catalog_autocorrect():
 def test_openrouter_preset_reference_requires_a_url_safe_slug(model_name):
     """Malformed preset references must fail before model-list probing."""
     with patch(
-        "hermes_cli.models.fetch_api_models",
+        "sage_cli.models.fetch_api_models",
         side_effect=AssertionError("malformed presets must not probe /models"),
     ):
         result = validate_requested_model(
@@ -143,7 +143,7 @@ def test_openrouter_preset_reference_requires_a_url_safe_slug(model_name):
 
 
 def test_preset_reference_does_not_bypass_other_provider_validation():
-    with patch("hermes_cli.models.fetch_api_models", return_value=["gpt-5.4"]):
+    with patch("sage_cli.models.fetch_api_models", return_value=["gpt-5.4"]):
         result = validate_requested_model(
             "@preset/email-copywriter",
             "openai",
@@ -163,7 +163,7 @@ def test_preset_reference_does_not_bypass_custom_endpoint_validation():
         "suggested_base_url": None,
         "used_fallback": False,
     }
-    with patch("hermes_cli.models.probe_api_models", return_value=probe) as mock_probe:
+    with patch("sage_cli.models.probe_api_models", return_value=probe) as mock_probe:
         result = validate_requested_model(
             "@preset/email-copywriter",
             "openrouter",
@@ -195,8 +195,8 @@ model_aliases:
 
     script = r"""
 import json
-import hermes_cli.model_switch as model_switch
-import hermes_cli.models as models
+import sage_cli.model_switch as model_switch
+import sage_cli.models as models
 
 
 def fail_model_probe(*args, **kwargs):

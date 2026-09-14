@@ -5,8 +5,8 @@ purpose, so the client count IS its liveness signal."""
 from fastapi import FastAPI, WebSocket
 from starlette.testclient import TestClient
 
-import hermes_cli.web_server as ws_mod
-from hermes_cli.web_server_idle_exit import (
+import sage_cli.web_server as ws_mod
+from sage_cli.web_server_idle_exit import (
     IdleClientTracker, should_exit_idle, start_idle_watchdog, wrap_asgi_with_ws_tracking)
 
 

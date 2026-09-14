@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ def blobs_dir() -> Path:
 def ledger_enabled() -> bool:
     """Config gate ``skills.ledger`` (default True); lazy import keeps this importable without the CLI."""
     try:
-        from hermes_cli.config import cfg_get, load_config
+        from sage_cli.config import cfg_get, load_config
         return bool(cfg_get(load_config(), "skills", "ledger", default=True))
     except Exception as e:  # pragma: no cover — best-effort config read
         logger.debug("skill_ledger: config read failed (%s); defaulting on", e)

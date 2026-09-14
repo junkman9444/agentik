@@ -10,10 +10,10 @@ without the grant.
 import io
 import contextlib
 
-import hermes_cli.doctor as doctor_mod
+import sage_cli.doctor as doctor_mod
 import pathlib
-from hermes_cli.setup_quick import _print_macos_fda_tip
-from hermes_cli import doctor_platform
+from sage_cli.setup_quick import _print_macos_fda_tip
+from sage_cli import doctor_platform
 
 
 def _capture(fn):
@@ -65,14 +65,14 @@ class TestDoctorFdaCheck:
 
 class TestSetupFdaTip:
     def test_silent_on_non_macos(self, monkeypatch):
-        import hermes_cli.setup as setup_mod
+        import sage_cli.setup as setup_mod
 
         monkeypatch.setattr(setup_mod.sys, "platform", "linux")
         out = _capture(_print_macos_fda_tip)
         assert out == ""
 
     def test_silent_when_already_granted(self, monkeypatch, tmp_path):
-        import hermes_cli.setup as setup_mod
+        import sage_cli.setup as setup_mod
 
         monkeypatch.setattr(setup_mod.sys, "platform", "darwin")
         tcc = tmp_path / "Library" / "Application Support" / "com.apple.TCC"
@@ -82,7 +82,7 @@ class TestSetupFdaTip:
         assert out == ""
 
     def test_tip_printed_when_denied(self, monkeypatch, tmp_path):
-        import hermes_cli.setup as setup_mod
+        import sage_cli.setup as setup_mod
 
         monkeypatch.setattr(setup_mod.sys, "platform", "darwin")
         tcc = tmp_path / "Library" / "Application Support" / "com.apple.TCC"

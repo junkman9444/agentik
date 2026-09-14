@@ -8,7 +8,7 @@ the session provider (the "sticky provider fallback pollution" bug).
 """
 
 import pytest
-from hermes_cli import main_provider_setup
+from sage_cli import main_provider_setup
 
 
 class _FakePool:
@@ -27,7 +27,7 @@ class _FakePool:
 def _patch_opencode_pool(monkeypatch, *, available: bool):
     """Make the opencode-go aggregator look configured but with a pool whose
     only credential is (un)available, depending on ``available``."""
-    import hermes_cli.auth as auth
+    import sage_cli.auth as auth
     import agent.credential_pool as cp
 
     monkeypatch.setattr(
@@ -61,7 +61,7 @@ def _strip_provider_env(monkeypatch):
 def test_exhausted_pool_provider_is_not_authenticated(monkeypatch):
     """The fix: an exhausted pool is NOT authenticated. Fails on main, where
     the gate accepted any stored pool entry regardless of usability."""
-    from hermes_cli.model_switch import get_authenticated_provider_slugs
+    from sage_cli.model_switch import get_authenticated_provider_slugs
 
     _patch_opencode_pool(monkeypatch, available=False)
     slugs = get_authenticated_provider_slugs(current_provider="alibaba")
@@ -70,7 +70,7 @@ def test_exhausted_pool_provider_is_not_authenticated(monkeypatch):
 
 def test_opaque_legacy_pool_value_stays_visible(monkeypatch):
     """Legacy token-style auth-store values have no parsed pool entries."""
-    from hermes_cli.model_switch_providers import _credential_pool_is_usable
+    from sage_cli.model_switch_providers import _credential_pool_is_usable
 
     monkeypatch.setattr(
         "agent.credential_pool.load_pool",
@@ -91,7 +91,7 @@ def test_picker_shows_exhausted_pool_provider(monkeypatch):
     """The interactive picker must include providers whose credential pool
     entries are all exhausted, so the user can still switch to a different
     model under the same provider."""
-    from hermes_cli.model_switch_providers import list_picker_providers
+    from sage_cli.model_switch_providers import list_picker_providers
 
     _patch_opencode_pool(monkeypatch, available=False)
     providers = list_picker_providers(
@@ -131,14 +131,14 @@ def test_aux_task_picker_requests_exhausted_pool_visibility(monkeypatch):
     so silently hiding a provider whose keys are all exhausted is exactly the
     bug the #66584 picker fix addressed, one interactive picker over.
     """
-    import hermes_cli.main as main
+    import sage_cli.main as main
 
     recorded: dict = {}
     monkeypatch.setattr(
-        "hermes_cli.model_switch.list_authenticated_providers",
+        "sage_cli.model_switch.list_authenticated_providers",
         _spy_list_authenticated(recorded),
     )
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: {})
+    monkeypatch.setattr("sage_cli.config.load_config", lambda: {})
 
     with pytest.raises(_StopPicker):
         main_provider_setup._aux_select_for_task("compression")

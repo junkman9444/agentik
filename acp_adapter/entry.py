@@ -8,17 +8,17 @@ Usage::
     python -m acp_adapter.entry   # or: hermes acp / hermes-acp
 """
 
-# IMPORTANT: hermes_bootstrap must be the very first import — UTF-8 stdio
-# on Windows.  No-op on POSIX.  See hermes_bootstrap.py for full rationale.
+# IMPORTANT: sage_bootstrap must be the very first import — UTF-8 stdio
+# on Windows.  No-op on POSIX.  See sage_bootstrap.py for full rationale.
 try:
-    import hermes_bootstrap  # noqa: F401
+    import sage_bootstrap  # noqa: F401
 except ModuleNotFoundError:
     # Partial ``hermes update`` (git-reset landed, ``uv pip install -e .`` did not):
     # UTF-8 stdio setup is skipped on Windows; POSIX is unaffected.
     pass
 else:
     # Stop a ``utils/``/``proxy/``/``ui/`` package in the launch cwd from shadowing Hermes modules.
-    hermes_bootstrap.harden_import_path()
+    sage_bootstrap.harden_import_path()
 
 import argparse
 import asyncio
@@ -26,7 +26,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 
 # Liveness-probe methods outside the ACP schema. The router correctly answers JSON-RPC -32601
@@ -73,7 +73,7 @@ def _setup_logging() -> None:
 
 def _load_env() -> None:
     """Load .env from HERMES_HOME (default ``~/.hermes``)."""
-    from hermes_cli.env_loader import load_hermes_dotenv
+    from sage_cli.env_loader import load_hermes_dotenv
 
     hermes_home = get_hermes_home()
     loaded = load_hermes_dotenv(hermes_home=hermes_home)
@@ -100,7 +100,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _print_version() -> None:
-    from hermes_cli import __version__ as hermes_version
+    from sage_cli import __version__ as hermes_version
 
     print(hermes_version)
 
@@ -113,7 +113,7 @@ def _run_check() -> None:
 
 
 def _run_setup() -> None:
-    from hermes_cli.main import main as hermes_main
+    from sage_cli.main import main as hermes_main
 
     old_argv = sys.argv[:]
     try:
@@ -144,7 +144,7 @@ _SETUP_BROWSER_STEPS = (
 def _run_setup_browser(assume_yes: bool = False) -> int:
     """Bootstrap agent-browser + Chromium via dep_ensure -> install.{sh,ps1}
     --ensure (shared with the runtime lazy installer). Returns 0 on success, 1 on failure."""
-    from hermes_cli.dep_ensure import ensure_dependency
+    from sage_cli.dep_ensure import ensure_dependency
 
     try:
         for dep, failure_msg in _SETUP_BROWSER_STEPS:
@@ -190,7 +190,7 @@ def main(argv: list[str] | None = None) -> None:
     # model_tools.py module scope to avoid freezing the gateway's loop on lazy import (#16856).
     if os.environ.get("HERMES_ACP_SKIP_CONFIGURED_MCP", "").strip() != "1":
         try:
-            from hermes_cli.mcp_startup import start_background_mcp_discovery
+            from sage_cli.mcp_startup import start_background_mcp_discovery
 
             start_background_mcp_discovery(logger=logger, thread_name="acp-mcp-discovery")
         except Exception:

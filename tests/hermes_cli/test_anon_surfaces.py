@@ -21,7 +21,7 @@ from types import SimpleNamespace
 import pytest
 from unittest.mock import AsyncMock, call
 
-from hermes_cli import (
+from sage_cli import (
     anon_auth,
     auth_commands,
     model_setup_flows,
@@ -30,8 +30,8 @@ from hermes_cli import (
     portal_cli,
     status_auth,
 )
-from hermes_cli.auth import _load_auth_store  # noqa: F401  (store import name kept for parity with core tests)
-from hermes_constants import get_hermes_home
+from sage_cli.auth import _load_auth_store  # noqa: F401  (store import name kept for parity with core tests)
+from sage_constants import get_hermes_home
 
 WELCOME = "https://welcome-api.nousresearch.com/v1"
 # Words that must never appear on a user-facing free-tier surface.
@@ -79,7 +79,7 @@ def isolated_store(monkeypatch, tmp_path):
     monkeypatch.setattr(nous_account, "_fetch_nous_account_info",
                         lambda *a, **k: pytest.fail("portal fetch must not happen on a read-only surface"))
     nous_account.reset_nous_portal_account_info_cache()
-    import hermes_cli.auth as auth_mod
+    import sage_cli.auth as auth_mod
     auth_mod.invalidate_nous_auth_status_cache()
     yield
     nous_account.reset_nous_portal_account_info_cache()
@@ -158,7 +158,7 @@ def test_keepalive_does_not_start_for_free_tier(isolated_store, monkeypatch):
 def test_every_in_chat_free_tier_string_names_the_slash_command(monkeypatch):
     from gateway.run_notifications import GatewayNotificationsMixin
 
-    monkeypatch.setattr("hermes_cli.auth.resolve_provider", lambda _requested: "nous")
+    monkeypatch.setattr("sage_cli.auth.resolve_provider", lambda _requested: "nous")
     monkeypatch.setattr(anon_auth, "guest_carries_inference", lambda: True)
     startup = GatewayNotificationsMixin._free_tier_startup_line(object())
     command_copy = (
@@ -209,8 +209,8 @@ def test_terminal_only_strings_keep_the_terminal_verb(monkeypatch, capsys):
     assert "hermes " in anon_auth.UPGRADE_UNAVAILABLE
     assert "hermes " in anon_auth.FREE_TIER_NOT_SIGNED_IN
 
-    monkeypatch.setattr("hermes_cli.auth.get_provider_auth_state", lambda _provider: {"access_token": "token"})
-    monkeypatch.setattr("hermes_cli.model_switch_providers._free_tier_nous_row", lambda _provider: None)
+    monkeypatch.setattr("sage_cli.auth.get_provider_auth_state", lambda _provider: {"access_token": "token"})
+    monkeypatch.setattr("sage_cli.model_switch_providers._free_tier_nous_row", lambda _provider: None)
     model_setup_flows._model_flow_nous({})
     assert "hermes " in capsys.readouterr().out
 
@@ -240,7 +240,7 @@ async def test_the_wait_line_is_only_composed_on_the_state(monkeypatch):
     )
 
     monkeypatch.setattr(
-        "hermes_cli.auth_device_flow._print_device_code_instructions", lambda *_args, **_kwargs: None
+        "sage_cli.auth_device_flow._print_device_code_instructions", lambda *_args, **_kwargs: None
     )
     cli_copy = []
     anon_auth.render_sign_in_cli_code(state, printer=cli_copy.append)
@@ -259,12 +259,12 @@ async def test_the_wait_line_is_only_composed_on_the_state(monkeypatch):
     # format_wait_line itself would emit the same text and pass the assertions
     # above, so the renderers are checked by source instead.
     repo = Path(anon_auth.__file__).resolve().parents[1]
-    for rel in ("gateway/slash_commands_login.py", "hermes_cli/cli_commands_mixin.py"):
+    for rel in ("gateway/slash_commands_login.py", "sage_cli/cli_commands_mixin.py"):
         assert "format_wait_line" not in (repo / rel).read_text(encoding="utf-8"), rel
 
 
 def test_cli_chat_status_names_the_free_tier(isolated_store):
-    from hermes_cli.cli_session_mixin import CLISessionMixin
+    from sage_cli.cli_session_mixin import CLISessionMixin
 
     _write_auth(_guest_state())
     rendered = []

@@ -10,8 +10,8 @@ import argparse
 
 import pytest
 
-import hermes_cli.models as models_mod
-from hermes_cli import models_pricing
+import sage_cli.models as models_mod
+from sage_cli import models_pricing
 
 CURATED = ["vendor/allowed", "vendor/blocked"]
 ALLOWED = {"vendor/allowed"}
@@ -33,9 +33,9 @@ def no_policy(monkeypatch):
 class TestLoginNous:
 
     def _run(self, monkeypatch, tmp_path):
-        import hermes_cli.auth as auth_mod
-        import hermes_cli.auth_nous as auth_nous
-        import hermes_cli.nous_subscription as ns
+        import sage_cli.auth as auth_mod
+        import sage_cli.auth_nous as auth_nous
+        import sage_cli.nous_subscription as ns
 
         seen: dict = {}
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
@@ -99,8 +99,8 @@ class TestModelSwitchPicker:
     """The ``/model`` picker's nous branch (``list_authenticated_providers``)."""
 
     def _rows(self, monkeypatch):
-        import hermes_cli.auth as auth_mod
-        import hermes_cli.model_switch as ms
+        import sage_cli.auth as auth_mod
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(
             auth_mod,
@@ -145,8 +145,8 @@ class TestRecommendedDefaultEndpoint:
     """This endpoint picks a model the user never sees chosen."""
 
     def _call(self, monkeypatch):
-        import hermes_cli.auth as auth_mod
-        from hermes_cli.web_routers.models import get_recommended_default_model
+        import sage_cli.auth as auth_mod
+        from sage_cli.web_routers.models import get_recommended_default_model
 
         # Blocked first, so an unfiltered list would make it the silent
         # default — otherwise this passes whether or not the filter runs.
@@ -215,8 +215,8 @@ class TestNousPrefetch:
     trip for nothing."""
 
     def test_nous_is_not_collected_for_prefetch(self, monkeypatch):
-        import hermes_cli.auth as auth_mod
-        import hermes_cli.model_switch_providers as ms
+        import sage_cli.auth as auth_mod
+        import sage_cli.model_switch_providers as ms
 
         monkeypatch.setattr(
             auth_mod, "_load_auth_store",
@@ -229,7 +229,7 @@ class TestNousPrefetch:
 class TestPolicyNoticeIsShown:
 
     def test_login_prints_it(self, monkeypatch, tmp_path, policy, capsys):
-        import hermes_cli.nous_account as account_mod
+        import sage_cli.nous_account as account_mod
 
         monkeypatch.setattr(account_mod, "nous_policy_present", lambda: True)
         TestLoginNous()._run(monkeypatch, tmp_path)
@@ -238,7 +238,7 @@ class TestPolicyNoticeIsShown:
     def test_login_silent_for_an_ungoverned_org(
         self, monkeypatch, tmp_path, no_policy, capsys
     ):
-        import hermes_cli.nous_account as account_mod
+        import sage_cli.nous_account as account_mod
 
         monkeypatch.setattr(account_mod, "nous_policy_present", lambda: False)
         TestLoginNous()._run(monkeypatch, tmp_path)

@@ -13,8 +13,8 @@ import io
 import zipfile
 from pathlib import Path
 
-import hermes_cli.local_runtime.binaries as binaries
-from hermes_cli.web_routers.local_models import _job, _runtime_progress_hook
+import sage_cli.local_runtime.binaries as binaries
+from sage_cli.web_routers.local_models import _job, _runtime_progress_hook
 
 
 def _make_zip(path: Path, names_sizes: dict[str, int]) -> None:
@@ -131,7 +131,7 @@ def test_progress_hook_accumulates_across_assets(monkeypatch):
     # Drive the throttle's clock so every tick lands (the real hook drops
     # sub-250ms non-terminal ticks; this test is about arithmetic, not
     # pacing — pacing has its own assertions above).
-    from hermes_cli.web_routers import local_models as lm
+    from sage_cli.web_routers import local_models as lm
 
     clock = {"now": 0.0}
 

@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NamedTuple, Optional, Set
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from tools import skill_usage
 from utils import atomic_json_write
 
@@ -81,7 +81,7 @@ def _subdict(node: Any, *keys: str) -> Dict[str, Any]:
 def _read_config_section(*path: str, label: str, log: logging.Logger = logger) -> Dict[str, Any]:
     """Read a nested section of ~/.hermes/config.yaml. Tolerates missing file."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from sage_cli.config import load_config_readonly
         cfg = load_config_readonly()
     except Exception as e:
         log.debug("Failed to load config for %s: %s", label, e)
@@ -993,8 +993,8 @@ def _resolve_review_provider() -> tuple:
     rp: Dict[str, Any] = {}
     overrides, provider, model_name = {}, None, ""
     try:
-        from hermes_cli.config import load_config_readonly
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from sage_cli.config import load_config_readonly
+        from sage_cli.runtime_provider import resolve_runtime_provider
         binding = _resolve_review_runtime(load_config_readonly())
         model_name = binding.model
         rp = resolve_runtime_provider(

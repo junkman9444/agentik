@@ -1,4 +1,4 @@
-"""Test the platform-branched PTY bridge import in hermes_cli.web_server_chat.
+"""Test the platform-branched PTY bridge import in sage_cli.web_server_chat.
 
 The /api/pty WebSocket handler picks its bridge at import
 time via ``sys.platform.startswith("win")`` — Windows gets the ConPTY
@@ -21,7 +21,7 @@ import sys
 
 import pytest
 
-import hermes_cli.web_server_chat as _web_server_chat
+import sage_cli.web_server_chat as _web_server_chat
 
 
 def test_web_server_exposes_pty_bridge_symbols():
@@ -38,8 +38,8 @@ def test_web_server_exposes_pty_bridge_symbols():
 @pytest.mark.skipif(sys.platform.startswith("win"), reason="POSIX-only")
 def test_web_server_uses_posix_pty_bridge_on_posix():
     """On POSIX, the bridge must be the fcntl/termios PtyBridge."""
-    from hermes_cli.pty_bridge import PtyBridge as PosixBridge
-    from hermes_cli.pty_bridge import PtyUnavailableError as PosixErr
+    from sage_cli.pty_bridge import PtyBridge as PosixBridge
+    from sage_cli.pty_bridge import PtyUnavailableError as PosixErr
 
     assert _web_server_chat.PtyBridge is PosixBridge
     assert _web_server_chat._PTY_BRIDGE_AVAILABLE is True
@@ -52,21 +52,21 @@ def test_pty_bridge_import_block_is_platform_branched():
     block (``web_server_chat``) directly so this fails the same way on every
     OS — the runtime symbol checks above can pass even when the branch shape
     is wrong on the current platform."""
-    from hermes_cli import web_server_chat
+    from sage_cli import web_server_chat
 
     src = pytest.importorskip("inspect").getsource(web_server_chat)
     # The shape we expect (from PR #39913):
     #
     #   if sys.platform.startswith("win"):
     #       try:
-    #           from hermes_cli.win_pty_bridge import WinPtyBridge as PtyBridge, ...
+    #           from sage_cli.win_pty_bridge import WinPtyBridge as PtyBridge, ...
     #       except ImportError:
     #           PtyBridge = None
     #           ...
     #   else:
     #       try:
-    #           from hermes_cli.pty_bridge import PtyBridge, PtyUnavailableError
+    #           from sage_cli.pty_bridge import PtyBridge, PtyUnavailableError
     #       ...
     assert 'sys.platform.startswith("win")' in src or "sys.platform.startswith('win')" in src
-    assert "from hermes_cli.win_pty_bridge import" in src
-    assert "from hermes_cli.pty_bridge import" in src
+    assert "from sage_cli.win_pty_bridge import" in src
+    assert "from sage_cli.pty_bridge import" in src

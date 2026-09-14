@@ -40,7 +40,7 @@ def _coerce_bool(value: Any, default: bool = False) -> bool:
 def _load_plugin_config() -> Dict[str, Any]:
     """Read ``memory.byterover``; fall back to legacy ``memory.provider_config`` (early docs used it)."""
     try:
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         memory_config = load_config().get("memory", {})
     except Exception:
         return {}
@@ -53,7 +53,7 @@ def _load_plugin_config() -> Dict[str, Any]:
 
 def _get_brv_cwd() -> Path:
     """Profile-scoped working directory for the brv context tree."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return get_hermes_home() / "byterover"
 
 

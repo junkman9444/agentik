@@ -8,9 +8,9 @@ visible to the CLI data layer), not specific catalog values.
 """
 
 import pytest
-import hermes_cli.config as _cfg_mod
-import hermes_cli.web_server_files as _web_server_files
-import hermes_cli.web_server_gateway as _web_server_gateway
+import sage_cli.config as _cfg_mod
+import sage_cli.web_server_files as _web_server_files
+import sage_cli.web_server_gateway as _web_server_gateway
 
 
 def _client():
@@ -18,15 +18,15 @@ def _client():
         from starlette.testclient import TestClient
     except ImportError:
         pytest.skip("fastapi/starlette not installed")
-    import hermes_state
-    from hermes_constants import get_hermes_home
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    import sage_state
+    from sage_constants import get_hermes_home
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
     client = TestClient(app)
     client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
     # Keep the state DB under the isolated HERMES_HOME for any handler that
     # touches it.
-    hermes_state.DEFAULT_DB_PATH = get_hermes_home() / "state.db"
+    sage_state.DEFAULT_DB_PATH = get_hermes_home() / "state.db"
     return client, _SESSION_HEADER_NAME
 
 
@@ -52,7 +52,7 @@ class TestMcpEndpoints:
     def test_http_bearer_auth_separates_secret_from_config(
         self, _isolate_hermes_home
     ):
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         secret = "dashboard-secret-value"
         response = self.client.post(
@@ -89,7 +89,7 @@ class TestMcpEndpoints:
         assert response.status_code == 200
         assert response.json()["auth"] == "oauth"
 
-        from hermes_cli.mcp_config import _get_mcp_servers
+        from sage_cli.mcp_config import _get_mcp_servers
 
         assert _get_mcp_servers()["oauth-server"]["auth"] == "oauth"
 
@@ -161,8 +161,8 @@ class TestCredentialPoolEndpoints:
         source and suppress (provider, source).
         """
         from agent.credential_pool import load_pool
-        from hermes_cli.auth import is_source_suppressed
-        from hermes_cli.config import save_env_value
+        from sage_cli.auth import is_source_suppressed
+        from sage_cli.config import save_env_value
 
         fake_key = "sk-or-" + "x" * 20  # constructed, never a real key shape
         save_env_value("OPENROUTER_API_KEY", fake_key)
@@ -190,8 +190,8 @@ class TestCredentialPoolEndpoints:
         silently blocked from env re-seeding.
         """
         from agent.credential_pool import load_pool
-        from hermes_cli.auth import is_source_suppressed
-        from hermes_cli.config import save_env_value
+        from sage_cli.auth import is_source_suppressed
+        from sage_cli.config import save_env_value
 
         fake_key = "sk-or-" + "y" * 20
         save_env_value("OPENROUTER_API_KEY", fake_key)
@@ -219,7 +219,7 @@ class TestMemoryEndpoints:
     @pytest.fixture(autouse=True)
     def _setup(self, _isolate_hermes_home):
         self.client, _ = _client()
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         (get_hermes_home() / "memories").mkdir(parents=True, exist_ok=True)
 
@@ -236,7 +236,7 @@ class TestMemoryEndpoints:
         assert r.status_code == 400
 
     def test_reset_targets(self):
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         mem = get_hermes_home() / "memories"
         (mem / "MEMORY.md").write_text("notes")
@@ -285,7 +285,7 @@ class TestPairingEndpoints:
         as approved.
         """
         from gateway.pairing import PairingStore
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         (get_hermes_home() / "profiles" / "work").mkdir(parents=True, exist_ok=True)
         PairingStore().generate_code("telegram", "global-1", "GlobalGuy")
@@ -327,7 +327,7 @@ class TestWebhookEndpoints:
 
 
     def test_create_webhook_persists_script(self):
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         cfg = load_config()
         cfg.setdefault("platforms", {})["webhook"] = {
@@ -351,8 +351,8 @@ class TestWebhookEndpoints:
         assert subs[0]["script"] == "todoist_filter.py"
 
     def test_enable_platform_starts_gateway_restart(self, monkeypatch):
-        import hermes_cli.web_server as ws
-        from hermes_cli.config import load_config
+        import sage_cli.web_server as ws
+        from sage_cli.config import load_config
 
         _web_server_gateway._ACTION_PROCS.pop("gateway-restart", None)
         restart_calls = []
@@ -384,8 +384,8 @@ class TestWebhookEndpoints:
 
 
     def test_enable_platform_reuses_inflight_gateway_restart(self, monkeypatch):
-        import hermes_cli.web_server as ws
-        from hermes_cli.config import load_config
+        import sage_cli.web_server as ws
+        from sage_cli.config import load_config
 
         _web_server_gateway._ACTION_PROCS.pop("gateway-restart", None)
 
@@ -420,7 +420,7 @@ class TestOpsEndpoints:
 
 
     def test_hooks_list_reads_config(self):
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         cfg = load_config()
         cfg["hooks"] = {
@@ -500,7 +500,7 @@ class TestSessionManagementEndpoints:
     @pytest.fixture(autouse=True)
     def _setup(self, _isolate_hermes_home):
         self.client, _ = _client()
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         db.create_session(session_id="sess-x", source="cli")
@@ -515,7 +515,7 @@ class TestSessionManagementEndpoints:
         instead of ``list_sessions_rich`` and build preview/last-active rows
         just to count source labels.
         """
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         def fail_list_sessions_rich(self, *args, **kwargs):
             raise AssertionError("stats should use grouped source counts, not list_sessions_rich")
@@ -534,7 +534,7 @@ class TestSessionManagementEndpoints:
         # ages (mirrors the CLI: any filter disables the implicit 90-day
         # default). dry_run so nothing is deleted; the seeded session is
         # recent + ended, so it would be invisible under a 90-day cutoff.
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         db.create_session(session_id="sess-recent-ended", source="cli")
@@ -554,7 +554,7 @@ class TestSessionManagementEndpoints:
         assert all("last_active" in session for session in body["sessions"])
 
     def test_prune_reports_open_sessions_excluded_by_safety_guard(self):
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
 
         db = SessionDB()
         db.create_session(session_id="sess-old-open", source="skip-test")
@@ -681,7 +681,7 @@ class TestOfficialSkillsCatalogEndpoint:
             lambda self: metas,
         )
         monkeypatch.setattr(
-            "hermes_cli.web_routers.skills._installed_hub_identifiers",
+            "sage_cli.web_routers.skills._installed_hub_identifiers",
             lambda profile=None: {"official/gifs/gif-search": {"name": "gif-search"}},
         )
         r = self.client.get("/api/skills/hub/official")
@@ -713,7 +713,7 @@ class TestSkillsHubPreviewEndpoint:
         bundle = _FakeBundle("github/owner/repo/x")
         meta = _FakeMeta("github/owner/repo/x")
         monkeypatch.setattr(
-            "hermes_cli.skills_hub._resolve_source_meta_and_bundle",
+            "sage_cli.skills_hub._resolve_source_meta_and_bundle",
             lambda ident, sources: (meta, bundle, None),
         )
         r = self.client.get(
@@ -732,7 +732,7 @@ class TestSkillsHubPreviewEndpoint:
             "tools.skills_hub_search.create_source_router", lambda: []
         )
         monkeypatch.setattr(
-            "hermes_cli.skills_hub._resolve_source_meta_and_bundle",
+            "sage_cli.skills_hub._resolve_source_meta_and_bundle",
             lambda ident, sources: (None, None, None),
         )
         r = self.client.get("/api/skills/hub/preview?identifier=nope/x")
@@ -753,7 +753,7 @@ class TestSkillsHubScanEndpoint:
         )
         bundle = _FakeBundle("github/owner/repo/x", trust_level="community")
         monkeypatch.setattr(
-            "hermes_cli.skills_hub._resolve_source_meta_and_bundle",
+            "sage_cli.skills_hub._resolve_source_meta_and_bundle",
             lambda ident, sources: (None, bundle, None),
         )
 
@@ -807,7 +807,7 @@ class TestWebhookToggleEndpoint:
     def _setup(self, _isolate_hermes_home):
         self.client, _ = _client()
         # Enable the webhook platform so a subscription can be created.
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         cfg = load_config()
         cfg.setdefault("platforms", {})["webhook"] = {
@@ -823,7 +823,7 @@ class TestAdminEndpointsAuthGate:
     @pytest.fixture(autouse=True)
     def _setup(self, _isolate_hermes_home):
         from starlette.testclient import TestClient
-        from hermes_cli.web_server import app
+        from sage_cli.web_server import app
 
         # No session header → must be rejected.
         self.client = TestClient(app)
@@ -842,11 +842,11 @@ class TestUpdateCheckEndpoint:
         self.client, _ = _client()
 
     def test_git_install_reports_behind_count(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_cfg_mod, "detect_install_method", lambda *a, **k: "git")
         # Stub the shared checker so the contract is deterministic (no network).
-        import hermes_cli.banner as banner
+        import sage_cli.banner as banner
 
         monkeypatch.setattr(banner, "check_for_updates", lambda: 5)
 
@@ -871,7 +871,7 @@ class TestUpdateCheckEndpoint:
 
 
     def test_managed_runtime_dashboard_is_not_applyable(self, monkeypatch):
-        import hermes_cli.web_server as ws
+        import sage_cli.web_server as ws
 
         monkeypatch.setattr(_web_server_files, "_dashboard_local_update_managed_externally", lambda: True)
         monkeypatch.setattr(
@@ -899,7 +899,7 @@ class TestDebugShareEndpoint:
     @pytest.fixture(autouse=True)
     def _setup(self, _isolate_hermes_home):
         self.client, self.header = _client()
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         logs = get_hermes_home() / "logs"
         logs.mkdir(parents=True, exist_ok=True)
@@ -909,28 +909,28 @@ class TestDebugShareEndpoint:
 
 
     def test_redact_false_is_honored(self, monkeypatch):
-        import hermes_cli.debug as dbg
+        import sage_cli.debug as dbg
 
         monkeypatch.setattr(
             dbg, "upload_to_pastebin", lambda c, expiry_days=7: "https://paste.rs/x"
         )
         monkeypatch.setattr(dbg, "_schedule_auto_delete", lambda *a, **k: None)
         monkeypatch.setattr(dbg, "_best_effort_sweep_expired_pastes", lambda: None)
-        monkeypatch.setattr("hermes_cli.dump.run_dump", lambda a: None)
+        monkeypatch.setattr("sage_cli.dump.run_dump", lambda a: None)
 
         r = self.client.post("/api/ops/debug-share", json={"redact": False})
         assert r.status_code == 200
         assert r.json()["redacted"] is False
 
     def test_default_body_redacts(self, monkeypatch):
-        import hermes_cli.debug as dbg
+        import sage_cli.debug as dbg
 
         monkeypatch.setattr(
             dbg, "upload_to_pastebin", lambda c, expiry_days=7: "https://paste.rs/x"
         )
         monkeypatch.setattr(dbg, "_schedule_auto_delete", lambda *a, **k: None)
         monkeypatch.setattr(dbg, "_best_effort_sweep_expired_pastes", lambda: None)
-        monkeypatch.setattr("hermes_cli.dump.run_dump", lambda a: None)
+        monkeypatch.setattr("sage_cli.dump.run_dump", lambda a: None)
 
         # No JSON body at all — should default redact=True.
         r = self.client.post("/api/ops/debug-share")
@@ -938,7 +938,7 @@ class TestDebugShareEndpoint:
         assert r.json()["redacted"] is True
 
     def test_upload_failure_returns_502(self, monkeypatch):
-        import hermes_cli.debug as dbg
+        import sage_cli.debug as dbg
 
         monkeypatch.setattr(
             dbg,
@@ -947,7 +947,7 @@ class TestDebugShareEndpoint:
         )
         monkeypatch.setattr(dbg, "_schedule_auto_delete", lambda *a, **k: None)
         monkeypatch.setattr(dbg, "_best_effort_sweep_expired_pastes", lambda: None)
-        monkeypatch.setattr("hermes_cli.dump.run_dump", lambda a: None)
+        monkeypatch.setattr("sage_cli.dump.run_dump", lambda a: None)
 
         r = self.client.post("/api/ops/debug-share", json={"redact": True})
         assert r.status_code == 502
@@ -966,7 +966,7 @@ class TestToolsConfigEndpoints:
 
 
     def test_save_env_writes_key_and_validates_allowlist(self):
-        from hermes_cli.config import get_env_value
+        from sage_cli.config import get_env_value
 
         cfg = self.client.get("/api/tools/toolsets/web/config").json()
         # Find a real env-var key from the visible provider matrix.
@@ -1012,7 +1012,7 @@ def test_spawn_hermes_action_scrubs_gateway_loop_guard_env(monkeypatch, tmp_path
     it, or the in-process restart-loop guard rejects the restart and it silently
     fails (#52470).
     """
-    import hermes_cli.web_server as ws
+    import sage_cli.web_server as ws
 
     monkeypatch.setenv("_HERMES_GATEWAY", "1")
     monkeypatch.setattr(_web_server_gateway, "_ACTION_LOG_DIR", tmp_path)
@@ -1053,7 +1053,7 @@ def test_desktop_lifespan_reaps_orphan_gateways_on_startup(
     WebSocket. The lifespan calls _reap_unsupervised_gateway_orphans() once at
     startup under HERMES_DESKTOP=1 so the stale orphan is cleared first.
     """
-    import hermes_cli.web_server as ws
+    import sage_cli.web_server as ws
 
     called = []
 
@@ -1066,9 +1066,9 @@ def test_desktop_lifespan_reaps_orphan_gateways_on_startup(
     # real cron scheduler thread.
     monkeypatch.setattr(ws, "_warm_gateway_module", lambda: None)
     monkeypatch.setattr(ws, "_start_desktop_cron_ticker", lambda *_args: None)
-    # web_server imports the reaper lazily from hermes_cli.gateway, so patch it
+    # web_server imports the reaper lazily from sage_cli.gateway, so patch it
     # on that module.
-    import hermes_cli.gateway as g
+    import sage_cli.gateway as g
 
     monkeypatch.setattr(g, "_reap_unsupervised_gateway_orphans", _fake_reap)
 
@@ -1081,7 +1081,7 @@ def test_desktop_lifespan_reaps_orphan_gateways_on_startup(
 
 def test_desktop_lifespan_terminates_managed_gateway_restart(monkeypatch):
     """A Desktop-owned gateway child must not survive its serve backend."""
-    import hermes_cli.web_server as ws
+    import sage_cli.web_server as ws
 
     calls = []
 

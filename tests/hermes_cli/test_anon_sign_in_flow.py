@@ -13,10 +13,10 @@ import time
 import httpx
 import pytest
 
-from hermes_cli import anon_auth
-from hermes_cli.auth import _auth_file_path
-from hermes_cli.auth_constants import AuthError
-from tests.hermes_cli.test_anon_upgrade import (  # noqa: F401  (fixtures used by name)
+from sage_cli import anon_auth
+from sage_cli.auth import _auth_file_path
+from sage_cli.auth_constants import AuthError
+from tests.sage_cli.test_anon_upgrade import (  # noqa: F401  (fixtures used by name)
     EMAIL, FREE_PICK, PORTAL, WELCOME, _shared_store, _write_model_config, free_account, portal)
 
 __all__ = ["free_account", "portal"]
@@ -85,7 +85,7 @@ def test_a_timeout_yields_timed_out_and_keeps_the_enriched_detail(portal, monkey
     assert portal.token_grants == 0
 
     # The token poll can time out too, and its guidance is enriched at the source.
-    from hermes_cli import auth_device_flow
+    from sage_cli import auth_device_flow
     enriched = auth_device_flow._nous_device_auth_timeout_message(PORTAL)
     _stub_wait(monkeypatch, {"status": "completed", "account_email": EMAIL})
 
@@ -116,7 +116,7 @@ def test_a_retired_identity_yields_retired_and_clears_the_free_tier(portal, monk
     assert state.kind == "retired"
     assert state.copy == anon_auth.UPGRADE_REASON_COPY["account_retired"]
     assert cleared == [("retired", guest["anon_token"])]
-    from hermes_cli.auth import _load_auth_store
+    from sage_cli.auth import _load_auth_store
     assert "nous" not in _load_auth_store().get("providers", {})
 
 
@@ -189,7 +189,7 @@ def test_a_transport_error_yields_failed_without_leaking_the_detail_into_chat_co
 def test_a_persist_failure_yields_failed_rather_than_raising(portal, free_account, monkeypatch):
     _seed_free_tier()
     settles = []
-    from hermes_cli import auth_nous
+    from sage_cli import auth_nous
     monkeypatch.setattr(
         auth_nous, "persist_nous_credentials", lambda *a, **kw: (_ for _ in ()).throw(OSError("read-only home")))
     monkeypatch.setattr(anon_auth, "settle_after_upgrade", lambda state: settles.append(state) or {})
@@ -205,7 +205,7 @@ def test_a_persist_failure_yields_failed_rather_than_raising(portal, free_accoun
 def test_a_settle_failure_yields_failed_rather_than_raising(portal, free_account, monkeypatch):
     _seed_free_tier()
     persists = []
-    from hermes_cli import auth_nous
+    from sage_cli import auth_nous
     real_persist = auth_nous.persist_nous_credentials
     monkeypatch.setattr(
         auth_nous, "persist_nous_credentials",
@@ -223,7 +223,7 @@ def test_a_settle_failure_yields_failed_rather_than_raising(portal, free_account
 
 
 def test_already_signed_in_short_circuits_before_any_network(portal):
-    from hermes_cli.auth import _load_auth_store, _save_auth_store, _save_provider_state
+    from sage_cli.auth import _load_auth_store, _save_auth_store, _save_provider_state
     store = _load_auth_store()
     _save_provider_state(store, "nous", {"auth_method": "oauth_device_code", "access_token": "x"})
     _save_auth_store(store)
@@ -331,7 +331,7 @@ def test_cancelling_during_a_completed_status_request_obeys_the_surface_policy(
 
     assert states[-1].kind == ("superseded" if cancel_wins else "completed")
     assert portal.token_grants == (0 if cancel_wins else 1)
-    from hermes_cli.auth import _load_auth_store
+    from sage_cli.auth import _load_auth_store
     state = _load_auth_store()["providers"]["nous"]
     assert anon_auth.is_guest_state(state) is cancel_wins
 
@@ -366,7 +366,7 @@ def test_a_gateway_style_supersede_after_a_completed_promotion_still_signs_in(
 
     assert states[-1].kind == "completed"
     assert portal.token_grants == 1
-    from hermes_cli.auth import _load_auth_store
+    from sage_cli.auth import _load_auth_store
     state = _load_auth_store()["providers"]["nous"]
     assert not anon_auth.is_guest_state(state)
 
@@ -394,7 +394,7 @@ def test_settle_runs_exactly_once_per_completion(portal, free_account, monkeypat
     _seed_free_tier()
     settles, persists = [], []
     real_settle = anon_auth.settle_after_upgrade
-    from hermes_cli import auth_nous
+    from sage_cli import auth_nous
     real_persist = auth_nous.persist_nous_credentials
     monkeypatch.setattr(
         anon_auth, "settle_after_upgrade",
@@ -428,7 +428,7 @@ def test_the_budget_shrinks_across_the_two_waits(portal, free_account, monkeypat
     """One absolute deadline: what the promotion wait spends, the token poll no longer has."""
     _seed_free_tier()
     captured = {}
-    from hermes_cli import auth_device_flow
+    from sage_cli import auth_device_flow
     real_request, real_poll = auth_device_flow._request_device_code, auth_device_flow._poll_for_token
 
     def _short_lived_code(client, portal_base_url, client_id, scope):

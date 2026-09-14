@@ -23,8 +23,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import main as cli_main
-from hermes_cli import main_desktop
+from sage_cli import main as cli_main
+from sage_cli import main_desktop
 
 PE_AMD64 = 0x8664
 PE_ARM64 = 0xAA64
@@ -68,7 +68,7 @@ def make_pe(path: Path, machine: int = PE_AMD64, *, truncate_to: int | None = No
 
 # ─── _windows_native_machine ────────────────────────────────────────────────
 
-# MACHINE_ATTRIBUTES.UserEnabled — mirrors hermes_cli.main.
+# MACHINE_ATTRIBUTES.UserEnabled — mirrors sage_cli.main.
 _USER_ENABLED = 0x00000001
 
 
@@ -215,7 +215,7 @@ def test_rollback_restores_backup_and_keeps_corrupt_copy(tmp_path):
     backup_exe = desktop_dir / "release" / "win-unpacked.bak" / "Hermes.exe"
     make_pe(backup_exe, PE_AMD64)  # valid old build
 
-    with patch("hermes_cli.main_desktop._windows_native_machine", return_value="AMD64"):
+    with patch("sage_cli.main_desktop._windows_native_machine", return_value="AMD64"):
         restored = main_desktop._rollback_desktop_from_backup(exe)
 
     assert restored == exe
@@ -246,8 +246,8 @@ def test_gate_fails_clearly_without_backup(tmp_path, capsys):
     fake.parent.mkdir(parents=True)
     fake.write_bytes(b"<html>proxy error</html>" + b" " * 600)
 
-    with patch("hermes_cli.main_desktop._purge_electron_build_cache", return_value=[]), \
-         patch("hermes_cli.main_desktop._desktop_stamp_path", return_value=tmp_path / "stamp.json"):
+    with patch("sage_cli.main_desktop._purge_electron_build_cache", return_value=[]), \
+         patch("sage_cli.main_desktop._desktop_stamp_path", return_value=tmp_path / "stamp.json"):
         verified, rolled_back = main_desktop._ensure_desktop_exe_launchable(desktop_dir, exe)
 
     assert verified is None
@@ -310,16 +310,16 @@ def test_build_only_fails_when_pack_produces_corrupt_exe(tmp_path, monkeypatch, 
         make_pe(staging / "win-unpacked" / "Hermes.exe", PE_AMD64, truncate_to=0x300)
         return subprocess.CompletedProcess(list(cmd), 0)
 
-    with patch("hermes_cli.main_desktop.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_install_repair._resolve_node_runtime_npm", return_value="npm.cmd"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._stop_desktop_processes_locking_build", return_value=[]), \
-         patch("hermes_cli.main_desktop._purge_electron_build_cache", return_value=[]), \
-         patch("hermes_cli.main_desktop._desktop_stamp_path", return_value=tmp_path / "stamp.json"), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp") as mock_stamp, \
-         patch("hermes_cli.main_desktop._windows_native_machine", return_value="AMD64"), \
-         patch("hermes_cli.main_desktop.subprocess.run", side_effect=pack_into_staging), \
+    with patch("sage_cli.main_desktop.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_install_repair._resolve_node_runtime_npm", return_value="npm.cmd"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._stop_desktop_processes_locking_build", return_value=[]), \
+         patch("sage_cli.main_desktop._purge_electron_build_cache", return_value=[]), \
+         patch("sage_cli.main_desktop._desktop_stamp_path", return_value=tmp_path / "stamp.json"), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp") as mock_stamp, \
+         patch("sage_cli.main_desktop._windows_native_machine", return_value="AMD64"), \
+         patch("sage_cli.main_desktop.subprocess.run", side_effect=pack_into_staging), \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns())
 

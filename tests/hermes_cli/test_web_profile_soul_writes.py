@@ -31,7 +31,7 @@ SOUL = "# Persona\n\nYou are a careful, terse assistant.\n"
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     monkeypatch.setenv("HERMES_DASHBOARD_SESSION_TOKEN", "soul-test-token")
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     with TestClient(web_server.app, raise_server_exceptions=False) as c:
         # web_server resolves _SESSION_TOKEN once, at import. Read it back from
@@ -46,7 +46,7 @@ def client(tmp_path, monkeypatch):
 def profile_dir(tmp_path, monkeypatch) -> Path:
     """Create a real profile directory under the test HERMES_HOME."""
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     d = profiles_mod.get_profile_dir("demo")
     d.mkdir(parents=True, exist_ok=True)
@@ -143,7 +143,7 @@ class TestSoulIoIsOffTheEventLoop:
     fsyncs before replacing — so the save blocks for as long as the filesystem
     takes to commit. These handlers sit in the same router as the profile
     delete and describe-auto paths; the rest of that sweep is covered by
-    ``tests/hermes_cli/test_web_profiles_off_loop.py``.
+    ``tests/sage_cli/test_web_profiles_off_loop.py``.
     """
 
     @staticmethod

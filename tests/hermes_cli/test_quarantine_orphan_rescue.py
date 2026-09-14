@@ -27,10 +27,10 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import _early_recovery as er
-from hermes_cli import _install_repair as ir
-from hermes_cli import main as cli_main
-from hermes_cli import main_install_repair
+from sage_cli import _early_recovery as er
+from sage_cli import _install_repair as ir
+from sage_cli import main as cli_main
+from sage_cli import main_install_repair
 
 
 def _make_scripts_dir(tmp_path: Path) -> Path:

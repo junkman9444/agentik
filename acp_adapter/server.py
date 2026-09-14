@@ -310,7 +310,7 @@ class HermesACPAgent(SlashCommandsMixin, acp.Agent):
         """Resolve ``provider:model`` input into the provider and normalized model id."""
         target_provider, new_model = current_provider, raw_model.strip()
         try:
-            from hermes_cli.models import detect_provider_for_model, parse_model_input
+            from sage_cli.models import detect_provider_for_model, parse_model_input
 
             raw = new_model
             target_provider, new_model = parse_model_input(new_model, current_provider)
@@ -454,7 +454,7 @@ class HermesACPAgent(SlashCommandsMixin, acp.Agent):
         (``agent/turn_context.py``). No-op if discovery finished, join timed out, registry
         unchanged, or session closed."""
         try:
-            from hermes_cli.mcp_startup import mcp_discovery_in_flight
+            from sage_cli.mcp_startup import mcp_discovery_in_flight
         except Exception:
             return
         if not mcp_discovery_in_flight():
@@ -463,7 +463,7 @@ class HermesACPAgent(SlashCommandsMixin, acp.Agent):
 
         def _wait_then_refresh() -> None:
             try:
-                from hermes_cli.mcp_startup import join_mcp_discovery
+                from sage_cli.mcp_startup import join_mcp_discovery
 
                 if not join_mcp_discovery(timeout=30.0):
                     return
@@ -1008,7 +1008,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

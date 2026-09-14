@@ -173,7 +173,7 @@ def test_receipts_are_bounded_redacted_and_session_scoped(tmp_path, monkeypatch)
         registry._running[session.id] = session
         registry._move_to_finished(session)
         sessions.append(session)
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     paths = list((get_hermes_home() / "logs" / "process-results").glob("*.json"))
     assert len(paths) == 2
     assert all(secret not in path.read_text(encoding="utf-8") for path in paths)
@@ -190,7 +190,7 @@ def test_receipts_are_bounded_redacted_and_session_scoped(tmp_path, monkeypatch)
     with scoped_current_session_id("unrelated-session"):
         assert load_completed_results(recovered.id) == {}
         assert fresh.get(recovered.id) is None
-    from hermes_state import SessionDB
+    from sage_state import SessionDB
     db = SessionDB()
     try:
         db.create_session("owner-session", "cli")
@@ -210,7 +210,7 @@ def test_receipts_are_bounded_redacted_and_session_scoped(tmp_path, monkeypatch)
     assert fresh.get(recovered.id) is None
 
     # Multiplex readers must keep the producer's profile on native threads.
-    from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+    from sage_constants import set_hermes_home_override, reset_hermes_home_override
     profile = tmp_path / "thread-profile"
     token = set_hermes_home_override(profile)
     try:

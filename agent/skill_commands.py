@@ -8,7 +8,7 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from hermes_constants import display_hermes_home
+from sage_constants import display_hermes_home
 from agent.prompt_cache_boundary import register_stable_prefix
 from agent.skill_preprocessing import load_skills_config as _load_skills_config, preprocess_skill_content
 
@@ -145,7 +145,7 @@ def _resolve_skill_commands_home() -> str:
     profile's skill list cached, so ``get_skill_commands()`` reported a cache miss for skills that only
     exist under the new profile (#88023).
     """
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return str(get_hermes_home())
 
 
@@ -379,7 +379,7 @@ def scan_skill_commands() -> Dict[str, Dict[str, Any]]:
         from agent.skill_utils import (
             get_external_skills_dirs, get_project_skills_dirs, iter_project_skill_files, iter_skill_index_files,
         )
-        from hermes_cli.commands import resolve_command
+        from sage_cli.commands import resolve_command
         disabled = _get_disabled_skill_names()
         seen_names: set = set()
         # Precedence: project (through the quarantine chokepoint) > local > external.

@@ -14,7 +14,7 @@ from unittest import mock
 import pytest
 import yaml
 
-from hermes_cli.plugin_packs import (
+from sage_cli.plugin_packs import (
     PackError,
     PackPluginEntry,
     PluginPack,
@@ -28,7 +28,7 @@ from hermes_cli.plugin_packs import (
     resolve_pack_plugins,
     validate_config_seed,
 )
-from hermes_cli.subcommands.plugins import build_plugins_parser
+from sage_cli.subcommands.plugins import build_plugins_parser
 
 SHA_A = "a" * 40
 SHA_B = "b" * 40
@@ -186,7 +186,7 @@ def test_load_pack_missing_file_errors():
 # ---------------------------------------------------------------------------
 
 def _fake_catalog_entry(name):
-    from hermes_cli.plugin_catalog import CatalogCapabilities, PluginCatalogEntry
+    from sage_cli.plugin_catalog import CatalogCapabilities, PluginCatalogEntry
     return PluginCatalogEntry(
         name=name, repo="https://github.com/idx-owner/idx-repo", sha=SHA_B, description="d", maintainer="idx-owner",
         capabilities=CatalogCapabilities(provides_tools=["tools"]))
@@ -197,7 +197,7 @@ def test_resolve_pack_plugins_uses_catalog_for_bare_names():
     bare_name = pack.plugins[1].name
     fake_entry = _fake_catalog_entry(bare_name)
     with mock.patch(
-        "hermes_cli.plugin_catalog.load_catalog_live",
+        "sage_cli.plugin_catalog.load_catalog_live",
         return_value=[fake_entry],
     ):
         resolved = resolve_pack_plugins(pack)
@@ -214,7 +214,7 @@ def test_resolve_pack_plugins_carries_catalog_miss_as_error():
         )
     )
     with mock.patch(
-        "hermes_cli.plugin_catalog.load_catalog_live", return_value=[]
+        "sage_cli.plugin_catalog.load_catalog_live", return_value=[]
     ):
         resolved = resolve_pack_plugins(pack)
     assert resolved[0].identifier is None
@@ -269,7 +269,7 @@ def test_install_fan_out_passes_pinned_refs_to_installer(tmp_path):
     )
     patches = _fanout_patches(None)
     patches["_install_plugin_core"] = installer
-    with mock.patch.multiple("hermes_cli.plugins_cmd", **patches):
+    with mock.patch.multiple("sage_cli.plugins_cmd", **patches):
         results = install_pack_plugins(pack, _resolved(pack), FakeConsole())
 
     assert [r.ok for r in results] == [True, True]
@@ -301,7 +301,7 @@ def test_install_fan_out_invokes_capability_consent_per_plugin(tmp_path):
         ],
         consent_mock=consent,
     )
-    with mock.patch.multiple("hermes_cli.plugins_cmd", **patches):
+    with mock.patch.multiple("sage_cli.plugins_cmd", **patches):
         install_pack_plugins(pack, _resolved(pack), FakeConsole())
 
     assert consent.call_count == 2
@@ -312,7 +312,7 @@ def test_install_fan_out_invokes_capability_consent_per_plugin(tmp_path):
 
 
 def test_install_fan_out_continues_past_failures_and_reports():
-    from hermes_cli.plugins_cmd import PluginOperationError
+    from sage_cli.plugins_cmd import PluginOperationError
 
     pack = parse_pack(
         yaml.safe_dump(
@@ -333,7 +333,7 @@ def test_install_fan_out_continues_past_failures_and_reports():
 
     patches = _fanout_patches(installer)
     console = FakeConsole()
-    with mock.patch.multiple("hermes_cli.plugins_cmd", **patches):
+    with mock.patch.multiple("sage_cli.plugins_cmd", **patches):
         results = install_pack_plugins(pack, _resolved(pack), console)
 
     assert [r.ok for r in results] == [False, True]
@@ -355,7 +355,7 @@ def test_pack_install_exits_nonzero_on_partial_failure(tmp_path, monkeypatch):
         ),
         encoding="utf-8",
     )
-    from hermes_cli.plugins_cmd import PluginOperationError
+    from sage_cli.plugins_cmd import PluginOperationError
 
     def installer(identifier, *, force, ref):
         if "bad" in identifier:
@@ -366,7 +366,7 @@ def test_pack_install_exits_nonzero_on_partial_failure(tmp_path, monkeypatch):
     patches = _fanout_patches(installer)
     monkeypatch.setattr("sys.stdin", mock.MagicMock(isatty=lambda: True))
     monkeypatch.setattr("sys.stdout", mock.MagicMock(isatty=lambda: True))
-    with mock.patch.multiple("hermes_cli.plugins_cmd", **patches), mock.patch(
+    with mock.patch.multiple("sage_cli.plugins_cmd", **patches), mock.patch(
         "rich.console.Console", return_value=fake_console
     ):
         with pytest.raises(SystemExit) as exc:
@@ -385,9 +385,9 @@ def test_pack_install_refuses_noninteractive_sessions(tmp_path, monkeypatch):
     with mock.patch(
         "rich.console.Console", return_value=fake_console
     ), mock.patch(
-        "hermes_cli.plugin_packs.resolve_pack_plugins",
+        "sage_cli.plugin_packs.resolve_pack_plugins",
         side_effect=lambda pack: _resolved(pack),
-    ), mock.patch("hermes_cli.plugins_cmd._install_plugin_core", installer):
+    ), mock.patch("sage_cli.plugins_cmd._install_plugin_core", installer):
         with pytest.raises(SystemExit) as exc:
             cmd_pack_install(str(pack_file))
     assert exc.value.code == 1
@@ -405,9 +405,9 @@ def test_pack_install_aborts_cleanly_on_decline(tmp_path, monkeypatch):
     with mock.patch(
         "rich.console.Console", return_value=fake_console
     ), mock.patch(
-        "hermes_cli.plugin_packs.resolve_pack_plugins",
+        "sage_cli.plugin_packs.resolve_pack_plugins",
         side_effect=lambda pack: _resolved(pack),
-    ), mock.patch("hermes_cli.plugins_cmd._install_plugin_core", installer):
+    ), mock.patch("sage_cli.plugins_cmd._install_plugin_core", installer):
         with pytest.raises(SystemExit):
             cmd_pack_install(str(pack_file))
     installer.assert_not_called()
@@ -427,15 +427,15 @@ def _seed_install_state(home, monkeypatch, *, metadata, config=None, plugins=())
         json.dumps(metadata), encoding="utf-8"
     )
     monkeypatch.setattr(
-        "hermes_cli.plugins_cmd._read_install_metadata", lambda: metadata
+        "sage_cli.plugins_cmd._read_install_metadata", lambda: metadata
     )
-    monkeypatch.setattr("hermes_cli.plugins_cmd._plugins_dir", lambda: plugins_dir)
+    monkeypatch.setattr("sage_cli.plugins_cmd._plugins_dir", lambda: plugins_dir)
     cfg = config or {}
     monkeypatch.setattr(
-        "hermes_cli.plugins_cmd._get_enabled_set",
+        "sage_cli.plugins_cmd._get_enabled_set",
         lambda: set((cfg.get("plugins") or {}).get("enabled") or []),
     )
-    monkeypatch.setattr("hermes_cli.plugin_packs._sanitized_entry_config",
+    monkeypatch.setattr("sage_cli.plugin_packs._sanitized_entry_config",
                         lambda pid: ((cfg.get("plugins") or {}).get("entries") or {}).get(pid, {}))
 
 
@@ -499,7 +499,7 @@ def test_export_strips_secret_and_capability_config_keys(tmp_path, monkeypatch):
     )
     # Use the real sanitizer against a fake loaded config.
     monkeypatch.setattr(
-        "hermes_cli.plugin_packs._sanitized_entry_config",
+        "sage_cli.plugin_packs._sanitized_entry_config",
         real_sanitized_entry_config,
     )
     fake_cfg = {
@@ -514,7 +514,7 @@ def test_export_strips_secret_and_capability_config_keys(tmp_path, monkeypatch):
             }
         }
     }
-    with mock.patch("hermes_cli.config.load_config", return_value=fake_cfg):
+    with mock.patch("sage_cli.config.load_config", return_value=fake_cfg):
         text, _warnings = export_pack()
     assert "sk-super-secret" not in text
     assert "api_key" not in text

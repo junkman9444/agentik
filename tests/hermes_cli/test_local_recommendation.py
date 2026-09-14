@@ -23,14 +23,14 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli.local_runtime.catalog import (
+from sage_cli.local_runtime.catalog import (
     CATALOG,
     PLEASANT_FLOOR_TOK_S,
     predicted_decode_tok_s,
     recommended_entry,
     select_variant,
 )
-from hermes_cli.local_runtime.estimator import HardwareBudget
+from sage_cli.local_runtime.estimator import HardwareBudget
 
 _GIB = 1 << 30
 

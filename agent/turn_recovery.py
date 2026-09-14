@@ -239,7 +239,7 @@ def _print_anthropic_401_diagnostics(agent: Any, key: Any) -> None:
     """Anthropic 401 that survived a credential refresh: show auth method + fixes."""
     from agent.anthropic_credentials import _is_oauth_token
     from agent.azure_identity_adapter import is_token_provider
-    from hermes_constants import display_hermes_home
+    from sage_constants import display_hermes_home
     _plines(agent, "🔐 Anthropic 401 — authentication failed.")
     if is_token_provider(key):
         # Azure Foundry Entra ID: JWT minted per-request by an httpx hook; 401 = Azure
@@ -476,7 +476,7 @@ def recover_after_classification(
         _retry.reasoning_mandatory_retry_attempted = True
         agent._reasoning_disable_rejected = True
         try:
-            from hermes_cli.models_reasoning_caps import refresh_reasoning_caps_async
+            from sage_cli.models_reasoning_caps import refresh_reasoning_caps_async
             refresh_reasoning_caps_async(agent.provider)
         except Exception:
             pass
@@ -574,7 +574,7 @@ def _welcome_tier_guidance(classified: Any, *, model: Any, in_chat: bool) -> str
     refusal, route = ctx.get("welcome_refusal"), ctx.get("welcome_route")
     if not refusal and not route:
         return ""
-    from hermes_cli.anon_auth import welcome_refusal_copy, welcome_route_refusal_copy
+    from sage_cli.anon_auth import welcome_refusal_copy, welcome_route_refusal_copy
     if refusal:
         return welcome_refusal_copy(refusal, model=str(model or ""), in_chat=in_chat)
     return welcome_route_refusal_copy(str(route), in_chat=in_chat)
@@ -870,7 +870,7 @@ def log_api_error_attempt(
     # provider never names the model, so we do.
     if getattr(api_error, "status_code", None) == 404:
         try:
-            from hermes_cli.model_normalize import suggest_prefixed_model_id
+            from sage_cli.model_normalize import suggest_prefixed_model_id
 
             _suggestion = suggest_prefixed_model_id(_provider, _model)
         except Exception:

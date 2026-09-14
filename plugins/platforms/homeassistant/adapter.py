@@ -304,7 +304,7 @@ class HomeAssistantAdapter(BasePlatformAdapter):
 # #3823) Added when the Email adapter moved from gateway/platforms/email.py into this bundled plugin.
 # register() exposes the platform via the registry, replacing the Platform.EMAIL elif in gateway/run.py, the
 # _PLATFORM_CONNECTED_CHECKERS entry in gateway/config.py, the _PLATFORMS["email"] static dict in
-# hermes_cli/gateway.py, and the _send_email dispatch in tools/send_message_tool.py. EMAIL_*
+# sage_cli/gateway.py, and the _send_email dispatch in tools/send_message_tool.py. EMAIL_*
 # env→PlatformConfig seeding stays in core.
 # ──────────────────────────────────────────────────────────────────────────
 async def _standalone_send(
@@ -338,9 +338,9 @@ async def _standalone_send(
 
 
 def _is_connected(config) -> bool:
-    """Connected when ``HASS_TOKEN`` is set; read via ``hermes_cli.gateway.get_env_value`` at call
+    """Connected when ``HASS_TOKEN`` is set; read via ``sage_cli.gateway.get_env_value`` at call
     time so tests patching ``gateway_mod.get_env_value`` can suppress ambient env vars."""
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
     return bool((gateway_mod.get_env_value("HASS_TOKEN") or "").strip())
 
 

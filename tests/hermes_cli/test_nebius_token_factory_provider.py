@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from hermes_cli.auth import (
+from sage_cli.auth import (
     PROVIDER_REGISTRY,
     resolve_api_key_provider_credentials,
     resolve_provider,
 )
-from hermes_cli.model_normalize import normalize_model_for_provider
-from hermes_cli.models import (
+from sage_cli.model_normalize import normalize_model_for_provider
+from sage_cli.models import (
     CANONICAL_PROVIDERS,
     _PROVIDER_ALIASES,
     _PROVIDER_LABELS,
@@ -77,7 +77,7 @@ def test_nebius_canonical_provider_and_label():
 
 
 def test_nebius_provider_module_overlay():
-    from hermes_cli.providers import (
+    from sage_cli.providers import (
         HERMES_OVERLAYS,
         determine_api_mode,
         get_label,
@@ -112,7 +112,7 @@ def test_nebius_model_catalog_prefers_live_profile_fetch(monkeypatch):
     profile = get_provider_profile("nebius-token-factory")
     assert profile is not None
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_api_key_provider_credentials",
+        "sage_cli.auth.resolve_api_key_provider_credentials",
         lambda provider_id: {
             "provider": provider_id,
             "api_key": "nebius-live-key",
@@ -145,7 +145,7 @@ def test_nebius_model_catalog_falls_back_to_profile_models(monkeypatch):
     profile = get_provider_profile("nebius-token-factory")
     assert profile is not None
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_api_key_provider_credentials",
+        "sage_cli.auth.resolve_api_key_provider_credentials",
         lambda provider_id: {
             "provider": provider_id,
             "api_key": "nebius-live-key",

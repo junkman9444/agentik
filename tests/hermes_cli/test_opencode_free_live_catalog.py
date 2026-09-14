@@ -21,7 +21,7 @@ static snapshot only).
 
 from unittest.mock import patch
 
-from hermes_cli.models import (
+from sage_cli.models import (
     _KEYLESS_STABLE_CACHE_PROVIDERS,
     _PROVIDER_MODELS,
     cached_provider_model_ids,
@@ -58,7 +58,7 @@ class TestProviderModelIdsOpencodeFree:
     def test_live_catalog_revalidation_excludes_delisted(self):
         """The delisted model must NOT appear when the live relay no longer lists it."""
         with patch(
-            "hermes_cli.models._fetch_opencode_free_models",
+            "sage_cli.models._fetch_opencode_free_models",
             return_value=list(_LIVE_FREE_MODELS),
         ):
             result = provider_model_ids("opencode-free")
@@ -70,7 +70,7 @@ class TestProviderModelIdsOpencodeFree:
     def test_live_catalog_filters_out_keyed_free_suffix_model(self):
         """ox-alpha-free (KEYED Go-subscription) must never enter the keyless picker."""
         with patch(
-            "hermes_cli.models._fetch_opencode_free_models",
+            "sage_cli.models._fetch_opencode_free_models",
             return_value=list(_LIVE_FREE_MODELS),
         ):
             result = provider_model_ids("opencode-free")
@@ -78,14 +78,14 @@ class TestProviderModelIdsOpencodeFree:
 
     def test_falls_back_to_static_floor_when_live_fetch_fails(self):
         """On live-fetch failure/empty, the static floor keeps the picker populated."""
-        with patch("hermes_cli.models._fetch_opencode_free_models", return_value=None):
+        with patch("sage_cli.models._fetch_opencode_free_models", return_value=None):
             result = provider_model_ids("opencode-free")
         assert result == _STATIC_FLOOR
         assert result  # never empty on a transient outage
 
     def test_empty_live_result_falls_back_to_static_floor(self):
         """An empty live result (no free models) is not trusted over the floor."""
-        with patch("hermes_cli.models._fetch_opencode_free_models", return_value=[]):
+        with patch("sage_cli.models._fetch_opencode_free_models", return_value=[]):
             result = provider_model_ids("opencode-free")
         assert result == _STATIC_FLOOR
 
@@ -95,7 +95,7 @@ class TestOpencodeFreeCacheFingerprint:
         """opencode-free is in the stable-fingerprint set (no credential to rotate)."""
         assert "opencode-free" in _KEYLESS_STABLE_CACHE_PROVIDERS
 
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         fp1 = mod._credential_fingerprint("opencode-free")
         fp2 = mod._credential_fingerprint("opencode-free")
@@ -107,7 +107,7 @@ class TestOpencodeFreeCacheFingerprint:
         persists it under a stable fingerprint (SWR cache path the picker uses)."""
         import time
 
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         with (
             patch.object(mod, "_load_provider_models_cache", return_value={}),
@@ -139,7 +139,7 @@ class TestOpencodeFreeFollowUps:
     def test_fetch_memoizes_success_in_process(self):
         """Direct provider_model_ids() callers must not each pay a network
         round-trip: the second call within the memo TTL is served in-process."""
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         self._reset_memo(mod)
         calls = {"n": 0}
@@ -159,7 +159,7 @@ class TestOpencodeFreeFollowUps:
                 _json.dumps({"data": [{"id": m} for m in _LIVE_FREE_MODELS]}).encode()
             )
 
-        with patch("hermes_cli.urllib_security.open_credentialed_url", fake_open):
+        with patch("sage_cli.urllib_security.open_credentialed_url", fake_open):
             first = mod._fetch_opencode_free_models()
             second = mod._fetch_opencode_free_models()
         assert first == second == list(_LIVE_FREE_MODELS)
@@ -169,7 +169,7 @@ class TestOpencodeFreeFollowUps:
     def test_fetch_memoizes_failure_negative_cache(self):
         """An unreachable relay is memoized too — repeated validations must not
         each block for the full network timeout."""
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         self._reset_memo(mod)
         calls = {"n": 0}
@@ -178,7 +178,7 @@ class TestOpencodeFreeFollowUps:
             calls["n"] += 1
             raise OSError("relay down")
 
-        with patch("hermes_cli.urllib_security.open_credentialed_url", fake_open):
+        with patch("sage_cli.urllib_security.open_credentialed_url", fake_open):
             assert mod._fetch_opencode_free_models() is None
             assert mod._fetch_opencode_free_models() is None
         assert calls["n"] == 1
@@ -188,7 +188,7 @@ class TestOpencodeFreeFollowUps:
         """A newly-live free model absent from the static floor must still heal
         opencode-go/zen selections to the keyless Zen relay (sibling-site widen:
         opencode_zen_free_runtime used to check the floor only)."""
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         live_only = "ling-3.0-flash-fin-free"
         assert live_only not in {m.lower() for m in _PROVIDER_MODELS["opencode-free"]}
@@ -208,7 +208,7 @@ class TestOpencodeFreeFollowUps:
     def test_heal_union_reads_swr_disk_cache(self):
         """A fresh process (empty memo) still heals live-only models via the
         SWR disk-cache entry — no blocking fetch on the resolution hot path."""
-        import hermes_cli.models as mod
+        import sage_cli.models as mod
 
         live_only = "ling-3.0-flash-fin-free"
         self._reset_memo(mod)

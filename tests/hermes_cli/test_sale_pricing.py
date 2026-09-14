@@ -5,9 +5,9 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock
 
-import hermes_cli.models as models_mod
-from hermes_cli import models_pricing
-from hermes_cli.models_pricing import compute_sale_discount, fetch_models_with_pricing
+import sage_cli.models as models_mod
+from sage_cli import models_pricing
+from sage_cli.models_pricing import compute_sale_discount, fetch_models_with_pricing
 
 
 def test_free_model_gets_flat_100_percent_discount():
@@ -95,7 +95,7 @@ def test_resolve_nous_pricing_credentials_honors_inference_env_override(monkeypa
     )
     # Auth resolution fails / returns nothing — the env override must still win.
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_nous_runtime_credentials",
+        "sage_cli.auth.resolve_nous_runtime_credentials",
         lambda: None,
     )
     api_key, base_url = models_pricing._resolve_nous_pricing_credentials()
@@ -108,7 +108,7 @@ def test_resolve_nous_pricing_credentials_honors_inference_env_override(monkeypa
 def test_resolve_nous_pricing_credentials_normalizes_either_suffix(monkeypatch):
     """``/v1`` on the override is optional and must not change the result."""
     monkeypatch.setattr(
-        "hermes_cli.auth.resolve_nous_runtime_credentials", lambda: None
+        "sage_cli.auth.resolve_nous_runtime_credentials", lambda: None
     )
     for override in (
         "https://stg-inference-api.nousresearch.com",

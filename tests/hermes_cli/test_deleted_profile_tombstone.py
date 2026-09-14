@@ -13,8 +13,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli.config import ensure_hermes_home
-from hermes_cli.profiles import (
+from sage_cli.config import ensure_hermes_home
+from sage_cli.profiles import (
     backfill_profile_envs,
     create_profile,
     delete_profile,
@@ -24,8 +24,8 @@ from hermes_cli.profiles import (
     resolve_profile_env,
     set_active_profile,
 )
-from hermes_constants import named_profile_home
-from hermes_logging import setup_logging
+from sage_constants import named_profile_home
+from sage_logging import setup_logging
 
 
 @pytest.fixture()
@@ -42,8 +42,8 @@ def _named_homes(tmp_path: Path) -> list[str]:
 
 
 def _delete(name: str) -> None:
-    with patch("hermes_cli.profiles._cleanup_gateway_service"), patch(
-        "hermes_cli.profiles._stop_profile_backends"
+    with patch("sage_cli.profiles._cleanup_gateway_service"), patch(
+        "sage_cli.profiles._stop_profile_backends"
     ):
         delete_profile(name, yes=True)
 
@@ -51,8 +51,8 @@ def _delete(name: str) -> None:
 class TestDeletedProfileTombstone:
     def test_delete_then_logging_setup_does_not_recreate_home(self, profile_env, monkeypatch):
         profile_dir = create_profile("worker", no_alias=True, no_skills=True)
-        with patch("hermes_cli.profiles._cleanup_gateway_service"), patch(
-            "hermes_cli.profiles._stop_profile_backends"
+        with patch("sage_cli.profiles._cleanup_gateway_service"), patch(
+            "sage_cli.profiles._stop_profile_backends"
         ):
             delete_profile("worker", yes=True)
 
@@ -69,8 +69,8 @@ class TestDeletedProfileTombstone:
 
     def test_empty_shell_after_delete_is_not_listed_or_served(self, profile_env):
         profile_dir = create_profile("worker", no_alias=True, no_skills=True)
-        with patch("hermes_cli.profiles._cleanup_gateway_service"), patch(
-            "hermes_cli.profiles._stop_profile_backends"
+        with patch("sage_cli.profiles._cleanup_gateway_service"), patch(
+            "sage_cli.profiles._stop_profile_backends"
         ):
             delete_profile("worker", yes=True)
 
@@ -84,8 +84,8 @@ class TestDeletedProfileTombstone:
 
     def test_tombstoned_home_is_not_bootstrapped(self, profile_env, monkeypatch):
         profile_dir = create_profile("worker", no_alias=True, no_skills=True)
-        with patch("hermes_cli.profiles._cleanup_gateway_service"), patch(
-            "hermes_cli.profiles._stop_profile_backends"
+        with patch("sage_cli.profiles._cleanup_gateway_service"), patch(
+            "sage_cli.profiles._stop_profile_backends"
         ):
             delete_profile("worker", yes=True)
         profile_dir.mkdir(parents=True)
@@ -97,8 +97,8 @@ class TestDeletedProfileTombstone:
 
     def test_create_after_delete_clears_tombstone(self, profile_env):
         create_profile("worker", no_alias=True, no_skills=True)
-        with patch("hermes_cli.profiles._cleanup_gateway_service"), patch(
-            "hermes_cli.profiles._stop_profile_backends"
+        with patch("sage_cli.profiles._cleanup_gateway_service"), patch(
+            "sage_cli.profiles._stop_profile_backends"
         ):
             delete_profile("worker", yes=True)
 
@@ -186,7 +186,7 @@ class TestNamedProfileHome:
         assert named_profile_home(custom_home / "logs") is None
 
     def test_unrelated_profiles_dir_still_mkdirs(self, tmp_path):
-        from hermes_constants import mkdir_under_hermes_home
+        from sage_constants import mkdir_under_hermes_home
 
         custom_home = tmp_path / "srv" / "profiles" / "buildcache"
         log_dir = mkdir_under_hermes_home(custom_home / "logs")

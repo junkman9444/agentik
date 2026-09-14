@@ -21,14 +21,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from hermes_cli import main as hermes_main
-import hermes_cli.main_web_build as main_web_build
-import hermes_cli.main_install_repair as main_install_repair
-from hermes_cli import update_cmd
-import hermes_cli.update_cmd_fleet as update_cmd_fleet
-import hermes_cli.update_cmd_deps as update_cmd_deps
-from hermes_cli.update_receipt import COMMAND_BOUNDARY_STOP_REASON
-from hermes_constants import get_hermes_home
+from sage_cli import main as hermes_main
+import sage_cli.main_web_build as main_web_build
+import sage_cli.main_install_repair as main_install_repair
+from sage_cli import update_cmd
+import sage_cli.update_cmd_fleet as update_cmd_fleet
+import sage_cli.update_cmd_deps as update_cmd_deps
+from sage_cli.update_receipt import COMMAND_BOUNDARY_STOP_REASON
+from sage_constants import get_hermes_home
 
 
 def _make_head_moved_side_effect(pre_sha="abc123", post_sha="def456"):
@@ -130,7 +130,7 @@ def _patch_update_deps(monkeypatch, tmp_path, run_side_effect):
     monkeypatch.setattr(update_cmd, "_purge_stale_hermes_modules", lambda: None)
     monkeypatch.setattr(hermes_main, "_purge_stale_hermes_modules", lambda: None)
 
-    import hermes_cli.gateway as hermes_gateway
+    import sage_cli.gateway as hermes_gateway
 
     monkeypatch.setattr(
         hermes_gateway, "find_gateway_pids", lambda **_kwargs: []
@@ -140,11 +140,11 @@ def _patch_update_deps(monkeypatch, tmp_path, run_side_effect):
         hermes_gateway, "find_profile_gateway_processes", lambda *a, **k: []
     )
     monkeypatch.setattr(
-        "hermes_cli.update_receipt.collect_fleet_versions",
+        "sage_cli.update_receipt.collect_fleet_versions",
         lambda **k: [],
     )
     monkeypatch.setattr(
-        "hermes_cli.update_inventory.collect_runtime_inventory",
+        "sage_cli.update_inventory.collect_runtime_inventory",
         lambda: SimpleNamespace(runtimes=[], to_dict=lambda: {}),
     )
 
@@ -345,7 +345,7 @@ def test_stale_fleet_matrix_on_latest_receipt_is_pending(monkeypatch):
 
 def test_run_pending_restart_true_when_no_gateways(monkeypatch, capsys):
     monkeypatch.setattr(
-        "hermes_cli.gateway.find_gateway_pids", lambda **k: []
+        "sage_cli.gateway.find_gateway_pids", lambda **k: []
     )
     monkeypatch.setattr(hermes_main, "_purge_stale_hermes_modules", lambda: None)
 
@@ -422,10 +422,10 @@ def test_clean_update_escalates_surviving_serve_as_unaccounted(
     the update must (1) warn, (2) reconcile it as ``unaccounted`` instead of
     borrowing the gateway's restart, and (3) exit 1 with a ``partial``
     receipt — not print a clean success."""
-    from hermes_cli.update_inventory import (
+    from sage_cli.update_inventory import (
         RuntimeRecord, UpdatePlan, _restart_mechanism,
     )
-    import hermes_cli.update_inventory as ui
+    import sage_cli.update_inventory as ui
 
     args = _update_args()
     _patch_update_deps(monkeypatch, tmp_path, _make_head_moved_side_effect())
@@ -454,7 +454,7 @@ def test_clean_update_escalates_surviving_serve_as_unaccounted(
     monkeypatch.setattr(ui, "match_runtime_outcomes", _match)
     # Real survivor probe semantics against a fake ledger: pid 5555 is still
     # the same incarnation the plan recorded.
-    import hermes_cli.process_identity as pi
+    import sage_cli.process_identity as pi
 
     monkeypatch.setattr(
         pi, "ledger_entries",

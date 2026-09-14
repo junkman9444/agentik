@@ -16,7 +16,7 @@ import subprocess
 import sys
 from unittest.mock import patch
 
-from hermes_cli import main_desktop
+from sage_cli import main_desktop
 
 
 class TestDesktopLinuxUsernsSandboxAvailable:

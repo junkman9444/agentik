@@ -128,7 +128,7 @@ def _api_server_key(profile: str | None = None) -> str:
 def _profile_execution_policy(profile: str) -> dict:
     """Resolve execution policy under the exact multiplexed profile home."""
     from gateway.hosted_room_execution_policy import execution_policy_mapping
-    from hermes_constants import reset_hermes_home_override, set_hermes_home_override
+    from sage_constants import reset_hermes_home_override, set_hermes_home_override
     token = None
     if _bound_server is not None and profile not in {_current_profile(), _profile_name()}:
         token = set_hermes_home_override(str(_foreign_profile_home(profile)))

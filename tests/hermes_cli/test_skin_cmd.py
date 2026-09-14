@@ -9,8 +9,8 @@ import os
 import pytest
 import yaml
 
-from hermes_cli import skin_cmd
-from hermes_constants import get_hermes_home
+from sage_cli import skin_cmd
+from sage_constants import get_hermes_home
 
 
 def _skins():

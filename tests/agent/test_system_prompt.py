@@ -341,7 +341,7 @@ class TestNamedProfileHintIntegration:
 
         # Sanity-check the real chain before asserting on the prompt.
         from agent.file_safety import _resolve_active_profile_name
-        from hermes_constants import get_default_hermes_root, get_hermes_home
+        from sage_constants import get_default_hermes_root, get_hermes_home
 
         assert _resolve_active_profile_name() == "coder"
         assert get_hermes_home() == profile_home
@@ -444,7 +444,7 @@ def test_coding_prompt_orders_shared_context_before_workspace(monkeypatch):
             ),
         ),
         patch("agent.file_safety._resolve_active_profile_name", return_value="default"),
-        patch("hermes_time.now", return_value=datetime(2026, 1, 2)),
+        patch("sage_time.now", return_value=datetime(2026, 1, 2)),
     ):
         prompt = build_system_prompt(agent, system_message="SYSTEM_MESSAGE")
 
@@ -458,7 +458,7 @@ class TestTelegramRichMessagesHint:
     def test_base_hint_without_rich_messages(self, monkeypatch):
         """When rich_messages is False, only the base hint is used."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": False}}}}
             }
@@ -471,7 +471,7 @@ class TestTelegramRichMessagesHint:
         """When rich_messages is True in gateway.platforms, the extension
         is appended (the canonical/primary location)."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": True}}}}
             }
@@ -484,7 +484,7 @@ class TestTelegramRichMessagesHint:
         """Top-level ``platforms.telegram.extra.rich_messages`` is merged
         alongside gateway.platforms, so it works on its own."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}}
             }
@@ -496,7 +496,7 @@ class TestTelegramRichMessagesHint:
         """Top-level ``platforms.telegram.extra`` wins over gateway.platforms
         at the leaf, matching the adapter's merge precedence."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"rich_messages": False}}}},
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}},
@@ -508,7 +508,7 @@ class TestTelegramRichMessagesHint:
         """When gateway.platforms.telegram.extra has other keys but not
         rich_messages, the top-level rich_messages still activates."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": {"disable_link_previews": True}}}},
                 "platforms": {"telegram": {"extra": {"rich_messages": True}}},
@@ -519,7 +519,7 @@ class TestTelegramRichMessagesHint:
     def test_base_hint_without_config(self, monkeypatch):
         """When config has no telegram section, only base hint is used."""
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {}
             stable = _stable_prompt(agent)
         assert "Standard Markdown auto-converts" in stable
@@ -546,7 +546,7 @@ class TestTelegramRichMessagesHint:
         monkeypatch.setenv("HERMES_HOME", str(home))
         # Point config resolution at the temp file without mocking the loader:
         # mirror the pattern used in test_config_env_expansion.py.
-        from hermes_cli import config as _cfgmod
+        from sage_cli import config as _cfgmod
         monkeypatch.setattr(_cfgmod, "get_config_path", lambda: home / "config.yaml")
 
         agent = _make_agent(platform="telegram")
@@ -559,7 +559,7 @@ class TestTelegramRichMessagesHint:
         it should fail open to the base hint (Tek's fail-open concern).
         """
         agent = _make_agent(platform="telegram")
-        with patch("hermes_cli.config.load_config_readonly") as mock_cfg:
+        with patch("sage_cli.config.load_config_readonly") as mock_cfg:
             mock_cfg.return_value = {
                 "gateway": {"platforms": {"telegram": {"extra": "not-a-map"}}}
             }
@@ -791,7 +791,7 @@ def test_conversation_start_uses_session_start_not_build_time(monkeypatch):
         ),
         patch("agent.file_safety._resolve_active_profile_name", return_value="default"),
         # The system prompt is rebuilt a day LATER than the session start.
-        patch("hermes_time.now", return_value=datetime(2026, 1, 2, 9, 0)),
+        patch("sage_time.now", return_value=datetime(2026, 1, 2, 9, 0)),
     ):
         prompt = build_system_prompt(agent, system_message="SYSTEM_MESSAGE")
 
@@ -822,7 +822,7 @@ class TestConversationStartedTwoLine:
         assert "trust this over the start date" in vol
 
     def test_same_day_session_keeps_single_line(self):
-        from hermes_time import now as hermes_now
+        from sage_time import now as hermes_now
         sid = hermes_now().strftime("%Y%m%d_%H%M%S_fresh")
         vol = self._volatile(self._agent(sid))
         assert "Conversation started:" in vol

@@ -12,8 +12,8 @@ loop, so the desktop WS never received gateway.ready and boot escalated to the
 import threading
 import time
 
-from hermes_cli import web_server
-import hermes_cli.web_server_gateway as _web_server_gateway
+from sage_cli import web_server
+import sage_cli.web_server_gateway as _web_server_gateway
 
 
 def _reset_cache():

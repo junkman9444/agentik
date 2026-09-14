@@ -10,8 +10,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from hermes_cli import doctor_live
-from hermes_cli.doctor_live import (
+from sage_cli import doctor_live
+from sage_cli.doctor_live import (
     ProbeResult,
     maybe_run_live_checks,
     run_live_checks,
@@ -41,7 +41,7 @@ def _clean_env(monkeypatch):
 
 class TestLiveFlagGating:
     def test_parser_has_live_flag_default_false(self):
-        from hermes_cli.subcommands.doctor import build_doctor_parser
+        from sage_cli.subcommands.doctor import build_doctor_parser
 
         parser = argparse.ArgumentParser()
         sub = parser.add_subparsers(dest="command")
@@ -198,8 +198,8 @@ class TestBrowserAvailableNpxRung:
 
     def _block_path_and_node_modules_checks(self, monkeypatch, tmp_path):
         monkeypatch.setattr("shutil.which", lambda *a, **k: None)
-        monkeypatch.setattr("hermes_cli.doctor.HERMES_HOME", tmp_path / "home")
-        monkeypatch.setattr("hermes_cli.doctor.PROJECT_ROOT", tmp_path / "root")
+        monkeypatch.setattr("sage_cli.doctor.HERMES_HOME", tmp_path / "home")
+        monkeypatch.setattr("sage_cli.doctor.PROJECT_ROOT", tmp_path / "root")
 
     def test_true_when_npx_resolves_agent_browser(self, monkeypatch, tmp_path):
         self._block_path_and_node_modules_checks(monkeypatch, tmp_path)

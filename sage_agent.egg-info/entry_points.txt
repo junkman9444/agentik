@@ -1,0 +1,5 @@
+[console_scripts]
+hermes = sage_cli.main:main
+sage = sage_cli.main:main
+sage-acp = acp_adapter.entry:main
+sage-agent = run_agent:main

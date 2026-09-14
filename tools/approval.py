@@ -328,7 +328,7 @@ def load_permanent_allowlist() -> set:
     """Load ``command_allowlist`` from config and sync it into the approval state
     so is_approved() honors 'always' choices from previous sessions."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from sage_cli.config import load_config_readonly
         config = load_config_readonly()
         raw = config.get("command_allowlist")
         legacy = isinstance(raw, str)
@@ -358,7 +358,7 @@ def load_permanent_allowlist() -> set:
 def save_permanent_allowlist(patterns: set):
     """Save permanently allowed command patterns to config."""
     try:
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
         config = load_config()
         config["command_allowlist"] = list(patterns)
         save_config(config)
@@ -1157,7 +1157,7 @@ _PLUGIN_COMPAT_LAZY = {
     'HARDLINE_PATTERNS': ('tools.approval_detection', 'HARDLINE_PATTERNS'),
     'HARDLINE_PATTERNS_COMPILED': ('tools.approval_detection', 'HARDLINE_PATTERNS_COMPILED'),
     'HUMAN_WAIT_MARGIN_S': ('tools.approval_human_wait', 'HUMAN_WAIT_MARGIN_S'),
-    'cfg_get': ('hermes_cli.config', 'cfg_get'),
+    'cfg_get': ('sage_cli.config', 'cfg_get'),
     'get_plugin_manager': ('tools.approval_prompt', 'get_plugin_manager'),
     'human_wait_ceiling': ('tools.approval_human_wait', 'human_wait_ceiling'),
     'human_wait_seconds': ('tools.approval_human_wait', 'human_wait_seconds'),
@@ -1178,7 +1178,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

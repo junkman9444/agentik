@@ -118,7 +118,7 @@ class TestLoadMCPConfig:
                 "env": {},
             }
         }
-        with patch("hermes_cli.config.load_config", return_value={"mcp_servers": servers}):
+        with patch("sage_cli.config.load_config", return_value={"mcp_servers": servers}):
             from tools.mcp_tool_config import _load_mcp_config
             result = _load_mcp_config()
             assert "filesystem" in result
@@ -126,7 +126,7 @@ class TestLoadMCPConfig:
 
     def test_mcp_servers_not_dict_returns_empty(self):
         """mcp_servers set to non-dict value -> empty dict."""
-        with patch("hermes_cli.config.load_config", return_value={"mcp_servers": "invalid"}):
+        with patch("sage_cli.config.load_config", return_value={"mcp_servers": "invalid"}):
             from tools.mcp_tool_config import _load_mcp_config
             result = _load_mcp_config()
             assert result == {}
@@ -142,9 +142,9 @@ class TestLoadMCPConfig:
         }
         manager = SimpleNamespace(get_portable_mcp_servers=lambda: portable)
         with (
-            patch("hermes_cli.config.load_config", return_value={"mcp_servers": native}),
-            patch("hermes_cli.plugins.discover_plugins"),
-            patch("hermes_cli.plugins.get_plugin_manager", return_value=manager),
+            patch("sage_cli.config.load_config", return_value={"mcp_servers": native}),
+            patch("sage_cli.plugins.discover_plugins"),
+            patch("sage_cli.plugins.get_plugin_manager", return_value=manager),
             patch.dict(os.environ, {"PORT": "3000"}),
         ):
             from tools.mcp_tool_config import _load_mcp_config
@@ -159,8 +159,8 @@ class TestLoadMCPConfig:
     ):
         import json
         import yaml
-        from hermes_cli.agent_plugins import MCP_SCHEMA_V1, PLUGIN_SCHEMA_V1
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli.agent_plugins import MCP_SCHEMA_V1, PLUGIN_SCHEMA_V1
+        from sage_cli import plugins as plugins_mod
 
         home = tmp_path / "home"
         plugin = home / "plugins" / "portable"
@@ -1373,7 +1373,7 @@ class TestBuildSafeEnv:
     def test_secret_source_injected_vars_are_passed(self, monkeypatch):
         """Vars tagged by an external secret source (Bitwarden/1Password) are
         deliberately allowed for MCP stdio servers."""
-        from hermes_cli import env_loader
+        from sage_cli import env_loader
         from tools.mcp_tool_config import _build_safe_env
 
         monkeypatch.setitem(env_loader._SECRET_SOURCES, "ALPACA_API_KEY", "bitwarden")
@@ -1396,7 +1396,7 @@ class TestBuildSafeEnv:
         """Under multiplex the stdio child gets the ROUTED profile's value for a source-tagged name,
         never the launch profile's os.environ copy; a name the profile lacks is omitted."""
         from agent.secret_scope import set_multiplex_active, set_secret_scope, reset_secret_scope
-        from hermes_cli import env_loader
+        from sage_cli import env_loader
         from tools.mcp_tool_config import _build_safe_env
 
         monkeypatch.setitem(env_loader._SECRET_SOURCES, "GITHUB_TOKEN", "bitwarden")

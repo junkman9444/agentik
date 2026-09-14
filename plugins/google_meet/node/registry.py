@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 from plugins.google_meet._jsonfile import read_json, write_json_atomic
 

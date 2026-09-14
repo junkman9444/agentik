@@ -2,11 +2,11 @@ import argparse
 import os
 
 import pytest
-from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+from sage_constants import set_hermes_home_override, reset_hermes_home_override
 
-from hermes_cli.main import cmd_dashboard
-from hermes_cli.main_dashboard import _read_ssh_session_token_file
-from hermes_cli.subcommands.dashboard import build_dashboard_parser
+from sage_cli.main import cmd_dashboard
+from sage_cli.main_dashboard import _read_ssh_session_token_file
+from sage_cli.subcommands.dashboard import build_dashboard_parser
 
 
 def dashboard_parser():
@@ -142,7 +142,7 @@ def test_token_file_rejects_parent_escape(tmp_path, monkeypatch):
 
 
 def test_windows_runtime_root_stays_at_machine_root_for_named_profile(tmp_path, monkeypatch):
-    from hermes_cli import windows_ssh_runtime
+    from sage_cli import windows_ssh_runtime
 
     machine_root = tmp_path / "custom-hermes-root"
     monkeypatch.setenv("HERMES_HOME", str(machine_root / "profiles" / "writer_2"))

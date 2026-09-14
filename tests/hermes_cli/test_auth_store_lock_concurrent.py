@@ -28,7 +28,7 @@ import threading
 
 import pytest
 
-from hermes_cli.auth import _auth_store_lock
+from sage_cli.auth import _auth_store_lock
 
 CONCURRENCY = 40
 

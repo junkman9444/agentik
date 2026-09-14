@@ -11,11 +11,11 @@ def test_find_install_script_from_checkout(tmp_path):
     ``linux_only``: the POSIX arm picks ``install.sh`` + ``bash``, which is
     already what ``_IS_WINDOWS`` reports here — nothing needs faking.
     """
-    from hermes_cli.dep_ensure import _find_install_script
+    from sage_cli.dep_ensure import _find_install_script
     scripts_dir = tmp_path / "scripts"
     scripts_dir.mkdir()
     (scripts_dir / "install.sh").write_text("#!/bin/bash", encoding="utf-8")
-    path, shell = _find_install_script(package_dir=tmp_path / "hermes_cli", repo_root=tmp_path)
+    path, shell = _find_install_script(package_dir=tmp_path / "sage_cli", repo_root=tmp_path)
     assert path is not None
     assert path.name == "install.sh"
     assert shell == "bash"
@@ -31,7 +31,7 @@ def test_has_npx_agent_browser_true_when_npx_resolves():
     """agent-browser resolves lazily via npx on the default install (#43564)
     — _has_npx_agent_browser mirrors the runtime cascade so the "browser" dep
     check doesn't wrongly report it missing."""
-    from hermes_cli.dep_ensure import _has_npx_agent_browser
+    from sage_cli.dep_ensure import _has_npx_agent_browser
 
     with patch.object(bt_install, "_find_agent_browser", return_value="npx agent-browser"), \
          patch.object(bt_install, "_requires_real_termux_browser_install", return_value=False):
@@ -39,7 +39,7 @@ def test_has_npx_agent_browser_true_when_npx_resolves():
 
 
 def test_has_npx_agent_browser_false_on_termux_local_bare_npx():
-    from hermes_cli.dep_ensure import _has_npx_agent_browser
+    from sage_cli.dep_ensure import _has_npx_agent_browser
 
     with patch.object(bt_install, "_find_agent_browser", return_value="npx agent-browser"), \
          patch.object(bt_install, "_requires_real_termux_browser_install", return_value=True):
@@ -47,7 +47,7 @@ def test_has_npx_agent_browser_false_on_termux_local_bare_npx():
 
 
 def test_has_npx_agent_browser_false_when_nothing_resolves():
-    from hermes_cli.dep_ensure import _has_npx_agent_browser
+    from sage_cli.dep_ensure import _has_npx_agent_browser
 
     def _raise(**_kw):
         raise FileNotFoundError("agent-browser CLI not found")
@@ -66,7 +66,7 @@ def test_find_agent_browser_lazy_install_cycle_terminates(monkeypatch):
     both sides rather than mocking the cycle away."""
     import shutil
     import tools.browser_tool as bt
-    from hermes_cli import dep_ensure
+    from sage_cli import dep_ensure
 
     monkeypatch.setattr(bt, "_cached_agent_browser", None)
     monkeypatch.setattr(bt, "_agent_browser_resolved", False)
@@ -101,14 +101,14 @@ def test_ensure_dependency_uses_powershell_on_windows(tmp_path):
     """``windows_only``: the assertion is that we shell out to a real
     PowerShell. Faking ``_IS_WINDOWS`` on Linux also required faking
     ``shutil.which`` into inventing a powershell.exe that isn't there."""
-    from hermes_cli.dep_ensure import ensure_dependency
+    from sage_cli.dep_ensure import ensure_dependency
     scripts_dir = tmp_path / "scripts"
     scripts_dir.mkdir(parents=True)
     (scripts_dir / "install.ps1").write_text("# fake")
-    with patch("hermes_cli.dep_ensure._DEP_CHECKS", {"node": lambda: False}), \
-         patch("hermes_cli.dep_ensure._find_install_script", return_value=(scripts_dir / "install.ps1", "powershell")), \
-         patch("hermes_cli.dep_ensure.shutil") as mock_shutil, \
-         patch("hermes_constants.get_hermes_home", return_value=tmp_path / "fakehome"), \
+    with patch("sage_cli.dep_ensure._DEP_CHECKS", {"node": lambda: False}), \
+         patch("sage_cli.dep_ensure._find_install_script", return_value=(scripts_dir / "install.ps1", "powershell")), \
+         patch("sage_cli.dep_ensure.shutil") as mock_shutil, \
+         patch("sage_constants.get_hermes_home", return_value=tmp_path / "fakehome"), \
          patch("subprocess.run") as mock_run, \
          patch("sys.stdin") as mock_stdin:
         mock_shutil.which.side_effect = lambda name: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" if name == "powershell" else None

@@ -43,13 +43,13 @@ def _isolated_config_env(monkeypatch, tmp_path):
     ids=["single-query", "oneshot", "quiet-query"],
 )
 def test_noninteractive_guard_rejects_malformed_yaml(args, tmp_path, caplog, capsys):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     broken = "model: [unterminated\n"
     config_path = tmp_path / "config.yaml"
     config_path.write_text(broken, encoding="utf-8")
 
-    with caplog.at_level(logging.ERROR, logger="hermes_cli.config"):
+    with caplog.at_level(logging.ERROR, logger="sage_cli.config"):
         with pytest.raises(SystemExit) as exc_info:
             main_mod._guard_noninteractive_user_config(args)
 
@@ -67,13 +67,13 @@ def test_noninteractive_guard_rejects_malformed_yaml(args, tmp_path, caplog, cap
 
 
 def test_prepare_rejects_bad_config_before_plugin_discovery(monkeypatch, tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("model: [unterminated\n")
     discovery_calls = []
     monkeypatch.setitem(
         sys.modules,
-        "hermes_cli.plugins",
+        "sage_cli.plugins",
         types.SimpleNamespace(
             discover_plugins=lambda: discovery_calls.append("plugins")
         ),
@@ -92,7 +92,7 @@ def test_prepare_rejects_bad_config_before_plugin_discovery(monkeypatch, tmp_pat
 def test_noninteractive_guard_accepts_missing_empty_and_mapping_configs(
     content, tmp_path
 ):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     if content is not None:
         (tmp_path / "config.yaml").write_text(content, encoding="utf-8")
@@ -104,7 +104,7 @@ def test_noninteractive_guard_accepts_missing_empty_and_mapping_configs(
 
 
 def test_noninteractive_guard_rejects_non_mapping_yaml(tmp_path, capsys):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("- model\n- provider\n")
 
@@ -124,7 +124,7 @@ def test_noninteractive_guard_rejects_non_mapping_yaml(tmp_path, capsys):
     ids=["ignore-user-config", "safe-mode"],
 )
 def test_explicit_config_bypasses_allow_noninteractive_recovery(args, tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("model: [unterminated\n")
 
@@ -135,7 +135,7 @@ def test_explicit_config_bypasses_allow_noninteractive_recovery(args, tmp_path):
 
 
 def test_interactive_chat_keeps_existing_repair_behavior(tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("model: [unterminated\n")
     args = _args(query=None)
@@ -156,7 +156,7 @@ def test_interactive_chat_keeps_existing_repair_behavior(tmp_path):
     ids=["empty-query", "quiet", "quiet-empty-query"],
 )
 def test_queryless_chat_keeps_interactive_repair_behavior(args, tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("model: [unterminated\n")
 
@@ -167,7 +167,7 @@ def test_queryless_chat_keeps_interactive_repair_behavior(args, tmp_path):
 
 
 def test_env_only_config_bypass_allows_noninteractive_recovery(monkeypatch, tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     (tmp_path / "config.yaml").write_text("model: [unterminated\n")
     monkeypatch.setenv("HERMES_IGNORE_USER_CONFIG", "1")
@@ -180,7 +180,7 @@ def test_env_only_config_bypass_allows_noninteractive_recovery(monkeypatch, tmp_
 
 
 def test_reused_args_can_retry_after_config_repair(tmp_path):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     config_path = tmp_path / "config.yaml"
     config_path.write_text("model: [unterminated\n")
@@ -196,7 +196,7 @@ def test_reused_args_can_retry_after_config_repair(tmp_path):
 
 
 def test_ignore_user_config_is_applied_before_oneshot_startup(monkeypatch):
-    from hermes_cli import main as main_mod
+    from sage_cli import main as main_mod
 
     monkeypatch.delenv("HERMES_IGNORE_USER_CONFIG", raising=False)
 

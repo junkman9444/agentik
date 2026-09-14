@@ -21,7 +21,7 @@ import time
 import urllib.request
 from contextlib import suppress
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 logger = logging.getLogger(__name__)
 _REPO = "sheeki03/tirith"
@@ -45,7 +45,7 @@ def _env_int(key: str, default: int) -> int:
 def _load_security_config() -> dict:
     """Security settings from config.yaml, with env var overrides."""
     try:
-        from hermes_cli.config import load_config_readonly
+        from sage_cli.config import load_config_readonly
         cfg = load_config_readonly().get("security", {}) or {}
     except Exception:
         cfg = {}

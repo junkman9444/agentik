@@ -20,10 +20,10 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import main as hermes_main
-from hermes_cli import update_cmd
-import hermes_cli.update_cmd_deps as update_cmd_deps
-from hermes_constants import partial_update_hint
+from sage_cli import main as hermes_main
+from sage_cli import update_cmd
+import sage_cli.update_cmd_deps as update_cmd_deps
+from sage_constants import partial_update_hint
 
 
 def _write_skewed_tree(root: Path, *, skewed: bool) -> None:
@@ -351,7 +351,7 @@ def test_hint_does_not_claim_partial_update_for_lookalike_third_party(modname):
 
 
 @pytest.mark.parametrize("modname", ["tools.todo_tool", "agent.context_compressor",
-                                     "hermes_constants", "hermes_cli.config", "cli"])
+                                     "sage_constants", "sage_cli.config", "cli"])
 def test_hint_fires_for_each_first_party_root(modname):
     exc = ImportError("cannot import name 'X'")
     exc.name = modname
@@ -368,7 +368,7 @@ def test_probe_and_hint_share_one_first_party_definition():
     detection. Both now derive from FIRST_PARTY_MODULE_ROOTS; this test
     fails if either grows a private copy.
     """
-    from hermes_constants import FIRST_PARTY_MODULE_ROOTS, is_first_party_module
+    from sage_constants import FIRST_PARTY_MODULE_ROOTS, is_first_party_module
 
     captured = {}
 

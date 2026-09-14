@@ -971,7 +971,7 @@ class TestShellSafety:
     def test_env_var_template_metacharacters_are_literal_argv(
         self, monkeypatch, sample_wav, tmp_path
     ):
-        from hermes_cli._subprocess_compat import windows_hide_flags
+        from sage_cli._subprocess_compat import windows_hide_flags
         from tools.transcription_tools import (
             LOCAL_STT_COMMAND_ENV,
             _transcribe_local_command,

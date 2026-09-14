@@ -144,7 +144,7 @@ class TestCheckFnTransientFailureSuppression:
             set_multiplex_active,
             set_secret_scope,
         )
-        from hermes_constants import (
+        from sage_constants import (
             reset_hermes_home_override,
             set_hermes_home_override,
         )

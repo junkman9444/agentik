@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.cron command handling."""
+"""Tests for sage_cli.cron command handling."""
 
 import argparse
 from argparse import Namespace
@@ -7,9 +7,9 @@ from types import SimpleNamespace
 import pytest
 
 from cron.jobs import create_job, get_job, list_jobs, load_jobs, save_jobs
-from hermes_cli import cron as cron_cli
-from hermes_cli.cron import cron_command
-from hermes_cli.subcommands.cron import build_cron_parser
+from sage_cli import cron as cron_cli
+from sage_cli.cron import cron_command
+from sage_cli.subcommands.cron import build_cron_parser
 
 
 @pytest.fixture()
@@ -257,9 +257,9 @@ class TestCronListStatusRendering:
     """`cron list` must never paint an undelivered run as a success (#83993)."""
 
     def test_delivery_failed_is_not_green_ok(self, tmp_cron_dir, capsys, monkeypatch):
-        monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [1])
+        monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [1])
         # capsys is not a tty, so force colors on to check the paint itself.
-        monkeypatch.setattr("hermes_cli.colors.should_use_color", lambda: True)
+        monkeypatch.setattr("sage_cli.colors.should_use_color", lambda: True)
         create_job(prompt="Daily digest", schedule="every 1h")
         jobs = load_jobs()
         jobs[0]["last_run_at"] = "2026-09-01T09:00:00+00:00"
@@ -279,8 +279,8 @@ class TestCronListStatusRendering:
         assert cron_cli.Colors.GREEN not in last_run_line
 
     def test_ok_run_still_green(self, tmp_cron_dir, capsys, monkeypatch):
-        monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [1])
-        monkeypatch.setattr("hermes_cli.colors.should_use_color", lambda: True)
+        monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [1])
+        monkeypatch.setattr("sage_cli.colors.should_use_color", lambda: True)
         create_job(prompt="Daily digest", schedule="every 1h")
         jobs = load_jobs()
         jobs[0]["last_run_at"] = "2026-09-01T09:00:00+00:00"
@@ -305,7 +305,7 @@ class TestGatewayNotRunningWarning:
 
     def test_list_warns_when_gateway_absent(self, tmp_cron_dir, capsys, monkeypatch):
         create_job(prompt="Daily report", schedule="0 11 * * *")
-        monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [])
+        monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [])
         cron_command(Namespace(cron_command="list", all=True))
         out = capsys.readouterr().out
         assert "Gateway is not running" in out
@@ -325,11 +325,11 @@ class TestExternalCronProviderStatus:
     ):
         create_job(prompt="Ping", schedule="every 2m")
         monkeypatch.setattr(
-            "hermes_cli.cron._active_cron_provider_name", lambda: "chronos"
+            "sage_cli.cron._active_cron_provider_name", lambda: "chronos"
         )
         # Even with NO gateway process and NO ticker heartbeat, Chronos status
         # must NOT report a stall / "not firing".
-        monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [])
+        monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [])
         cron_command(Namespace(cron_command="status"))
         out = capsys.readouterr().out
         assert "chronos" in out
@@ -347,9 +347,9 @@ class TestExternalCronProviderStatus:
         # The create-time "gateway not running" nag is a ticker-only concern;
         # an external provider doesn't depend on a live in-process ticker.
         monkeypatch.setattr(
-            "hermes_cli.cron._active_cron_provider_name", lambda: "chronos"
+            "sage_cli.cron._active_cron_provider_name", lambda: "chronos"
         )
-        monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [])
+        monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [])
         cron_command(
             Namespace(
                 cron_command="create",
@@ -385,7 +385,7 @@ def test_cron_list_warns_when_gateway_not_running(monkeypatch, capsys):
             }
         ],
     )
-    monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", lambda: [])
+    monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", lambda: [])
     monkeypatch.setattr(cron_cli, "_active_cron_provider_name", lambda: "builtin")
 
     cron_cli.cron_list()
@@ -557,7 +557,7 @@ class TestSlashCronListLastStatus:
     literal next to a run that looks otherwise fine."""
 
     def _run_list(self, tmp_cron_dir, capsys):
-        from hermes_cli.cli_commands_mixin import CLICommandsMixin
+        from sage_cli.cli_commands_mixin import CLICommandsMixin
 
         class _Host(CLICommandsMixin):
             pass

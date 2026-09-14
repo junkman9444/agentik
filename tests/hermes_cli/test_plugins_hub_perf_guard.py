@@ -4,12 +4,12 @@ import threading
 from pathlib import Path
 from types import SimpleNamespace
 
-from hermes_cli import web_server
-import hermes_cli.config as _cfg_mod
-import hermes_cli.web_routers.dashboard_ui as _rt_dashboard_ui
-import hermes_cli.web_server_dashboard as _web_server_dashboard
-import hermes_cli.web_server_memory as _web_server_memory
-from hermes_cli import plugins_cmd
+from sage_cli import web_server
+import sage_cli.config as _cfg_mod
+import sage_cli.web_routers.dashboard_ui as _rt_dashboard_ui
+import sage_cli.web_server_dashboard as _web_server_dashboard
+import sage_cli.web_server_memory as _web_server_memory
+from sage_cli import plugins_cmd
 from tools import registry as tools_registry
 
 
@@ -147,7 +147,7 @@ def test_plugins_hub_short_ttl_cache_collapses_duplicate_fetches(monkeypatch):
 def test_plugin_install_endpoint_invalidates_hub_cache(monkeypatch):
     import asyncio
 
-    from hermes_cli.web_models import _AgentPluginInstallBody
+    from sage_cli.web_models import _AgentPluginInstallBody
 
     tools_registry.invalidate_check_fn_cache()
     _web_server_dashboard._invalidate_plugins_hub_cache()

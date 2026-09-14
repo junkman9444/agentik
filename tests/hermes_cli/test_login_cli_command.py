@@ -6,8 +6,8 @@ from unittest.mock import MagicMock
 import pytest
 from rich.console import Console
 
-from hermes_cli import anon_auth
-from hermes_cli import cli_commands_mixin as commands
+from sage_cli import anon_auth
+from sage_cli import cli_commands_mixin as commands
 
 
 class _Thread:
@@ -231,7 +231,7 @@ def test_the_live_tui_drain_prints_through_cprint_instead_of_the_captured_consol
 def test_upgrade_guest_keeps_the_terminal_timeout(monkeypatch):
     seen = []
     monkeypatch.setattr(anon_auth, "render_sign_in_cli", lambda **kwargs: seen.append(kwargs) or 0)
-    monkeypatch.setattr("hermes_cli.auth_device_flow._is_remote_session", lambda: True)
+    monkeypatch.setattr("sage_cli.auth_device_flow._is_remote_session", lambda: True)
 
     assert anon_auth.upgrade_guest(SimpleNamespace(timeout=None, no_browser=False)) == 0
     assert seen[0]["timeout_seconds"] == 15.0
@@ -239,7 +239,7 @@ def test_upgrade_guest_keeps_the_terminal_timeout(monkeypatch):
 
 
 def test_the_terminal_renderer_keeps_the_original_line_sequence(monkeypatch, capsys):
-    monkeypatch.setattr("hermes_cli.auth_device_flow._is_remote_session", lambda: True)
+    monkeypatch.setattr("sage_cli.auth_device_flow._is_remote_session", lambda: True)
     monkeypatch.setattr(anon_auth, "run_sign_in", lambda **_kwargs: iter([
         anon_auth.Code("https://example.test/sign-in", "CODE-1", 900, 5),
         anon_auth.Waiting(),

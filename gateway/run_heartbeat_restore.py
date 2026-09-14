@@ -14,8 +14,8 @@ async def restore_heartbeat_watches(runner) -> None:
     Run all storage work off-loop so a cold profile DB cannot block adapters.
     """
     from gateway.run import _profile_runtime_scope
-    from hermes_cli.heartbeat import HeartbeatManager
-    from hermes_constants import get_hermes_home
+    from sage_cli.heartbeat import HeartbeatManager
+    from sage_constants import get_hermes_home
 
     store = runner.session_store
 

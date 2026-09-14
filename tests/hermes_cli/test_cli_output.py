@@ -1,4 +1,4 @@
-from hermes_cli import cli_output
+from sage_cli import cli_output
 
 
 class _TTY:

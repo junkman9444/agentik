@@ -146,7 +146,7 @@ def _resolve_matrix_bang_command(name: str) -> str | None:
         return None
     candidates = list(dict.fromkeys((name.lower(), name.lower().replace("_", "-"))))
     try:
-        from hermes_cli.commands import is_gateway_known_command
+        from sage_cli.commands import is_gateway_known_command
         for candidate in candidates:
             if is_gateway_known_command(candidate):
                 return candidate
@@ -358,7 +358,7 @@ def _resolve_max_message_length(config) -> int:
 # the multiplex gateway imports this once and a module constant would collide every profile's Olm
 # identity in one crypto.db.
 # Store directory for E2EE keys and sync state. Mirrors the pairing-store fix (a6397c379). See #89168.
-from hermes_constants import get_hermes_dir as _get_hermes_dir
+from sage_constants import get_hermes_dir as _get_hermes_dir
 
 _STARTUP_GRACE_SECONDS = 5  # ignore messages older than this many seconds before startup
 
@@ -1659,7 +1659,7 @@ class MatrixAdapter(BasePlatformAdapter):
             return await self.send(
                 chat_id, "No authenticated models are available for this session.", metadata=metadata)
         try:
-            from hermes_cli.providers import get_label
+            from sage_cli.providers import get_label
             provider_label = get_label(current_provider)
         except Exception:
             provider_label = current_provider
@@ -2954,8 +2954,8 @@ async def _standalone_send(pconfig, chat_id, message, *, thread_id=None, media_f
 
 def interactive_setup() -> None:
     """Interactive credential setup (setup_fn); CLI helpers are lazy-imported."""
-    from hermes_cli.config import get_env_value, remove_env_value, save_env_value
-    from hermes_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success, print_warning
+    from sage_cli.config import get_env_value, remove_env_value, save_env_value
+    from sage_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success, print_warning
     print_header("Matrix")
     existing = get_env_value("MATRIX_ACCESS_TOKEN") or get_env_value("MATRIX_PASSWORD")
     if existing:
@@ -3051,10 +3051,10 @@ def _apply_yaml_config(yaml_cfg: dict, matrix_cfg: dict) -> dict | None:
 
 
 def _is_connected(config) -> bool:
-    """Connected = homeserver + token (or password). Reads via hermes_cli.gateway.get_env_value so
+    """Connected = homeserver + token (or password). Reads via sage_cli.gateway.get_env_value so
     setup-status callers that patch it see the same value; PlatformConfig extras are honored."""
     extra = getattr(config, "extra", {}) or {}
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
     homeserver = extra.get("homeserver") or gateway_mod.get_env_value("MATRIX_HOMESERVER") or ""
     token = (getattr(config, "token", None) or gateway_mod.get_env_value("MATRIX_ACCESS_TOKEN")
              or gateway_mod.get_env_value("MATRIX_PASSWORD") or "")

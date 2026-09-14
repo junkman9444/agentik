@@ -1,4 +1,4 @@
-from hermes_cli import nous_auth_keepalive as keepalive
+from sage_cli import nous_auth_keepalive as keepalive
 
 # Both lifetimes have been observed on real installs.
 OBSERVED_LIFETIMES_SECONDS = (3594, 899)

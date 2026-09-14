@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from hermes_cli import models
-from hermes_cli import models_local
+from sage_cli import models
+from sage_cli import models_local
 
 
 MODEL = "publisher/model"

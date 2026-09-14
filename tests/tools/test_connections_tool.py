@@ -445,7 +445,7 @@ def _session_tool_names(enabled_toolsets, *, connectors, disabled_toolsets=None)
 
 def test_cli_session_gets_the_tool_outside_a_code_workspace(tmp_path, monkeypatch):
     """The path a plain `hermes` run takes: _get_platform_tools, no git cwd."""
-    from hermes_cli.tools_config import _get_platform_tools
+    from sage_cli.tools_config import _get_platform_tools
 
     monkeypatch.chdir(tmp_path)
     enabled = sorted(_get_platform_tools({}, "cli", include_default_mcp_servers=True))
@@ -458,7 +458,7 @@ def test_cli_session_gets_the_tool_inside_a_code_workspace(monkeypatch):
     """Same resolver, run from this repo — the surface the live miss was on."""
     from pathlib import Path
 
-    from hermes_cli.tools_config import _get_platform_tools
+    from sage_cli.tools_config import _get_platform_tools
 
     monkeypatch.chdir(Path(__file__).resolve().parents[2])
     enabled = sorted(_get_platform_tools({}, "cli", include_default_mcp_servers=True))
@@ -493,7 +493,7 @@ def test_focus_mode_coding_posture_gets_the_tool(monkeypatch):
 
 def test_signed_out_session_sees_nothing(tmp_path, monkeypatch):
     """check_fn is the only entitlement gate, on every surface."""
-    from hermes_cli.tools_config import _get_platform_tools
+    from sage_cli.tools_config import _get_platform_tools
     from tui_gateway.server import _load_enabled_toolsets
 
     monkeypatch.chdir(tmp_path)
@@ -516,7 +516,7 @@ def test_operator_can_still_turn_it_off(tmp_path, monkeypatch):
     like any other. Naming a platform composite instead must NOT strip it —
     that branch preserves core tools on purpose (#33924).
     """
-    from hermes_cli.tools_config import _get_platform_tools
+    from sage_cli.tools_config import _get_platform_tools
 
     monkeypatch.chdir(tmp_path)
     enabled = sorted(_get_platform_tools({}, "cli", include_default_mcp_servers=True))

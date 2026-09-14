@@ -1,6 +1,6 @@
 """Ownership age is not evidence that a model turn is running."""
 
-from hermes_cli.active_sessions import session_already_owned_message
+from sage_cli.active_sessions import session_already_owned_message
 
 
 def test_owner_refusal_distinguishes_lease_age_from_turn_activity():

@@ -5,9 +5,9 @@ import json
 import types
 
 
-from hermes_cli.config import load_config, save_config
-from hermes_cli import setup as setup_mod
-from hermes_cli.setup import setup_model_provider
+from sage_cli.config import load_config, save_config
+from sage_cli import setup as setup_mod
+from sage_cli.setup import setup_model_provider
 
 
 def _maybe_keep_current_tts(question, choices):
@@ -41,11 +41,11 @@ def _clear_vercel_env(monkeypatch):
 
 def _stub_tts(monkeypatch):
     """Stub out TTS prompts so setup_model_provider doesn't block."""
-    monkeypatch.setattr("hermes_cli.setup.prompt_choice", lambda q, c, d=0: (
+    monkeypatch.setattr("sage_cli.setup.prompt_choice", lambda q, c, d=0: (
         _maybe_keep_current_tts(q, c) if _maybe_keep_current_tts(q, c) is not None
         else d
     ))
-    monkeypatch.setattr("hermes_cli.setup.prompt_yes_no", lambda *a, **kw: False)
+    monkeypatch.setattr("sage_cli.setup.prompt_yes_no", lambda *a, **kw: False)
 
 
 def _write_model_config(tmp_path, provider, base_url="", model_name="test-model"):
@@ -74,7 +74,7 @@ def test_setup_delegates_to_select_provider_and_model(tmp_path, monkeypatch):
     def fake_select():
         _write_model_config(tmp_path, "custom", "http://localhost:11434/v1", "qwen3.5:32b")
 
-    monkeypatch.setattr("hermes_cli.main.select_provider_and_model", fake_select)
+    monkeypatch.setattr("sage_cli.main.select_provider_and_model", fake_select)
 
     setup_model_provider(config)
     save_config(config)
@@ -107,14 +107,14 @@ def test_select_provider_and_model_warns_if_named_custom_provider_disappears(
         save_config(current)
         return next(i for i, label in enumerate(choices) if label.startswith("Local (localhost:8080/v1)"))
 
-    monkeypatch.setattr("hermes_cli.auth.resolve_provider", lambda provider: None)
-    monkeypatch.setattr("hermes_cli.main._prompt_provider_choice", fake_prompt_provider_choice)
+    monkeypatch.setattr("sage_cli.auth.resolve_provider", lambda provider: None)
+    monkeypatch.setattr("sage_cli.main._prompt_provider_choice", fake_prompt_provider_choice)
     monkeypatch.setattr(
-        "hermes_cli.main._model_flow_named_custom",
+        "sage_cli.main._model_flow_named_custom",
         lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("named custom flow should not run")),
     )
 
-    from hermes_cli.main import select_provider_and_model
+    from sage_cli.main import select_provider_and_model
 
     select_provider_and_model()
 
@@ -144,10 +144,10 @@ def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tm
 
     prompt_values = iter(["token-id", "token-secret", ""])
 
-    monkeypatch.setattr("hermes_cli.setup.prompt_choice", fake_prompt_choice)
-    monkeypatch.setattr("hermes_cli.setup.prompt", lambda *args, **kwargs: next(prompt_values))
+    monkeypatch.setattr("sage_cli.setup.prompt_choice", fake_prompt_choice)
+    monkeypatch.setattr("sage_cli.setup.prompt", lambda *args, **kwargs: next(prompt_values))
     monkeypatch.setattr(
-        "hermes_cli.nous_subscription.get_nous_subscription_features",
+        "sage_cli.nous_subscription.get_nous_subscription_features",
         lambda config: type("Features", (), {"nous_auth_present": True})(),
     )
     monkeypatch.setitem(
@@ -160,7 +160,7 @@ def test_modal_setup_persists_direct_mode_when_user_chooses_their_own_account(tm
     )
     monkeypatch.setitem(sys.modules, "swe_rex", object())
 
-    from hermes_cli.setup import setup_terminal_backend
+    from sage_cli.setup import setup_terminal_backend
 
     setup_terminal_backend(config)
 
@@ -186,10 +186,10 @@ def test_vercel_setup_configures_access_token_auth(tmp_path, monkeypatch):
 
     prompt_values = iter(["python3.13", "yes", "2", "4096", "token", "project", "team"])
 
-    monkeypatch.setattr("hermes_cli.setup.prompt_choice", fake_prompt_choice)
-    monkeypatch.setattr("hermes_cli.setup.prompt", lambda *args, **kwargs: next(prompt_values))
+    monkeypatch.setattr("sage_cli.setup.prompt_choice", fake_prompt_choice)
+    monkeypatch.setattr("sage_cli.setup.prompt", lambda *args, **kwargs: next(prompt_values))
 
-    from hermes_cli.setup import setup_terminal_backend
+    from sage_cli.setup import setup_terminal_backend
 
     setup_terminal_backend(config)
 
@@ -233,10 +233,10 @@ def test_vercel_setup_prefills_project_and_team_from_link_file(tmp_path, monkeyp
         value = next(prompt_values)
         return value or default
 
-    monkeypatch.setattr("hermes_cli.setup.prompt_choice", fake_prompt_choice)
-    monkeypatch.setattr("hermes_cli.setup.prompt", fake_prompt)
+    monkeypatch.setattr("sage_cli.setup.prompt_choice", fake_prompt_choice)
+    monkeypatch.setattr("sage_cli.setup.prompt", fake_prompt)
 
-    from hermes_cli.setup import setup_terminal_backend
+    from sage_cli.setup import setup_terminal_backend
 
     setup_terminal_backend(config)
 

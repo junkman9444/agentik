@@ -7,19 +7,19 @@ from argparse import Namespace
 from pathlib import Path
 
 import pytest
-from hermes_cli import profile_cmd
+from sage_cli import profile_cmd
 
 
 @pytest.fixture()
 def profiles():
     """Resolve the live profiles module at call time.
 
-    Sibling test files reload ``hermes_cli.profiles`` / ``hermes_cli.main``;
-    a top-level ``from hermes_cli.profiles import ...`` here would bind the
+    Sibling test files reload ``sage_cli.profiles`` / ``sage_cli.main``;
+    a top-level ``from sage_cli.profiles import ...`` here would bind the
     pre-reload function objects and silently divorce this file's monkeypatches
     from the code under test when the whole directory runs as one sweep.
     """
-    return importlib.import_module("hermes_cli.profiles")
+    return importlib.import_module("sage_cli.profiles")
 
 
 def test_default_export_path_is_managed_and_outside_named_profiles(
@@ -83,7 +83,7 @@ def test_cli_export_rejects_bad_profile_name_without_traceback(
     tmp_path, monkeypatch, capsys, profiles
 ):
     """A bad name must print a clean error — the helper raises before export."""
-    main_mod = importlib.import_module("hermes_cli.main")
+    main_mod = importlib.import_module("sage_cli.main")
     default_home = tmp_path / ".hermes"
     default_home.mkdir()
     monkeypatch.setattr(profiles, "_get_default_hermes_home", lambda: default_home)
@@ -104,7 +104,7 @@ def test_cli_export_rejects_bad_profile_name_without_traceback(
 def test_cli_export_default_does_not_write_into_the_current_checkout(
     tmp_path, monkeypatch, capsys, profiles
 ):
-    main_mod = importlib.import_module("hermes_cli.main")
+    main_mod = importlib.import_module("sage_cli.main")
     default_home = tmp_path / ".hermes"
     default_home.mkdir()
     (default_home / "config.yaml").write_text("model: test\n", encoding="utf-8")
@@ -113,7 +113,7 @@ def test_cli_export_default_does_not_write_into_the_current_checkout(
     monkeypatch.chdir(checkout)
     monkeypatch.setattr(profiles, "_get_default_hermes_home", lambda: default_home)
     monkeypatch.setattr(
-        "hermes_constants.get_default_hermes_root", lambda: default_home
+        "sage_constants.get_default_hermes_root", lambda: default_home
     )
 
     profile_cmd.cmd_profile(
@@ -134,7 +134,7 @@ def test_cli_export_default_does_not_write_into_the_current_checkout(
 def test_slash_export_uses_the_same_managed_destination(
     tmp_path, monkeypatch, profiles
 ):
-    mixin_mod = importlib.import_module("hermes_cli.cli_commands_mixin")
+    mixin_mod = importlib.import_module("sage_cli.cli_commands_mixin")
     default_home = tmp_path / ".hermes"
     default_home.mkdir()
     monkeypatch.setattr(profiles, "_get_default_hermes_home", lambda: default_home)
@@ -158,9 +158,9 @@ def test_slash_export_uses_the_same_managed_destination(
 async def test_profile_export_api_uses_the_shared_managed_destination(
     tmp_path, monkeypatch, profiles
 ):
-    from hermes_cli.web_models import ProfileExport
+    from sage_cli.web_models import ProfileExport
 
-    router_mod = importlib.import_module("hermes_cli.web_routers.profiles")
+    router_mod = importlib.import_module("sage_cli.web_routers.profiles")
 
     managed = tmp_path / "profile-exports" / "default-20260823-120000.tar.gz"
     monkeypatch.setattr(profiles, "get_profile_export_path", lambda name: managed)

@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 import yaml
 
 from cli import HermesCLI
-from hermes_cli.commands import GATEWAY_KNOWN_COMMANDS, SUBCOMMANDS, gateway_help_lines, resolve_command
-from hermes_cli.commands_completion import SlashCommandCompleter
-from hermes_cli.commands_platforms import telegram_bot_commands
+from sage_cli.commands import GATEWAY_KNOWN_COMMANDS, SUBCOMMANDS, gateway_help_lines, resolve_command
+from sage_cli.commands_completion import SlashCommandCompleter
+from sage_cli.commands_platforms import telegram_bot_commands
 from prompt_toolkit.completion import CompleteEvent
 from prompt_toolkit.document import Document
 
@@ -37,8 +37,8 @@ def test_approvals_registry_drives_help_menu_and_autocomplete():
 def _isolate_config(monkeypatch, home):
     monkeypatch.setenv("HERMES_HOME", str(home))
     monkeypatch.setenv("HERMES_MANAGED_DIR", str(home / "missing-managed"))
-    from hermes_cli import managed_scope
-    from hermes_cli.config import _LOAD_CONFIG_CACHE, _RAW_CONFIG_CACHE
+    from sage_cli import managed_scope
+    from sage_cli.config import _LOAD_CONFIG_CACHE, _RAW_CONFIG_CACHE
 
     _LOAD_CONFIG_CACHE.clear()
     _RAW_CONFIG_CACHE.clear()
@@ -50,8 +50,8 @@ def _isolate_config(monkeypatch, home):
 
 
 def test_shared_command_refuses_managed_mode_override(tmp_path, monkeypatch):
-    from hermes_cli import managed_scope
-    from hermes_cli.approval_mode import run_approval_mode_command
+    from sage_cli import managed_scope
+    from sage_cli.approval_mode import run_approval_mode_command
 
     home = tmp_path / "home"
     managed = tmp_path / "managed"

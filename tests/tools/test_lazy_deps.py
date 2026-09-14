@@ -119,7 +119,7 @@ class TestSecurityGating:
         # blocking the user out of their own backends.
         monkeypatch.delenv("HERMES_DISABLE_LAZY_INSTALLS", raising=False)
         monkeypatch.setattr(
-            "hermes_cli.config.load_config",
+            "sage_cli.config.load_config",
             lambda: (_ for _ in ()).throw(RuntimeError("config broken")),
         )
         assert ld._allow_lazy_installs() is True
@@ -473,7 +473,7 @@ class TestInstallSpecs:
         monkeypatch.delenv("HERMES_DISABLE_LAZY_INSTALLS", raising=False)
         monkeypatch.delenv(ld._LAZY_TARGET_ENV, raising=False)
         monkeypatch.setattr(
-            "hermes_cli.config.load_config", lambda: {}, raising=False
+            "sage_cli.config.load_config", lambda: {}, raising=False
         )
         # Contract: install_specs never raises — even an unexpected installer
         # crash comes back as a failed result the caller can render.
@@ -560,7 +560,7 @@ class TestInstallWarmsBytecode:
         monkeypatch.setattr(ld, "_lazy_install_target", lambda: None)
         monkeypatch.setattr(ld.shutil, "which", lambda name: "uv" if name == "uv" else None)
         monkeypatch.setattr(
-            "hermes_cli.managed_uv.resolve_uv", lambda *a, **kw: "uv", raising=False
+            "sage_cli.managed_uv.resolve_uv", lambda *a, **kw: "uv", raising=False
         )
 
         class _Completed:

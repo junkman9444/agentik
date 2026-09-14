@@ -18,7 +18,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     test_client = TestClient(web_server.app)
     # Same auth pattern as the git-route tests: present the session token.
@@ -28,7 +28,7 @@ def client(tmp_path, monkeypatch):
 
 def test_local_models_routes_require_auth(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     unauth = TestClient(web_server.app)
     assert unauth.get("/api/local-models/status").status_code == 401
@@ -55,7 +55,7 @@ def test_status_shape_and_defaults(client):
 
 
 def test_status_lists_staged_models_with_labels(client, tmp_path):
-    from hermes_cli.local_runtime.bootstrap import models_dir
+    from sage_cli.local_runtime.bootstrap import models_dir
 
     _write_fake_gguf(models_dir() / "Some-Model.gguf", size=2048)
     data = client.get("/api/local-models/status").json()
@@ -100,14 +100,14 @@ def test_catalog_prices_every_entry_for_this_machine(client):
 def test_catalog_never_hides_unaffordable_models(client, monkeypatch):
     """Unaffordable entries stay visible with a plain reason — hiding them
     is how users conclude the feature is broken."""
-    from hermes_cli.local_runtime.estimator import HardwareBudget
+    from sage_cli.local_runtime.estimator import HardwareBudget
 
     tiny = HardwareBudget(usable_vram_bytes=1 << 30, total_device_bytes=1 << 30,
                           ram_available_bytes=1 << 30)
-    monkeypatch.setattr("hermes_cli.local_runtime.hardware.probe_budget",
+    monkeypatch.setattr("sage_cli.local_runtime.hardware.probe_budget",
                         lambda **kw: tiny)
     data = client.get("/api/local-models/catalog").json()
-    from hermes_cli.local_runtime.catalog import CATALOG
+    from sage_cli.local_runtime.catalog import CATALOG
 
     assert len(data["models"]) == len(CATALOG)
     refused = [m for m in data["models"] if not m["fits"]]
@@ -147,15 +147,15 @@ def test_download_short_of_server_length_errors_and_cleans_up(client, monkeypatc
     # Pin a generous budget: variant selection prices against the machine
     # running the test, and a GPU-less CI runner honestly refuses every
     # build (409) — this test is about the download path, not selection.
-    from hermes_cli.local_runtime.estimator import HardwareBudget
+    from sage_cli.local_runtime.estimator import HardwareBudget
 
     budget = HardwareBudget(usable_vram_bytes=64 << 30,
                             total_device_bytes=64 << 30,
                             ram_available_bytes=64 << 30)
-    monkeypatch.setattr("hermes_cli.local_runtime.hardware.probe_budget",
+    monkeypatch.setattr("sage_cli.local_runtime.hardware.probe_budget",
                         lambda **kw: budget)
 
-    from hermes_cli.local_runtime.catalog import CATALOG
+    from sage_cli.local_runtime.catalog import CATALOG
 
     entry_id = CATALOG[0].id
     r = client.post("/api/local-models/download", json={"model_id": entry_id})
@@ -173,21 +173,21 @@ def test_download_short_of_server_length_errors_and_cleans_up(client, monkeypatc
     assert status is not None and status["status"] == "error"
     assert "bytes" in status["error"].lower()
 
-    from hermes_cli.local_runtime.bootstrap import models_dir
+    from sage_cli.local_runtime.bootstrap import models_dir
 
     assert not (models_dir() / f"{entry_id}.gguf").exists()
     assert not (models_dir() / f"{entry_id}.part").exists()
 
 
 def test_download_already_downloaded_short_circuits(client, monkeypatch):
-    from hermes_cli.local_runtime.bootstrap import models_dir
-    from hermes_cli.local_runtime.catalog import CATALOG, select_variant
-    from hermes_cli.local_runtime.estimator import HardwareBudget
+    from sage_cli.local_runtime.bootstrap import models_dir
+    from sage_cli.local_runtime.catalog import CATALOG, select_variant
+    from sage_cli.local_runtime.estimator import HardwareBudget
 
     # Pin the budget so the selected variant is deterministic in the test.
     budget = HardwareBudget(usable_vram_bytes=64 << 30, total_device_bytes=64 << 30,
                             ram_available_bytes=64 << 30)
-    monkeypatch.setattr("hermes_cli.local_runtime.hardware.probe_budget",
+    monkeypatch.setattr("sage_cli.local_runtime.hardware.probe_budget",
                         lambda **kw: budget)
     choice = select_variant(CATALOG[0], budget)
     assert choice is not None
@@ -198,7 +198,7 @@ def test_download_already_downloaded_short_circuits(client, monkeypatch):
 
 
 def test_delete_model(client):
-    from hermes_cli.local_runtime.bootstrap import models_dir
+    from sage_cli.local_runtime.bootstrap import models_dir
 
     _write_fake_gguf(models_dir() / "Doomed.gguf")
     assert client.delete("/api/local-models/models/Doomed").status_code == 200
@@ -214,7 +214,7 @@ def test_runtime_install_rejects_impossible_combo(client, monkeypatch):
     resolver's honest message — not a background job that dies silently.
     (win-arm64-vulkan; the old cuda case became real upstream at ~b1036x.)"""
     monkeypatch.setattr(
-        "hermes_cli.local_runtime.binaries._host_os_arch", lambda: ("win", "arm64"))
+        "sage_cli.local_runtime.binaries._host_os_arch", lambda: ("win", "arm64"))
     r = client.post("/api/local-models/runtime/install", json={"backend": "vulkan"})
     assert r.status_code == 400
     assert "arm64" in r.json()["detail"]
@@ -232,11 +232,11 @@ def test_eject_without_supervisor_is_not_a_500(client, monkeypatch):
     status route, so eject raised NameError -> 500 for every adopted-
     server session."""
     monkeypatch.setattr(
-        "hermes_cli.local_runtime.bootstrap.get_supervisor", lambda: None)
+        "sage_cli.local_runtime.bootstrap.get_supervisor", lambda: None)
     # No running server either: the route must answer 409 (no server),
     # never a NameError 500.
     monkeypatch.setattr(
-        "hermes_cli.web_routers.local_models._state_endpoint", lambda: None)
+        "sage_cli.web_routers.local_models._state_endpoint", lambda: None)
     r = client.post("/api/local-models/eject", json={"model_id": "anything"})
     assert r.status_code == 409, (r.status_code, r.text)
 
@@ -262,19 +262,19 @@ def test_download_tolerates_stale_catalog_size(client, monkeypatch):
     monkeypatch.setattr("urllib.request.urlopen",
                         lambda *a, **k: FakeResponse(body))
 
-    from hermes_cli.local_runtime.estimator import HardwareBudget
+    from sage_cli.local_runtime.estimator import HardwareBudget
 
     budget = HardwareBudget(usable_vram_bytes=64 << 30,
                             total_device_bytes=64 << 30,
                             ram_available_bytes=64 << 30)
-    monkeypatch.setattr("hermes_cli.local_runtime.hardware.probe_budget",
+    monkeypatch.setattr("sage_cli.local_runtime.hardware.probe_budget",
                         lambda **kw: budget)
     # Keep the post-download server bounce out of this unit.
     monkeypatch.setattr(
-        "hermes_cli.local_runtime.bootstrap.refresh_local_runtime",
+        "sage_cli.local_runtime.bootstrap.refresh_local_runtime",
         lambda: False)
 
-    from hermes_cli.local_runtime.catalog import CATALOG
+    from sage_cli.local_runtime.catalog import CATALOG
 
     # Catalog size for this entry is in the tens of GB — wildly stale
     # versus our 48-byte body. The download must still land.

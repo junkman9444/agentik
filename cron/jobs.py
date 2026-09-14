@@ -27,12 +27,12 @@ except ImportError:  # pragma: no cover - non-Windows
     msvcrt = None
 from datetime import datetime, timedelta
 from pathlib import Path
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from typing import Optional, Dict, List, Any, Callable, Set, Tuple, Union, Collection
 
 logger = logging.getLogger(__name__)
 
-from hermes_time import now as _hermes_now
+from sage_time import now as _hermes_now
 from utils import atomic_replace, atomic_write_text
 
 # croniter is imported lazily (slow import, only needed for cron exprs). HAS_CRONITER stays a
@@ -77,7 +77,7 @@ JOBS_FILE = CRON_DIR / "jobs.json"
 TICKER_HEARTBEAT_FILE = CRON_DIR / "ticker_heartbeat"
 TICKER_SUCCESS_FILE = CRON_DIR / "ticker_last_success"
 # Single source of truth for the ticker interval (scheduler_provider.py) and the staleness
-# threshold in `hermes cron status` (hermes_cli/cron.py), so they never drift apart.
+# threshold in `hermes cron status` (sage_cli/cron.py), so they never drift apart.
 TICKER_INTERVAL_SECONDS = 60
 
 # In-process lock for load_jobs→modify→save_jobs cycles; without it, parallel tick threads'
@@ -764,7 +764,7 @@ def parse_schedule(schedule: str) -> Dict[str, Any]:
         try:
             dt = datetime.fromisoformat(schedule.replace('Z', '+00:00'))
             # Naive timestamps become aware in the CONFIGURED Hermes timezone (not server-local):
-            # the due-check compares against hermes_time.now().
+            # the due-check compares against sage_time.now().
             # Make naive timestamps timezone-aware at parse time so the stored value doesn't depend on the
             # system timezone matching at check time. UTC) while now() runs in Asia/Kolkata, the stored
             # instant would land hours off from the user's wall-clock intent — far enough that one-shots
@@ -1496,14 +1496,14 @@ def _resolve_default_model_snapshot() -> Optional[str]:
     """Default model resolved as the ticker's ``run_job`` does, so unpinned jobs can snapshot it and
     keep running on it after a later swap. ``None`` on missing config or failure ("no snapshot")."""
     try:
-        from hermes_cli.config import _expand_env_vars, read_user_config_raw
+        from sage_cli.config import _expand_env_vars, read_user_config_raw
 
         cfg_path = get_hermes_home() / "config.yaml"
         if not cfg_path.exists():
             return None
         cfg = read_user_config_raw(cfg_path)
         with contextlib.suppress(Exception):
-            from hermes_cli import managed_scope
+            from sage_cli import managed_scope
             cfg = managed_scope.apply_managed_overlay(cfg)
         cfg = _expand_env_vars(cfg)
         cron_cfg = cfg.get("cron") or {}
@@ -1561,7 +1561,7 @@ def _normalize_reasoning_effort(value: Any) -> Optional[str]:
     text = str(value).strip().lower()
     if not text:
         return None
-    from hermes_constants import parse_reasoning_effort
+    from sage_constants import parse_reasoning_effort
 
     if parse_reasoning_effort(text) is None:
         raise ValueError(
@@ -1612,7 +1612,7 @@ def _compute_provider_model_snapshots(
     model_snapshot: Optional[str] = None
     if normalized_provider is None:
         with contextlib.suppress(Exception):
-            from hermes_cli.runtime_provider import resolve_runtime_provider
+            from sage_cli.runtime_provider import resolve_runtime_provider
 
             runtime_kwargs = {"requested": None}
             # Delegate all rate-limit / 5xx retry to hermes's outer conversation loop, which honors
@@ -2607,7 +2607,7 @@ COMPLETED_ONESHOT_RETENTION_DAYS = 7
 def _cron_config_number(key: str, default: Any, cast: Callable[[Any], Any]) -> Any:
     """Read ``cron.<key>`` from config as *cast*, falling back to *default* on any failure."""
     try:
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         cfg = load_config() or {}
         cron_cfg = cfg.get("cron", {}) if isinstance(cfg, dict) else {}
         return cast(cron_cfg.get(key, default))
@@ -3078,7 +3078,7 @@ def _get_due_jobs_locked() -> List[Dict[str, Any]]:
 
 # Per-run output files (`cron/output/<job>/<timestamp>.md`) are capped so a frequent job can't fill
 # the disk.
-# Unlike the quick-snapshot store (`hermes_cli.backup`, capped at 20) it had no retention, so a
+# Unlike the quick-snapshot store (`sage_cli.backup`, capped at 20) it had no retention, so a
 # frequently-scheduled job on a long-running deploy accumulated one file per run forever and could fill the
 # disk (#52383). Keep the most recent N files per job; a non-positive value disables pruning (opt-out).
 _CRON_OUTPUT_DEFAULT_KEEP = 50

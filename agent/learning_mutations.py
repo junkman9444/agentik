@@ -36,7 +36,7 @@ def _locate_memory(node_id: str) -> tuple[Path, list[str], int]:
     Entries come from ``MemoryStore._read_file`` — the memory tool's own parser —
     so journey indices stay aligned with what the graph renders; a profile card's
     local index is its global index minus the MEMORY.md card count."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     from agent.learning_graph import _memory_cards
     from tools.memory_tool import MemoryStore
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli.tools_config import (
+from sage_cli.tools_config import (
     _configure_shared_metrics_interactive,
     _shared_metrics_menu_label,
     _shared_metrics_state,
@@ -49,13 +49,13 @@ class TestToggle:
         config = _config(enabled=True)
         saved = {}
         monkeypatch.setattr(
-            "hermes_cli.setup.prompt_yes_no", lambda *_a, **_k: True
+            "sage_cli.setup.prompt_yes_no", lambda *_a, **_k: True
         )
         monkeypatch.setattr(
-            "hermes_cli.setup._record_send_consent_change", lambda **_k: None
+            "sage_cli.setup._record_send_consent_change", lambda **_k: None
         )
         monkeypatch.setattr(
-            "hermes_cli.tools_config.save_config",
+            "sage_cli.tools_config.save_config",
             lambda cfg: saved.update({"cfg": cfg}),
         )
         _configure_shared_metrics_interactive(config)
@@ -66,10 +66,10 @@ class TestToggle:
         config = _config(enabled=False, send=False)
         saved = []
         monkeypatch.setattr(
-            "hermes_cli.setup.prompt_yes_no", lambda *_a, **_k: False
+            "sage_cli.setup.prompt_yes_no", lambda *_a, **_k: False
         )
         monkeypatch.setattr(
-            "hermes_cli.tools_config.save_config", lambda cfg: saved.append(cfg)
+            "sage_cli.tools_config.save_config", lambda cfg: saved.append(cfg)
         )
         _configure_shared_metrics_interactive(config)
         assert saved == []
@@ -78,10 +78,10 @@ class TestToggle:
         """The toggle must not leave send=true with nothing to send."""
         config = _config(enabled=True, send=True)
         monkeypatch.setattr(
-            "hermes_cli.setup.prompt_yes_no", lambda *_a, **_k: False
+            "sage_cli.setup.prompt_yes_no", lambda *_a, **_k: False
         )
         monkeypatch.setattr(
-            "hermes_cli.tools_config.save_config", lambda cfg: None
+            "sage_cli.tools_config.save_config", lambda cfg: None
         )
         _configure_shared_metrics_interactive(config)
         shared = config["telemetry"]["shared_metrics"]

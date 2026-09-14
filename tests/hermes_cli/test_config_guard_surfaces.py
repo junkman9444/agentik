@@ -106,7 +106,7 @@ class TestServeGuard:
         """The `hermes serve` headless path fails closed before startup."""
         from argparse import Namespace
 
-        from hermes_cli import main as main_mod
+        from sage_cli import main as main_mod
 
         _write_corrupt_config(tmp_path)
         args = Namespace(
@@ -128,7 +128,7 @@ class TestServeGuard:
         """--ignore-user-config lets serve get past the corrupt-config guard."""
         from argparse import Namespace
 
-        from hermes_cli import main as main_mod
+        from sage_cli import main as main_mod
 
         _write_corrupt_config(tmp_path)
         args = Namespace(

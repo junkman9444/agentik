@@ -24,7 +24,7 @@ from typing import Any, Callable, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 from tools.voice_mode_transcript import _voice_config, is_voice_stop_phrase, is_whisper_hallucination
-from hermes_constants import is_termux as _is_termux_environment
+from sage_constants import is_termux as _is_termux_environment
 
 # ── Recording parameters ──
 SAMPLE_RATE = 16000  # Whisper native rate
@@ -297,7 +297,7 @@ def detect_audio_environment() -> dict:
     # Docker/Podman container detection — honor host audio forwarding. When the user mounts a
     # PulseAudio/PipeWire socket into the container and points PULSE_SERVER / PIPEWIRE_REMOTE at it, audio
     # works fine (issue #21203). Only block when no forwarding is configured.
-    from hermes_constants import is_container
+    from sage_constants import is_container
     if is_container():
         report("Running inside container (Docker/Podman/LXC) with host audio forwarding",
                "Running inside container (Docker/Podman/LXC) -- no audio devices.\n"
@@ -1423,7 +1423,7 @@ def _check_plugin_stt_provider(provider: str) -> bool:
         return False
     try:
         from agent.transcription_registry import get_provider
-        from hermes_cli.plugins import _ensure_plugins_discovered
+        from sage_cli.plugins import _ensure_plugins_discovered
         _ensure_plugins_discovered()
         plugin_provider = get_provider(key)
         if plugin_provider is None:
@@ -1566,7 +1566,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

@@ -23,8 +23,8 @@ def _install_config(monkeypatch, alias_entry):
         "model": {"default": "gpt-4", "provider": "openrouter"},
         "model_aliases": {"theta": alias_entry},
     }
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: cfg)
-    monkeypatch.setattr("hermes_cli.runtime_provider.load_config", lambda *a, **k: cfg)
+    monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: cfg)
+    monkeypatch.setattr("sage_cli.runtime_provider.load_config", lambda *a, **k: cfg)
     return cfg
 
 
@@ -47,10 +47,10 @@ def _switch_to_alias(monkeypatch, alias_entry):
         return {"accepted": True, "persist": True, "recognized": True, "message": ""}
 
     monkeypatch.setattr(
-        "hermes_cli.models_validate.validate_requested_model", _fake_validate
+        "sage_cli.models_validate.validate_requested_model", _fake_validate
     )
 
-    import hermes_cli.model_switch as ms
+    import sage_cli.model_switch as ms
 
     monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
     result = ms.switch_model(
@@ -80,7 +80,7 @@ class TestDirectAliasCredentialLoading:
                 "key_env": "THETA_API_KEY",
             },
         )
-        from hermes_cli.model_switch import _load_direct_aliases
+        from sage_cli.model_switch import _load_direct_aliases
 
         alias = _load_direct_aliases()["theta"]
         assert alias.api_key == "sk-literal"
@@ -88,7 +88,7 @@ class TestDirectAliasCredentialLoading:
 
     def test_credential_fields_default_to_empty(self, monkeypatch):
         """Aliases without credentials keep working (positional construction)."""
-        from hermes_cli.model_switch import DirectAlias
+        from sage_cli.model_switch import DirectAlias
 
         alias = DirectAlias("theta-1", "custom", ALIAS_HOST)
         assert alias.api_key == ""
@@ -109,7 +109,7 @@ class TestDirectAliasApiKeyHelper:
         self, monkeypatch, entry, expected
     ):
         monkeypatch.setenv("THETA_API_KEY", "sk-from-env")
-        from hermes_cli.model_switch import DirectAlias, direct_alias_api_key
+        from sage_cli.model_switch import DirectAlias, direct_alias_api_key
 
         alias = DirectAlias("theta-1", "custom", ALIAS_HOST, **entry)
         assert direct_alias_api_key(alias) == expected
@@ -203,12 +203,12 @@ class TestSessionKeyIsHostScoped:
                 }
             },
         }
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: cfg)
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.load_config", lambda *a, **k: cfg
+            "sage_cli.runtime_provider.load_config", lambda *a, **k: cfg
         )
         monkeypatch.setattr(
-            "hermes_cli.models_validate.validate_requested_model",
+            "sage_cli.models_validate.validate_requested_model",
             lambda *a, **k: {
                 "accepted": True,
                 "persist": True,
@@ -216,7 +216,7 @@ class TestSessionKeyIsHostScoped:
                 "message": "",
             },
         )
-        import hermes_cli.model_switch as ms
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
         return ms.switch_model(
@@ -263,9 +263,9 @@ class TestBuiltinProviderKeysDoNotLeak:
                 }
             },
         }
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: cfg)
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.load_config", lambda *a, **k: cfg
+            "sage_cli.runtime_provider.load_config", lambda *a, **k: cfg
         )
         monkeypatch.setenv(env_var, secret)
 
@@ -278,9 +278,9 @@ class TestBuiltinProviderKeysDoNotLeak:
             return {"accepted": True, "persist": True, "recognized": True, "message": ""}
 
         monkeypatch.setattr(
-            "hermes_cli.models_validate.validate_requested_model", _fake_validate
+            "sage_cli.models_validate.validate_requested_model", _fake_validate
         )
-        import hermes_cli.model_switch as ms
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
         result = ms.switch_model(
@@ -311,8 +311,8 @@ class TestProviderLabelCannotSelectAKeyForAnArbitraryHost:
             "model": {"default": "m", "provider": session_provider},
             "model_aliases": {"theta": alias},
         }
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: cfg)
-        monkeypatch.setattr("hermes_cli.runtime_provider.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.runtime_provider.load_config", lambda *a, **k: cfg)
         probed = {}
 
         def _fake_validate(model_name, prov, *, api_key=None, base_url=None,
@@ -320,8 +320,8 @@ class TestProviderLabelCannotSelectAKeyForAnArbitraryHost:
             probed["api_key"] = api_key
             return {"accepted": True, "persist": True, "recognized": True, "message": ""}
 
-        monkeypatch.setattr("hermes_cli.models_validate.validate_requested_model", _fake_validate)
-        import hermes_cli.model_switch as ms
+        monkeypatch.setattr("sage_cli.models_validate.validate_requested_model", _fake_validate)
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
         result = ms.switch_model(
@@ -375,14 +375,14 @@ class TestSessionCredentialIsScopedToTheOrigin:
             "model_aliases": {"theta": {
                 "model": "m2", "provider": "custom", "base_url": alias_base_url}},
         }
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: cfg)
-        monkeypatch.setattr("hermes_cli.runtime_provider.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: cfg)
+        monkeypatch.setattr("sage_cli.runtime_provider.load_config", lambda *a, **k: cfg)
         monkeypatch.setattr(
-            "hermes_cli.models_validate.validate_requested_model",
+            "sage_cli.models_validate.validate_requested_model",
             lambda *a, **k: {"accepted": True, "persist": True,
                              "recognized": True, "message": ""},
         )
-        import hermes_cli.model_switch as ms
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(ms, "DIRECT_ALIASES", {})
         return ms.switch_model(
@@ -421,7 +421,7 @@ class TestCredentialPrecedenceIsExplicit:
 
     def test_api_key_wins_over_key_env(self, monkeypatch):
         monkeypatch.setenv("THETA_API_KEY", "sk-from-key-env")
-        from hermes_cli.model_switch import DirectAlias, direct_alias_api_key
+        from sage_cli.model_switch import DirectAlias, direct_alias_api_key
 
         alias = DirectAlias("theta-1", "custom", ALIAS_HOST,
                             "sk-literal", "THETA_API_KEY")
@@ -430,7 +430,7 @@ class TestCredentialPrecedenceIsExplicit:
     def test_env_template_api_key_also_wins_over_key_env(self, monkeypatch):
         monkeypatch.setenv("PRIMARY", "sk-from-template")
         monkeypatch.setenv("FALLBACK", "sk-from-key-env")
-        from hermes_cli.model_switch import DirectAlias, direct_alias_api_key
+        from sage_cli.model_switch import DirectAlias, direct_alias_api_key
 
         alias = DirectAlias("theta-1", "custom", ALIAS_HOST,
                             "${PRIMARY}", "FALLBACK")
@@ -438,7 +438,7 @@ class TestCredentialPrecedenceIsExplicit:
 
     def test_key_env_used_when_api_key_is_blank(self, monkeypatch):
         monkeypatch.setenv("FALLBACK", "sk-from-key-env")
-        from hermes_cli.model_switch import DirectAlias, direct_alias_api_key
+        from sage_cli.model_switch import DirectAlias, direct_alias_api_key
 
         alias = DirectAlias("theta-1", "custom", ALIAS_HOST, "   ", "FALLBACK")
         assert direct_alias_api_key(alias) == "sk-from-key-env"
@@ -463,14 +463,14 @@ class TestSchemelessBaseUrls:
 
     @pytest.mark.parametrize("url", ["localhost:11434/v1", "127.0.0.1:11434/v1"])
     def test_schemeless_loopback_alias_keeps_the_session_credential(self, url):
-        from hermes_cli.model_switch import _may_reuse_session_credential
+        from sage_cli.model_switch import _may_reuse_session_credential
 
         assert _may_reuse_session_credential(url, url) is True
 
     def test_schemeless_is_not_treated_as_the_schemed_origin(self):
         """`http://h` and `h` are not asserted equal — an unknown scheme is
         not evidence that the origin is unchanged."""
-        from hermes_cli.model_switch import _may_reuse_session_credential
+        from sage_cli.model_switch import _may_reuse_session_credential
 
         assert _may_reuse_session_credential(
             "http://localhost:11434/v1", "localhost:11434/v1"
@@ -502,7 +502,7 @@ class TestAliasCacheIsProfileScoped:
 
     def _load(self, monkeypatch, home):
         monkeypatch.setenv("HERMES_HOME", str(home))
-        import hermes_cli.model_switch as ms
+        import sage_cli.model_switch as ms
 
         ms._ensure_direct_aliases()
         return ms.DIRECT_ALIASES
@@ -572,7 +572,7 @@ class TestAliasCacheIsProfileScoped:
             '  theta:\n    model: m\n    provider: custom\n'
             '    base_url: "https://h.example.com/v1"\n'
         ))
-        import hermes_cli.model_switch as ms
+        import sage_cli.model_switch as ms
 
         before = id(ms.DIRECT_ALIASES)
         self._load(monkeypatch, home)
@@ -598,11 +598,11 @@ class TestOneShotUsesTheSameHostInvariant:
         secret = f"sk-{provider}-LIVE-TOKEN"
         monkeypatch.setenv(env_var, secret)
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.load_config",
+            "sage_cli.runtime_provider.load_config",
             lambda *a, **k: {"model": {"default": "m", "provider": "openrouter"}},
         )
-        from hermes_cli.model_switch import DirectAlias, direct_alias_runtime_request
-        from hermes_cli.runtime_provider import resolve_runtime_provider
+        from sage_cli.model_switch import DirectAlias, direct_alias_runtime_request
+        from sage_cli.runtime_provider import resolve_runtime_provider
 
         alias = DirectAlias("c", provider, "https://evil.test/v1")
         requested, explicit_key = direct_alias_runtime_request(alias)
@@ -616,21 +616,21 @@ class TestOneShotUsesTheSameHostInvariant:
     def test_label_is_kept_when_the_alias_has_no_url(self):
         """Nothing to protect against without a foreign host, and the label is
         the only routing information there is."""
-        from hermes_cli.model_switch import DirectAlias, direct_alias_runtime_request
+        from sage_cli.model_switch import DirectAlias, direct_alias_runtime_request
 
         assert direct_alias_runtime_request(
             DirectAlias("c", "anthropic", "")
         ) == ("anthropic", None)
 
     def test_url_bearing_alias_is_forced_to_custom(self):
-        from hermes_cli.model_switch import DirectAlias, direct_alias_runtime_request
+        from sage_cli.model_switch import DirectAlias, direct_alias_runtime_request
 
         assert direct_alias_runtime_request(
             DirectAlias("c", "anthropic", "https://evil.test/v1")
         ) == ("custom", None)
 
     def test_declared_key_is_carried_through(self, monkeypatch):
-        from hermes_cli.model_switch import DirectAlias, direct_alias_runtime_request
+        from sage_cli.model_switch import DirectAlias, direct_alias_runtime_request
 
         assert direct_alias_runtime_request(
             DirectAlias("c", "anthropic", "https://evil.test/v1", "sk-own")
@@ -674,7 +674,7 @@ class TestDirectAliasHostGating:
         self, monkeypatch, base_url, expect_key
     ):
         monkeypatch.setenv("OLLAMA_API_KEY", "sk-ollama-KEY")
-        from hermes_cli.runtime_provider import _resolve_named_custom_runtime
+        from sage_cli.runtime_provider import _resolve_named_custom_runtime
 
         runtime = _resolve_named_custom_runtime(
             requested_provider="custom", explicit_base_url=base_url
@@ -690,8 +690,8 @@ class TestOneshotPassesAliasCredential:
     def test_alias_api_key_is_passed_to_the_resolver(self, monkeypatch):
         """``hermes chat -m theta`` must hand the alias's key to
         resolve_runtime_provider, not leave it to env fallbacks."""
-        from hermes_cli.model_switch import DirectAlias
-        import hermes_cli.model_switch as ms
+        from sage_cli.model_switch import DirectAlias
+        import sage_cli.model_switch as ms
 
         monkeypatch.setattr(
             ms,
@@ -709,10 +709,10 @@ class TestOneshotPassesAliasCredential:
         # oneshot imports the resolver inside the function, so patch it at
         # its source module.
         monkeypatch.setattr(
-            "hermes_cli.runtime_provider.resolve_runtime_provider", _fake_resolve
+            "sage_cli.runtime_provider.resolve_runtime_provider", _fake_resolve
         )
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda *a, **k: {})
-        import hermes_cli.oneshot as oneshot
+        monkeypatch.setattr("sage_cli.config.load_config", lambda *a, **k: {})
+        import sage_cli.oneshot as oneshot
 
         # _run_agent holds the alias wiring; run_oneshot() wraps it in a
         # catch-all that would swallow the sentinel.
@@ -741,7 +741,7 @@ class TestNoProductionCodeMutatesTheAliasCacheInPlace:
     """
 
     #: The only place allowed to write the cache.
-    OWNER = ("hermes_cli/model_switch.py", "_ensure_direct_aliases")
+    OWNER = ("sage_cli/model_switch.py", "_ensure_direct_aliases")
 
     MUTATORS = frozenset(
         {"update", "clear", "pop", "popitem", "setdefault", "__setitem__"}
@@ -823,7 +823,7 @@ class TestNoProductionCodeMutatesTheAliasCacheInPlace:
     def test_the_scan_actually_detects_a_violation(self):
         """Negative control — an always-passing scanner would prove nothing."""
         offending = (
-            "from hermes_cli.model_switch import DIRECT_ALIASES\n"
+            "from sage_cli.model_switch import DIRECT_ALIASES\n"
             "def warm():\n"
             "    DIRECT_ALIASES.update({'x': 1})\n"
             "    DIRECT_ALIASES['y'] = 2\n"

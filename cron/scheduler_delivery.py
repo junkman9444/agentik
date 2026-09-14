@@ -20,7 +20,7 @@ import sys
 from dataclasses import dataclass
 from typing import Any, List, Optional
 
-from hermes_cli._subprocess_compat import windows_hide_flags
+from sage_cli._subprocess_compat import windows_hide_flags
 
 # Log-record parity with the origin module.
 logger = logging.getLogger("cron.scheduler")
@@ -361,7 +361,7 @@ def _cron_job_origin_log_suffix(job: dict) -> str:
 def _plugin_cron_env_var(platform_name: str) -> str:
     """Cron home-channel env var registered by a plugin ``PlatformEntry.cron_deliver_env_var``."""
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from sage_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         entry = platform_registry.get(platform_name.lower())
@@ -471,7 +471,7 @@ def _iter_home_target_platforms():
     """Iterate built-in + plugin platform names that expose a home channel."""
     yield from _HOME_TARGET_ENV_VARS
     with contextlib.suppress(Exception):
-        from hermes_cli.plugins import discover_plugins
+        from sage_cli.plugins import discover_plugins
         discover_plugins()  # idempotent
         from gateway.platform_registry import platform_registry
         for entry in platform_registry.plugin_entries():
@@ -518,7 +518,7 @@ def cron_delivery_targets() -> list[dict]:
 
     # Bot Chat targets: one per local profile (machine-local; no gateway config or home channel).
     try:
-        from hermes_cli.profiles import list_profile_names
+        from sage_cli.profiles import list_profile_names
         for profile_name in list_profile_names():
             targets.append({
                 "id": f"{BOT_CHAT_PLATFORM}:{profile_name}",
@@ -664,8 +664,8 @@ def _deliver_to_bot_chat(job: dict, content: str, profile: str) -> Optional[str]
     import json
     import tempfile
     import uuid
-    from hermes_constants import get_hermes_home
-    from hermes_cli.profiles import get_profile_dir
+    from sage_constants import get_hermes_home
+    from sage_cli.profiles import get_profile_dir
     from tools.bot_live_delivery import (
         deliver_to_live_owner, find_canonical_live_owner, read_delivery_result,
     )
@@ -721,12 +721,12 @@ def _deliver_to_bot_chat(job: dict, content: str, profile: str) -> Optional[str]
     else:
         try:
             import importlib.util as _ilu
-            found = _ilu.find_spec("hermes_cli") is not None
+            found = _ilu.find_spec("sage_cli") is not None
         except Exception:
             found = False
         if not found:
             return "bot-chat delivery failed: hermes CLI not resolvable"
-        argv = [sys.executable, "-m", "hermes_cli.main"]
+        argv = [sys.executable, "-m", "sage_cli.main"]
 
     def _fail(msg: str, **log_kwargs) -> str:
         logger.warning("Job '%s': %s", job_id, msg, **log_kwargs)
@@ -819,7 +819,7 @@ def _resolve_bot_chat_target(job: dict, profile_arg: str) -> Optional[dict]:
     if not profile_arg:
         return {"platform": BOT_CHAT_PLATFORM, "chat_id": "", "thread_id": None}
     try:
-        from hermes_cli.profiles import normalize_profile_name, profile_exists
+        from sage_cli.profiles import normalize_profile_name, profile_exists
         canon = normalize_profile_name(profile_arg)
         if not profile_exists(canon):
             logger.warning(

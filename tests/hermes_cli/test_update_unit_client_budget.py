@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from hermes_cli import update_cmd_fleet as fleet
+from sage_cli import update_cmd_fleet as fleet
 
 
 @pytest.mark.parametrize("graceful,retry", [(False, False), (False, True), (True, False), ("catchup", False)])

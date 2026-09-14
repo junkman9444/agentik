@@ -16,8 +16,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
 
-from hermes_cli.observability.shared_metrics import SharedMetricsStore
-from hermes_cli.observability.shared_metrics_sender import SharedMetricsSender
+from sage_cli.observability.shared_metrics import SharedMetricsStore
+from sage_cli.observability.shared_metrics_sender import SharedMetricsSender
 
 INSTALL_ID = "12a73e97-4de9-4766-830d-9ca1192c0420"
 NOW = datetime(2026, 8, 26, 12, 0, tzinfo=timezone.utc)
@@ -85,10 +85,10 @@ def store(tmp_path):
     # fails closed without one, and this file tests transport, not consent.
     from datetime import datetime, timezone
 
-    from hermes_cli.observability.shared_metrics_sender import (
+    from sage_cli.observability.shared_metrics_sender import (
         reconcile_send_consent,
     )
-    from hermes_cli.sqlite_util import write_txn
+    from sage_cli.sqlite_util import write_txn
 
     with built._connection() as connection:
         with write_txn(connection):

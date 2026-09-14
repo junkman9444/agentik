@@ -8,7 +8,7 @@ import json
 import pytest
 import yaml
 
-from hermes_cli import plugin_catalog as pc_cat
+from sage_cli import plugin_catalog as pc_cat
 
 VALID_SHA = "38fe0fb53eff98d477f807432e965429e665ca33"
 OTHER_SHA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -20,11 +20,11 @@ def client(monkeypatch, tmp_path, _isolate_hermes_home):
         from starlette.testclient import TestClient
     except ImportError:
         pytest.skip("fastapi/starlette not installed")
-    import hermes_state
-    from hermes_constants import get_hermes_home
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    import sage_state
+    from sage_constants import get_hermes_home
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+    monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
     catalog_dir = tmp_path / "catalog"
     catalog_dir.mkdir()
     (catalog_dir / "alpha-plugin.yaml").write_text(yaml.safe_dump({
@@ -42,7 +42,7 @@ def client(monkeypatch, tmp_path, _isolate_hermes_home):
 
 
 def _install(name: str, sidecar: dict | None):
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     d = get_hermes_home() / "plugins" / name
     d.mkdir(parents=True)
     (d / "plugin.yaml").write_text(yaml.safe_dump({"name": name, "version": "1.0", "description": "x"}))
@@ -52,7 +52,7 @@ def _install(name: str, sidecar: dict | None):
 
 def test_catalog_endpoint_merges_installed_state_from_sidecar(client):
     from starlette.testclient import TestClient
-    from hermes_cli.web_server import app
+    from sage_cli.web_server import app
     assert TestClient(app).get("/api/dashboard/plugins/catalog").status_code == 401
 
     # Manifest name differs from the catalog name (the common case): matched through the sidecar.
@@ -67,7 +67,7 @@ def test_catalog_endpoint_merges_installed_state_from_sidecar(client):
 
 
 def test_install_endpoint_refuses_removed_plugins_with_no_bypass(client, monkeypatch):
-    from hermes_cli import plugins_cmd
+    from sage_cli import plugins_cmd
     monkeypatch.setattr(plugins_cmd, "_install_plugin_core", lambda *a, **k: pytest.fail("kill-listed install ran"))
     for body in ({"identifier": "https://github.com/evil/bad-plugin.git"},
                  {"identifier": "", "catalog_name": "bad-plugin"}, {"identifier": "evil/bad-plugin"}):

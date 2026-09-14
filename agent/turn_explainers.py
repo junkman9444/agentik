@@ -157,7 +157,7 @@ def _display_flag_enabled(agent, *, env_var: str, config_key: str, cache_attr: s
 
     ``env_var`` overrides on every call and is never cached. Reads the persisted config.yaml
     so gateway and CLI share the setting; ``load_config`` is imported lazily (startup cycle,
-    and tests patch it at ``hermes_cli.config``). Any failure → True (safe default: on)."""
+    and tests patch it at ``sage_cli.config``). Any failure → True (safe default: on)."""
     try:
         env = os.environ.get(env_var)
         if env is not None:
@@ -166,7 +166,7 @@ def _display_flag_enabled(agent, *, env_var: str, config_key: str, cache_attr: s
         if cached is not None:
             return cached
         try:
-            from hermes_cli.config import load_config as _load_config
+            from sage_cli.config import load_config as _load_config
             _cfg = _load_config() or {}
         except Exception:
             _cfg = {}
@@ -305,8 +305,8 @@ class TurnExplainersMixin:
             )
             if persistence_cause == "corrupt":
                 # Copy-pasteable, so name the real store (profiles / HERMES_HOME do not live under ~/.hermes).
-                from hermes_constants import get_default_hermes_root
-                from hermes_state import _default_db_path
+                from sage_constants import get_default_hermes_root
+                from sage_state import _default_db_path
 
                 body = body.replace("{db_path}", str(_default_db_path()))
                 body = body.replace(

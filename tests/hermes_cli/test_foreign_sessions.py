@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.foreign_sessions — Claude Code / Codex CLI import.
+"""Tests for sage_cli.foreign_sessions — Claude Code / Codex CLI import.
 
 Fixture JSONL is synthesized inline (tmp_path); the SessionDB is opened
 against a temp path so nothing touches the real HERMES_HOME store.
@@ -8,7 +8,7 @@ import json
 
 import pytest
 
-from hermes_cli.foreign_sessions import (
+from sage_cli.foreign_sessions import (
     _list_sessions,
     gather_foreign_sessions,
     import_foreign_session,
@@ -96,7 +96,7 @@ def _write_codex_fixture(tmp_path, extra_lines=None):
 
 @pytest.fixture
 def session_db(tmp_path):
-    from hermes_state import SessionDB
+    from sage_state import SessionDB
 
     db = SessionDB(db_path=tmp_path / "state.db")
     yield db

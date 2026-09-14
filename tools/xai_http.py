@@ -33,7 +33,7 @@ def has_xai_credentials() -> bool:
     if (get_secret("XAI_API_KEY", "") or "").strip():
         return True
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         auth_path = get_hermes_home() / "auth.json"
         if not auth_path.exists():
             return False
@@ -52,10 +52,10 @@ def has_xai_credentials() -> bool:
 def get_env_value(name: str, default=None):
     """Read ``name`` from ``~/.hermes/.env`` first, then ``os.environ``.
 
-    Wraps :func:`hermes_cli.config.get_env_value` so tests can patch ``tools.xai_http.get_env_value``.
+    Wraps :func:`sage_cli.config.get_env_value` so tests can patch ``tools.xai_http.get_env_value``.
     """
     try:
-        from hermes_cli.config import get_env_value as _hermes_get_env_value
+        from sage_cli.config import get_env_value as _hermes_get_env_value
     except ImportError:
         return os.environ.get(name, default)
     value = _hermes_get_env_value(name)
@@ -65,7 +65,7 @@ def get_env_value(name: str, default=None):
 def hermes_xai_user_agent() -> str:
     """Return a stable Hermes-specific User-Agent for xAI HTTP calls."""
     try:
-        from hermes_cli import __version__
+        from sage_cli import __version__
     except Exception:
         __version__ = "unknown"
     return f"Hermes-Agent/{__version__}"
@@ -109,7 +109,7 @@ def read_xai_imagine_storage_config(section_name: str) -> Dict[str, Any]:
     """Read ``<section_name>.xai.storage`` (``image_gen``/``video_gen``) -> {enabled, public_url, expires_after}.
     On by default so xAI returns permanent public URLs, not short-lived CDN ones; null TTL = permanent."""
     try:
-        from hermes_cli.config import load_config
+        from sage_cli.config import load_config
         storage = _dict_get(_dict_get(_dict_get(load_config(), section_name), "xai"), "storage")
     except Exception:
         storage = None
@@ -159,7 +159,7 @@ def maybe_mark_xai_storage_notice_seen(section_name: str) -> Optional[str]:
     if not notice:
         return None
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         marker_dir = get_hermes_home() / "state"
         marker_dir.mkdir(parents=True, exist_ok=True)
         marker = marker_dir / f"{section_name}_xai_storage_notice_seen"
@@ -200,7 +200,7 @@ def resolve_xai_http_credentials(
     entry, not whichever its strategy selects first.
 
     Prefers Hermes-managed xAI OAuth credentials when available, then falls back to ``XAI_API_KEY`` resolved
-    via ``hermes_cli.config.get_env_value`` so keys stored in ``~/.hermes/.env`` (the standard Hermes
+    via ``sage_cli.config.get_env_value`` so keys stored in ``~/.hermes/.env`` (the standard Hermes
     location) are honored — not just ones already exported into ``os.environ``. This keeps direct xAI
     endpoints (images, TTS, STT, etc.) aligned with the main runtime auth model and preserves the regression
     contract from PR #17140 / #17163.
@@ -208,7 +208,7 @@ def resolve_xai_http_credentials(
     scoping is identical to the fallback branch, and the base URL honors ``HERMES_XAI_BASE_URL`` /
     ``XAI_BASE_URL`` behind the same origin-pinning validation as the OAuth branch. See #87045, #88040.
     """
-    import hermes_cli.auth as auth_mod
+    import sage_cli.auth as auth_mod
     if prefer_api_key and (explicit_key := str(_resolve_explicit_xai_api_key() or "").strip()):
         # Origin-pinned so a tampered env override can't exfiltrate the bearer; rejection -> default URL.
         override = _xai_base_url_override()

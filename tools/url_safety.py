@@ -17,7 +17,7 @@ from contextlib import contextmanager
 from typing import Any, Optional
 from urllib.parse import parse_qsl, quote, unquote, urljoin, urlparse, urlsplit, urlunsplit
 
-from hermes_constants import get_hermes_home_override
+from sage_constants import get_hermes_home_override
 from utils import is_truthy_value
 
 logger = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ def _resolve_allow_private_urls() -> bool:
     if env_val in {"false", "0", "no"}:
         return False  # explicit false does not fall through to config
     try:
-        from hermes_cli.config import read_raw_config
+        from sage_cli.config import read_raw_config
         cfg = read_raw_config()
         for section in ("security", "browser"):  # preferred, then legacy
             block = cfg.get(section, {})

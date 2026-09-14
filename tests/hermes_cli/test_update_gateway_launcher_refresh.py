@@ -25,9 +25,9 @@ from unittest import mock
 
 import pytest
 
-import hermes_cli.gateway_windows as gateway_windows
-import hermes_cli.main as cli_main
-from hermes_cli import update_cmd
+import sage_cli.gateway_windows as gateway_windows
+import sage_cli.main as cli_main
+from sage_cli import update_cmd
 
 
 # ---------------------------------------------------------------------------
@@ -70,10 +70,10 @@ def test_restart_spec_normalizes_legacy_pythonw_argv(tmp_path):
     """
     pythonw, python = _make_venv(tmp_path, with_console_python=True)
 
-    argv = [str(pythonw), "-m", "hermes_cli.main", "gateway", "run"]
+    argv = [str(pythonw), "-m", "sage_cli.main", "gateway", "run"]
     with mock.patch.object(
         gateway_windows, "_stable_gateway_working_dir", return_value=str(tmp_path)
-    ), mock.patch("hermes_cli.config.get_hermes_home", return_value=str(tmp_path)):
+    ), mock.patch("sage_cli.config.get_hermes_home", return_value=str(tmp_path)):
         new_argv, cwd, env = gateway_windows.windowless_gateway_restart_spec(list(argv))
 
     assert new_argv[0] == str(python)

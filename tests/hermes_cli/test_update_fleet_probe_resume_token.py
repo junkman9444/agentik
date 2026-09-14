@@ -33,8 +33,8 @@ from __future__ import annotations
 
 import types
 
-from hermes_cli.main import _fleet_probe_expected_runtimes
-from hermes_cli.update_inventory import RuntimeRecord
+from sage_cli.main import _fleet_probe_expected_runtimes
+from sage_cli.update_inventory import RuntimeRecord
 
 
 def _plan(runtimes):

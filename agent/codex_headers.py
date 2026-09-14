@@ -42,7 +42,7 @@ def codex_cloudflare_headers(access_token: str, *, base_url: str = CODEX_AUX_BAS
     construction.
     """
     if is_official_codex_base_url(base_url):
-        from hermes_cli import __version__
+        from sage_cli import __version__
         headers = {"User-Agent": f"HermesAgent/{__version__}", "originator": "hermes-agent"}
     else:
         headers = {"User-Agent": "codex_cli_rs/0.0.0 (Hermes Agent)", "originator": "codex_cli_rs"}

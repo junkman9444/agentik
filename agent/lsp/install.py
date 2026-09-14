@@ -18,8 +18,8 @@ import threading
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
-from hermes_cli._subprocess_compat import windows_hide_flags
-from hermes_constants import find_node_executable
+from sage_cli._subprocess_compat import windows_hide_flags
+from sage_constants import find_node_executable
 
 logger = logging.getLogger("agent.lsp.install")
 
@@ -74,7 +74,7 @@ def _is_windows() -> bool:
 
 def hermes_lsp_bin_dir() -> Path:
     """Return the Hermes-owned bin staging dir for LSP servers."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     p = get_hermes_home() / "lsp" / "bin"
     p.mkdir(parents=True, exist_ok=True)
@@ -216,7 +216,7 @@ def _install_pip(pkg: str, bin_name: str) -> Optional[str]:
     pip_target.mkdir(parents=True, exist_ok=True)
     try:
         logger.info("[install] pip install --target %s %s", pip_target, pkg)
-        from hermes_cli.tools_config import _pip_install
+        from sage_cli.tools_config import _pip_install
 
         proc = _pip_install(["--target", str(pip_target), "--quiet", pkg], timeout=300)
         if proc.returncode != 0:

@@ -1,4 +1,4 @@
-"""Tests for hermes_cli.gateway."""
+"""Tests for sage_cli.gateway."""
 
 import json
 import os
@@ -9,7 +9,7 @@ from types import ModuleType, SimpleNamespace
 
 import pytest
 
-import hermes_cli.gateway as gateway
+import sage_cli.gateway as gateway
 
 
 _BREAKAWAY_MARKER = "_HERMES_GATEWAY_BREAKAWAY"
@@ -63,7 +63,7 @@ def _run_native_windows_gateway_start_diag(
         import sys
         import types
 
-        import hermes_cli.gateway as gateway_cli
+        import sage_cli.gateway as gateway_cli
 
         async def start_gateway(*, replace, verbosity):
             assert "_HERMES_GATEWAY_BREAKAWAY" not in os.environ
@@ -106,7 +106,7 @@ def _run_native_windows_gateway_start_diag(
     else:
         env[_BREAKAWAY_MARKER] = breakaway_marker
 
-    from hermes_cli._subprocess_compat import windows_detach_flags_without_breakaway
+    from sage_cli._subprocess_compat import windows_detach_flags_without_breakaway
 
     completed = subprocess.run(
         [sys.executable, "-c", script],
@@ -175,7 +175,7 @@ def test_gateway_run_subprocess_preserves_daemon_exit_codes(
         import sys
         import types
 
-        import hermes_cli.gateway as gateway_cli
+        import sage_cli.gateway as gateway_cli
 
         outcome = os.environ["HERMES_TEST_GATEWAY_OUTCOME"]
 
@@ -267,9 +267,9 @@ def test_s6_runtime_snapshot_reports_supervised_service(monkeypatch, tmp_path):
             return True
 
     monkeypatch.setattr(gateway, "is_linux", lambda: True)
-    monkeypatch.setattr("hermes_constants.is_container", lambda: True)
-    monkeypatch.setattr("hermes_cli.service_manager.detect_service_manager", lambda: "s6")
-    monkeypatch.setattr("hermes_cli.service_manager.get_service_manager", lambda: FakeS6Manager())
+    monkeypatch.setattr("sage_constants.is_container", lambda: True)
+    monkeypatch.setattr("sage_cli.service_manager.detect_service_manager", lambda: "s6")
+    monkeypatch.setattr("sage_cli.service_manager.get_service_manager", lambda: FakeS6Manager())
     monkeypatch.setattr(gateway, "find_gateway_pids", lambda: [123])
     monkeypatch.setattr(gateway, "_profile_suffix", lambda: "")
 
@@ -324,7 +324,7 @@ def test_spawn_detached_gateway_timestamps_stderr(monkeypatch, tmp_path):
     child_cmd = [
         "/usr/bin/python3",
         "-m",
-        "hermes_cli.main",
+        "sage_cli.main",
         "gateway",
         "run",
         "--replace",
@@ -346,7 +346,7 @@ def test_spawn_detached_gateway_timestamps_stderr(monkeypatch, tmp_path):
     assert cmd == [
         "/usr/bin/python3",
         "-m",
-        "hermes_cli.stderr_timestamp",
+        "sage_cli.stderr_timestamp",
         "--error-log",
         str(tmp_path / "logs" / "gateway.error.log"),
         "--",
@@ -494,7 +494,7 @@ class TestWaitForGatewayExit:
         # Kill-time re-verification: force-kills only proceed when the LIVE
         # cmdline still looks like a gateway.
         monkeypatch.setattr(
-            gateway, "_capture_gateway_argv", lambda pid: ["python", "-m", "hermes_cli.main", "gateway", "run"]
+            gateway, "_capture_gateway_argv", lambda pid: ["python", "-m", "sage_cli.main", "gateway", "run"]
         )
         monkeypatch.setattr(
             gateway,
@@ -515,7 +515,7 @@ class TestWaitForGatewayExit:
         monkeypatch.setattr(
             gateway,
             "_capture_gateway_argv",
-            lambda pid: None if pid == 11 else ["python", "-m", "hermes_cli.main", "gateway", "run"],
+            lambda pid: None if pid == 11 else ["python", "-m", "sage_cli.main", "gateway", "run"],
         )
         monkeypatch.setattr(
             gateway,
@@ -967,7 +967,7 @@ class TestReaperCandidateIsSupervisorOwned:
 def test_module_has_logger():
     """Verify module has a logger instance (regression guard for #27154)."""
     assert hasattr(gateway, "logger")
-    assert gateway.logger.name == "hermes_cli.gateway"
+    assert gateway.logger.name == "sage_cli.gateway"
 
 
 class TestWindowsScheduledTaskSupervisorGuard:
@@ -993,7 +993,7 @@ class TestWindowsScheduledTaskSupervisorGuard:
         # gateway_windows.get_task_name(), never a hardcoded literal — a
         # hardcoded "HermesGateway" would leave the guard dormant on every
         # standard install (task name is Hermes_Gateway / Hermes_Gateway_<p>).
-        import hermes_cli.gateway_windows as gateway_windows
+        import sage_cli.gateway_windows as gateway_windows
 
         monkeypatch.setattr(
             gateway_windows, "get_task_name", lambda: "Hermes_Gateway_testprof"
@@ -1027,7 +1027,7 @@ class TestWindowsScheduledTaskSupervisorGuard:
         monkeypatch.setattr(gateway, "is_windows", lambda: True)
         monkeypatch.setattr(gateway, "is_macos", lambda: False)
         monkeypatch.setattr(gateway, "supports_systemd_services", lambda: False)
-        import hermes_cli.gateway_windows as gateway_windows
+        import sage_cli.gateway_windows as gateway_windows
 
         monkeypatch.setattr(
             gateway_windows, "get_task_name", lambda: "Hermes_Gateway_testprof"
@@ -1267,7 +1267,7 @@ def test_find_windows_gateway_services_fails_closed_when_scm_scan_is_indetermina
 def test_find_profile_gateway_processes_strict_propagates_profile_listing_failure(
     monkeypatch,
 ):
-    import hermes_cli.profiles as profiles_mod
+    import sage_cli.profiles as profiles_mod
 
     monkeypatch.setattr(
         profiles_mod,

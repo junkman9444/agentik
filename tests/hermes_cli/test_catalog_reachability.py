@@ -11,7 +11,7 @@ Network-marked (skipped in hermetic CI unless explicitly enabled) — this is
 the test that catches wrong repo names (the Nemotron 401) and moved files.
 Run before any catalog commit:
 
-    HERMES_TEST_NETWORK=1 scripts/run_tests.sh tests/hermes_cli/test_catalog_reachability.py
+    HERMES_TEST_NETWORK=1 scripts/run_tests.sh tests/sage_cli/test_catalog_reachability.py
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ pytestmark = pytest.mark.skipif(
 
 
 def test_every_catalog_file_resolves():
-    from hermes_cli.local_runtime.catalog import CATALOG
+    from sage_cli.local_runtime.catalog import CATALOG
 
     problems = []
     drift = []

@@ -19,7 +19,7 @@ import time
 from pathlib import Path
 
 import pytest
-from hermes_cli import main_install_repair
+from sage_cli import main_install_repair
 
 pytestmark = pytest.mark.skipif(
     sys.platform != "win32", reason="live Windows shim-lock E2E"
@@ -74,8 +74,8 @@ def test_locked_shim_really_cannot_be_renamed(held_shim):
 
 
 def test_strict_quarantine_refuses_against_real_lock(held_shim, monkeypatch):
-    import hermes_cli.main as cli_main
-    import hermes_cli.main_install_repair as hermes_cli_main_install_repair
+    import sage_cli.main as cli_main
+    import sage_cli.main_install_repair as hermes_cli_main_install_repair
 
     scripts, _shim = held_shim
     install_ran: list = []
@@ -105,7 +105,7 @@ def test_strict_quarantine_refuses_against_real_lock(held_shim, monkeypatch):
 
 
 def test_recovery_installer_refuses_against_real_lock(held_shim, monkeypatch):
-    import hermes_cli._install_repair as ir
+    import sage_cli._install_repair as ir
 
     scripts, _shim = held_shim
     monkeypatch.setattr(ir, "_venv_scripts_dir", lambda root: scripts)
@@ -119,8 +119,8 @@ def test_recovery_installer_refuses_against_real_lock(held_shim, monkeypatch):
 
 def test_release_then_strict_quarantine_succeeds(tmp_path, monkeypatch):
     """After the holder exits, the same strict path proceeds normally."""
-    import hermes_cli.main as cli_main
-    import hermes_cli.main_install_repair as hermes_cli_main_install_repair
+    import sage_cli.main as cli_main
+    import sage_cli.main_install_repair as hermes_cli_main_install_repair
 
     scripts = tmp_path / "venv" / "Scripts"
     scripts.mkdir(parents=True)

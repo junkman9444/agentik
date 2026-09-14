@@ -8,7 +8,7 @@ import json
 import time
 from typing import Optional
 
-from hermes_cli.config import get_hermes_home
+from sage_cli.config import get_hermes_home
 from utils import atomic_json_write
 
 CACHE_PATH = get_hermes_home() / "sticker_cache.json"

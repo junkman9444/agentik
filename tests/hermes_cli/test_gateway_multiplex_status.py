@@ -17,7 +17,7 @@ from types import SimpleNamespace
 
 
 def _fake_multiplexer(monkeypatch, tmp_path, *, multiplex: bool):
-    import hermes_constants
+    import sage_constants
     import gateway.status as status
 
     (tmp_path / "profiles" / "beta").mkdir(parents=True)
@@ -26,12 +26,12 @@ def _fake_multiplexer(monkeypatch, tmp_path, *, multiplex: bool):
     )
     (tmp_path / "gateway.pid").write_text(str(os.getpid()))
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "profiles" / "beta"))
-    monkeypatch.setattr(hermes_constants, "_default_hermes_root_memo", None)
+    monkeypatch.setattr(sage_constants, "_default_hermes_root_memo", None)
     monkeypatch.setattr(status, "_pid_exists", lambda pid: True)
 
 
 def _run_status():
-    from hermes_cli import gateway as gw
+    from sage_cli import gateway as gw
 
     buf = io.StringIO()
     with redirect_stdout(buf):
@@ -42,7 +42,7 @@ def _run_status():
 
 
 def test_served_named_profile_reports_running(monkeypatch, tmp_path):
-    from hermes_cli.profiles import list_profiles
+    from sage_cli.profiles import list_profiles
 
     _fake_multiplexer(monkeypatch, tmp_path, multiplex=True)
 
@@ -52,7 +52,7 @@ def test_served_named_profile_reports_running(monkeypatch, tmp_path):
 
 
 def test_unserved_named_profile_still_reports_stopped(monkeypatch, tmp_path):
-    from hermes_cli.profiles import list_profiles
+    from sage_cli.profiles import list_profiles
 
     _fake_multiplexer(monkeypatch, tmp_path, multiplex=False)
 

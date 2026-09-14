@@ -22,9 +22,9 @@ def isolated_kanban_home_with_profiles(monkeypatch):
         os.makedirs(os.path.join(test_home, "profiles", prof), exist_ok=True)
     monkeypatch.setenv("HERMES_HOME", test_home)
     for mod in list(sys.modules.keys()):
-        if mod.startswith("hermes_cli") or mod.startswith("hermes_state") or mod == "hermes_constants":
+        if mod.startswith("sage_cli") or mod.startswith("sage_state") or mod == "sage_constants":
             del sys.modules[mod]
-    from hermes_cli import kanban_db
+    from sage_cli import kanban_db
     yield kanban_db
 
 
@@ -38,8 +38,8 @@ def test_cap_2_balances_two_profiles(isolated_kanban_home_with_profiles):
     """With cap=2: 2 alpha + 2 beta dispatched; remaining 3 alpha + 1 beta
     deferred to skipped_per_profile_capped."""
     kb = isolated_kanban_home_with_profiles
-    from hermes_cli import kanban_db_connect as kbc
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db_connect as kbc
+    from sage_cli import kanban_db_dispatch as kbd
     with kbc.connect_closing() as conn:
         kb.create_board(slug="default", name="Test")
         for i in range(5):
@@ -66,8 +66,8 @@ def test_capped_tasks_dispatched_on_subsequent_tick(isolated_kanban_home_with_pr
     eligible for dispatch on the next tick (after running tasks complete).
     This verifies the cap is per-tick state, not a permanent block."""
     kb = isolated_kanban_home_with_profiles
-    from hermes_cli import kanban_db_connect as kbc
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db_connect as kbc
+    from sage_cli import kanban_db_dispatch as kbd
     with kbc.connect_closing() as conn:
         kb.create_board(slug="default", name="Test")
         ids = [kb.create_task(conn, title=f"a{i}", assignee="alpha") for i in range(3)]

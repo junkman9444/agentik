@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import hermes_cli.main as m
-import hermes_cli.main_install_repair as hermes_cli_main_install_repair
-from hermes_cli import main_install_repair
-from hermes_cli import update_cmd
+import sage_cli.main as m
+import sage_cli.main_install_repair as hermes_cli_main_install_repair
+from sage_cli import main_install_repair
+from sage_cli import update_cmd
 
 
 def test_marker_round_trip(tmp_path, monkeypatch):
@@ -37,7 +37,7 @@ def test_marker_round_trip(tmp_path, monkeypatch):
 
 def _stub_install_env(monkeypatch, m, seen):
     """Common stubs so recovery's install path is inert and observable."""
-    import hermes_cli.main_install_repair as hermes_cli_main_install_repair
+    import sage_cli.main_install_repair as hermes_cli_main_install_repair
 
     class R:
         returncode = 0
@@ -45,11 +45,11 @@ def _stub_install_env(monkeypatch, m, seen):
     monkeypatch.setattr(m.subprocess, "run", lambda *a, **k: R())
     monkeypatch.setattr(m, "_is_termux_env", lambda *a, **k: False)
     monkeypatch.setattr(hermes_cli_main_install_repair, "_is_termux_env", lambda *a, **k: False)
-    monkeypatch.setattr("hermes_cli.managed_uv.ensure_uv", lambda: None)
-    # The install executor moved to hermes_cli._install_repair (shared between
+    monkeypatch.setattr("sage_cli.managed_uv.ensure_uv", lambda: None)
+    # The install executor moved to sage_cli._install_repair (shared between
     # the pre-import early pass and this late recovery path) — stub WHERE it
     # is executed, not the legacy main.py wrapper it replaced.
-    import hermes_cli._install_repair as ir
+    import sage_cli._install_repair as ir
 
     monkeypatch.setattr(
         ir, "run_core_install", lambda _root: seen.__setitem__("install", True)

@@ -27,9 +27,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 from agent.memory_provider import MemoryProvider, RecallStatus
 from agent.secret_scope import get_secret
-from hermes_cli.config import cfg_get
-from hermes_constants import get_hermes_home
-from hermes_time import now as _hermes_now
+from sage_cli.config import cfg_get
+from sage_constants import get_hermes_home
+from sage_time import now as _hermes_now
 from tools.registry import tool_error
 
 from .embedded import (
@@ -258,7 +258,7 @@ def _load_config() -> dict:
 def _event_timestamp() -> str:
     """Configured Hermes event time with an explicit UTC offset."""
     event_time = _hermes_now()
-    # hermes_time.now() is aware; guard a replacement clock emitting offset-less dates.
+    # sage_time.now() is aware; guard a replacement clock emitting offset-less dates.
     if event_time.tzinfo is None or event_time.utcoffset() is None:
         event_time = event_time.astimezone()
     return event_time.isoformat(timespec="seconds")

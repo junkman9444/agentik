@@ -26,9 +26,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from hermes_cli import update_abort_recovery as abort_recovery
-from hermes_cli import update_cmd
-from hermes_cli import update_restart_recovery as recovery
+from sage_cli import update_abort_recovery as abort_recovery
+from sage_cli import update_cmd
+from sage_cli import update_restart_recovery as recovery
 
 
 class _Completed:
@@ -59,7 +59,7 @@ def _serve_runtime(pid, *, create_time=None, kind="serve", profile="default"):
 
 
 def _identity_module():
-    return __import__("hermes_cli.process_identity", fromlist=["ledger_entries"])
+    return __import__("sage_cli.process_identity", fromlist=["ledger_entries"])
 
 
 # ---------------------------------------------------------------------------
@@ -837,14 +837,14 @@ def test_spawn_failure_reports_empty_serve_coverage(monkeypatch):
 
 
 def test_serve_coverage_reaches_the_persisted_receipt(tmp_path, monkeypatch):
-    from hermes_cli import update_receipt
+    from sage_cli import update_receipt
 
     monkeypatch.setattr(update_receipt, "_receipt_dir", lambda: tmp_path)
     update_receipt.begin_update_receipt()
     update_receipt.record_gateway_restart(
         restarted_services=[],
         incomplete=True,
-        phase_error="cannot import name 'line_input' from 'hermes_cli.cli_output'",
+        phase_error="cannot import name 'line_input' from 'sage_cli.cli_output'",
         fresh_recovery={
             "requested": ["default"],
             "verified": ["default"],
@@ -921,7 +921,7 @@ def test_no_survivors_prints_nothing(capsys):
 def test_recovery_module_reports_serve_units_in_a_real_process():
     """The protocol survives a genuine subprocess round-trip."""
     result = subprocess.run(
-        [sys.executable, "-m", "hermes_cli.update_restart_recovery", "--stdin"],
+        [sys.executable, "-m", "sage_cli.update_restart_recovery", "--stdin"],
         input=json.dumps(
             {"profiles": [], "serve_units": {"recover": True, "skip": []}}
         ),
@@ -941,8 +941,8 @@ def test_recovery_module_reports_serve_units_in_a_real_process():
 
 
 def _stub_dashboard_helpers(monkeypatch, **helpers):
-    """Stub the ``hermes_cli.main_dashboard`` helpers the dashboard-cleanup path reads at call time."""
-    from hermes_cli import main_dashboard
+    """Stub the ``sage_cli.main_dashboard`` helpers the dashboard-cleanup path reads at call time."""
+    from sage_cli import main_dashboard
 
     for name, value in helpers.items():
         monkeypatch.setattr(main_dashboard, name, value)
@@ -964,7 +964,7 @@ def test_managed_dashboard_restart_still_scans_for_serve_backends(monkeypatch):
     restarted meant the serve backend hosting ``tui_gateway`` was never even
     looked for, so it kept serving the pre-update generation.
     """
-    from hermes_cli import dashboard_procs
+    from sage_cli import dashboard_procs
 
     scan_calls: list[dict] = []
     _stub_dashboard_helpers(monkeypatch, **_dashboard_main_stub(scan_calls))
@@ -977,7 +977,7 @@ def test_managed_dashboard_restart_still_scans_for_serve_backends(monkeypatch):
 
 def test_restarted_dashboard_unit_is_not_killed_by_the_continued_scan(monkeypatch):
     """Continuing the scan must not undo the restart it just performed."""
-    from hermes_cli import dashboard_procs
+    from sage_cli import dashboard_procs
 
     killed: list[int] = []
     _stub_dashboard_helpers(
@@ -1003,7 +1003,7 @@ def test_restarted_dashboard_unit_is_not_killed_by_the_continued_scan(monkeypatc
 
 def test_serve_backend_survives_selection_when_the_dashboard_unit_restarts(monkeypatch):
     """A serve PID owned by a DIFFERENT unit is still selected for recovery."""
-    from hermes_cli import dashboard_procs
+    from sage_cli import dashboard_procs
 
     signalled: list[int] = []
     restarted: list[str] = []

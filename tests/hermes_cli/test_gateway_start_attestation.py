@@ -18,7 +18,7 @@ import json
 
 import pytest
 
-import hermes_cli.gateway_windows as gateway_windows
+import sage_cli.gateway_windows as gateway_windows
 
 
 # ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ def _install_pid_sequence(monkeypatch, snapshots):
         calls["n"] += 1
         return list(snapshots[idx])
 
-    monkeypatch.setattr("hermes_cli.gateway.find_gateway_pids", _fake)
+    monkeypatch.setattr("sage_cli.gateway.find_gateway_pids", _fake)
     return calls
 
 
@@ -83,7 +83,7 @@ def test_report_gateway_start_failure_is_loud_not_checkmark(monkeypatch, tmp_pat
         gateway_windows, "_wait_for_gateway_ready", lambda *a, **k: []
     )
     monkeypatch.setattr(
-        "hermes_cli.config.get_hermes_home", lambda: str(tmp_path)
+        "sage_cli.config.get_hermes_home", lambda: str(tmp_path)
     )
     monkeypatch.setattr(gateway_windows, "is_task_registered", lambda: True)
     monkeypatch.setattr(gateway_windows, "get_task_name", lambda: "Hermes_Gateway_x")
@@ -102,7 +102,7 @@ def test_report_gateway_start_failure_is_loud_not_checkmark(monkeypatch, tmp_pat
 
 @pytest.fixture
 def attest_home(monkeypatch, tmp_path):
-    monkeypatch.setattr("hermes_cli.config.get_hermes_home", lambda: str(tmp_path))
+    monkeypatch.setattr("sage_cli.config.get_hermes_home", lambda: str(tmp_path))
     monkeypatch.setattr(gateway_windows, "is_task_registered", lambda: False)
     return tmp_path
 

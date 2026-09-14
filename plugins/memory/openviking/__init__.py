@@ -37,7 +37,7 @@ from urllib.request import url2pathname
 from agent.message_content import flatten_message_text
 from agent.memory_provider import MemoryProvider
 from agent.skill_commands import extract_user_instruction_from_skill_message
-from hermes_cli import __version__ as _HERMES_VERSION
+from sage_cli import __version__ as _HERMES_VERSION
 from tools.registry import tool_error
 from utils import atomic_json_write, env_var_enabled
 
@@ -738,7 +738,7 @@ def _is_local_openviking_url(value: str) -> bool:
 
 def _load_hermes_openviking_config() -> dict:
     try:
-        from hermes_cli.config import load_config_readonly
+        from sage_cli.config import load_config_readonly
 
         config = load_config_readonly()
         memory_config = config.get("memory", {}) if isinstance(config, dict) else {}
@@ -901,7 +901,7 @@ def _local_openviking_bind(endpoint: str) -> tuple[str, int]:
 
 def _hermes_home_path() -> Path:
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         return get_hermes_home()
     except Exception:
         env_home = os.environ.get("SAGE_HOME")
@@ -1274,7 +1274,7 @@ class OpenVikingMemoryProvider(MemoryProvider):
         if endpoint:
             normalized["endpoint"] = _normalize_openviking_url(endpoint)
 
-        from hermes_cli.config import load_config, save_config
+        from sage_cli.config import load_config, save_config
 
         config = load_config()
         if not isinstance(config.get("memory"), dict):

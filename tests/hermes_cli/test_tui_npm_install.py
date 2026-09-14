@@ -6,12 +6,12 @@ import types
 from pathlib import Path
 
 import pytest
-from hermes_cli import main_tui_launch
+from sage_cli import main_tui_launch
 
 
 @pytest.fixture
 def main_mod():
-    import hermes_cli.main as m
+    import sage_cli.main as m
 
     return m
 
@@ -51,7 +51,7 @@ def test_make_tui_argv_uses_bundled_tui_when_workspace_missing(
 ) -> None:
     """Prebuilt-install regression (#56665): a prebuilt install (Docker
     image, Nix build, or prior `npm run build`) ships
-    hermes_cli/tui_dist/entry.js but never ships ui-tui/ (that directory only
+    sage_cli/tui_dist/entry.js but never ships ui-tui/ (that directory only
     exists in a git checkout). _make_tui_argv must try the bundled entry.js
     BEFORE _ensure_tui_workspace() — requiring the workspace first hard-exits
     every prebuilt dashboard Chat tab connection with `sys.exit(1)` (surfaced

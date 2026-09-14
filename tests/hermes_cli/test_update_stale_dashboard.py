@@ -22,14 +22,14 @@ from unittest.mock import patch, MagicMock
 
 import pytest
 
-from hermes_cli.main_dashboard import _find_stale_dashboard_pids
-from hermes_cli.dashboard_procs import _kill_stale_dashboard_processes
-from hermes_cli import dashboard_procs
-from hermes_cli import main_dashboard
-from hermes_cli import update_cmd
-from hermes_cli.update_cmd import _finish_dashboard_update_cleanup
-from hermes_cli.main_dashboard import _restart_managed_dashboard_service
-from hermes_cli.dashboard_procs import _kill_stale_dashboard_processes as _warn_stale_dashboard_processes
+from sage_cli.main_dashboard import _find_stale_dashboard_pids
+from sage_cli.dashboard_procs import _kill_stale_dashboard_processes
+from sage_cli import dashboard_procs
+from sage_cli import main_dashboard
+from sage_cli import update_cmd
+from sage_cli.update_cmd import _finish_dashboard_update_cleanup
+from sage_cli.main_dashboard import _restart_managed_dashboard_service
+from sage_cli.dashboard_procs import _kill_stale_dashboard_processes as _warn_stale_dashboard_processes
 
 
 @pytest.fixture(autouse=True)
@@ -111,7 +111,7 @@ def test_update_cleanup_spares_backend_owned_by_valid_ssh_lock(tmp_path, monkeyp
         return []
 
     with patch(
-        "hermes_cli.main_dashboard._find_stale_dashboard_pids",
+        "sage_cli.main_dashboard._find_stale_dashboard_pids",
         side_effect=assert_owned_pid_is_excluded,
     ):
         result = _kill_stale_dashboard_processes(restart_managed=True)
@@ -130,7 +130,7 @@ def test_explicit_stop_does_not_spare_backend_owned_by_valid_ssh_lock(
         return []
 
     with patch(
-        "hermes_cli.main_dashboard._find_stale_dashboard_pids",
+        "sage_cli.main_dashboard._find_stale_dashboard_pids",
         side_effect=assert_owned_pid_is_not_excluded,
     ):
         result = _kill_stale_dashboard_processes(restart_managed=False)
@@ -149,7 +149,7 @@ class TestFindStaleDashboardPids:
             mock_run.return_value = MagicMock(
                 returncode=0,
                 stdout="\n".join([
-                    _ps_line(os.getpid(), "python3 -m hermes_cli.main dashboard"),
+                    _ps_line(os.getpid(), "python3 -m sage_cli.main dashboard"),
                     _ps_line(12345, "hermes dashboard --port 9119"),
                 ]) + "\n",
                 stderr="",
@@ -194,7 +194,7 @@ class TestKillStaleDashboardPosix:
                 raise ProcessLookupError
             # SIGTERM itself: succeed silently.
 
-        with patch("hermes_cli.main_dashboard._find_stale_dashboard_pids",
+        with patch("sage_cli.main_dashboard._find_stale_dashboard_pids",
                    return_value=[12345, 12346]), \
              patch("os.kill", side_effect=fake_kill), \
              patch("time.sleep"):
@@ -244,7 +244,7 @@ class TestKillStaleDashboardPosix:
             raise AssertionError(f"unexpected subprocess.run call: {args}")
 
         with patch("subprocess.run", side_effect=fake_run), \
-             patch("hermes_cli.main_dashboard._find_stale_dashboard_pids", return_value=[]) as find_pids, \
+             patch("sage_cli.main_dashboard._find_stale_dashboard_pids", return_value=[]) as find_pids, \
              patch("os.kill") as kill:
             _kill_stale_dashboard_processes(restart_managed=True)
 
@@ -278,10 +278,10 @@ class TestKillStaleDashboardWindows:
             # taskkill returns 0 on success
             return MagicMock(returncode=0, stdout="", stderr="")
 
-        with patch("hermes_cli.main_dashboard._find_stale_dashboard_pids",
+        with patch("sage_cli.main_dashboard._find_stale_dashboard_pids",
                    return_value=[12345, 12346]), \
              patch("gateway.status.get_process_start_time", return_value=123), \
-             patch("hermes_cli._subprocess_compat.pid_is_hermes", return_value=True), \
+             patch("sage_cli._subprocess_compat.pid_is_hermes", return_value=True), \
              patch("subprocess.run", side_effect=fake_run) as mock_run:
             _kill_stale_dashboard_processes()
 
@@ -312,7 +312,7 @@ class TestDashboardUpdateCleanup:
 
     def test_all_failed_stops_do_not_claim_the_dashboard_was_stopped(self, capsys):
         with patch(
-            "hermes_cli.main._kill_stale_dashboard_processes",
+            "sage_cli.main._kill_stale_dashboard_processes",
             return_value={"matched": [12345], "killed": [], "failed": [(12345, "denied")],
                           "unrecovered": []},
         ):
@@ -338,12 +338,12 @@ class TestWindowsWmicEncoding:
         to the Windows-only CI job.
         """
         with patch("sys.platform", "win32"), \
-             patch("hermes_cli._subprocess_compat.bounded_probe_run") as mock_probe:
+             patch("sage_cli._subprocess_compat.bounded_probe_run") as mock_probe:
             mock_probe.return_value = subprocess.CompletedProcess(
                 args=["wmic"],
                 returncode=0,
                 stdout=(
-                    "CommandLine=python -m hermes_cli.main dashboard\n"
+                    "CommandLine=python -m sage_cli.main dashboard\n"
                     "ProcessId=12345\n"
                 ),
                 stderr="",
@@ -368,7 +368,7 @@ class TestWindowsWmicEncoding:
         """A spawn failure or timeout (bounded_probe_run → None) must yield
         an empty scan, not an AttributeError on result.stdout (#87134)."""
         with patch("sys.platform", "win32"), \
-             patch("hermes_cli._subprocess_compat.bounded_probe_run",
+             patch("sage_cli._subprocess_compat.bounded_probe_run",
                    return_value=None):
             assert _find_stale_dashboard_pids() == []
 
@@ -479,7 +479,7 @@ class TestManualBackendRespawn:
              patch.object(main_dashboard, "_get_pid_cgroup_path", return_value=None), \
              patch.object(main_dashboard, "_get_systemd_service_for_pid", return_value=None), \
              patch.object(main_dashboard, "_dashboard_cmdline_for_pid", return_value=argv), \
-             patch("hermes_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
+             patch("sage_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
              patch.object(live, "_respawn_dashboard_processes", return_value=[]) as respawn, \
              patch("os.kill", side_effect=fake_kill), \
              patch("time.sleep"):
@@ -493,7 +493,7 @@ class TestManualBackendRespawn:
         """``serve --port 0`` backends are stopped but not resurrected (#78821)."""
         live = self._live()
         argv = [
-            "python", "-m", "hermes_cli.main",
+            "python", "-m", "sage_cli.main",
             "serve", "--host", "127.0.0.1", "--port", "0",
         ]
 
@@ -507,7 +507,7 @@ class TestManualBackendRespawn:
              patch.object(main_dashboard, "_get_pid_cgroup_path", return_value=None), \
              patch.object(main_dashboard, "_get_systemd_service_for_pid", return_value=None), \
              patch.object(main_dashboard, "_dashboard_cmdline_for_pid", return_value=argv), \
-             patch("hermes_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
+             patch("sage_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
              patch.object(live, "_respawn_dashboard_processes") as respawn, \
              patch("os.kill", side_effect=fake_kill), \
              patch("time.sleep"):
@@ -534,7 +534,7 @@ class TestManualBackendRespawn:
              patch.object(main_dashboard, "_get_pid_cgroup_path", return_value=None), \
              patch.object(main_dashboard, "_get_systemd_service_for_pid", return_value=None), \
              patch.object(main_dashboard, "_dashboard_cmdline_for_pid", return_value=argv), \
-             patch("hermes_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
+             patch("sage_cli.dashboard_procs._hermes_home_for_pid", return_value=None), \
              patch.object(live, "_respawn_dashboard_processes", return_value=[]) as respawn, \
              patch("os.kill", side_effect=fake_kill), \
              patch("time.sleep"):
@@ -579,10 +579,10 @@ class TestFilterDashboardRespawnCandidates:
     """Unit tests for respawn filtering / dedupe / orphan skip (#78821)."""
 
     def test_skips_serve_port_zero(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = [
-            "python", "-m", "hermes_cli.main",
+            "python", "-m", "sage_cli.main",
             "--profile", "mini-cat",
             "serve", "--host", "127.0.0.1", "--port", "0",
         ]
@@ -591,7 +591,7 @@ class TestFilterDashboardRespawnCandidates:
         ]) == []
 
     def test_skips_legacy_dashboard_port_zero(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = [
             "hermes", "--profile", "coder",
@@ -600,23 +600,23 @@ class TestFilterDashboardRespawnCandidates:
         assert _filter_dashboard_respawn_candidates([(7, argv, None)]) == []
 
     def test_skips_serve_port_equals_zero(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = ["hermes", "serve", "--port=0"]
         assert _filter_dashboard_respawn_candidates([(1, argv, None)]) == []
 
     def test_keeps_ppid1_fixed_port_for_repeat_update(self):
         """Detached prior-update respawns (PPID 1) must remain restartable (#40449)."""
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = ["hermes", "dashboard", "--port", "9119"]
         assert _filter_dashboard_respawn_candidates([(10, argv, None)]) == [argv]
 
     def test_dedupes_identical_normalized_cmdlines(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
-        a = ["/usr/bin/python3", "-m", "hermes_cli.main", "dashboard", "--port", "8300"]
-        b = ["/other/python", "-m", "hermes_cli.main", "dashboard", "--port", "8300"]
+        a = ["/usr/bin/python3", "-m", "sage_cli.main", "dashboard", "--port", "8300"]
+        b = ["/other/python", "-m", "sage_cli.main", "dashboard", "--port", "8300"]
         out = _filter_dashboard_respawn_candidates([
             (1, a, None),
             (2, b, None),
@@ -624,7 +624,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == [a]
 
     def test_caps_one_per_profile(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         a = ["hermes", "--profile", "coder", "dashboard", "--port", "8300"]
         b = ["hermes", "--profile", "coder", "dashboard", "--port", "8301"]
@@ -637,7 +637,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == [a, c]
 
     def test_caps_one_per_hermes_home(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         home = "/tmp/hermes-home-a"
         a = ["hermes", "dashboard", "--port", "8300"]
@@ -652,7 +652,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == [a]
 
     def test_profile_flag_and_profiles_home_share_cap(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         a = ["hermes", "--profile", "coder", "dashboard", "--port", "8300"]
         b = ["hermes", "dashboard", "--port", "8301"]
@@ -663,7 +663,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == [a]
 
     def test_default_profile_same_root_home_caps(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         a = ["hermes", "--profile", "default", "dashboard", "--port", "8300"]
         b = ["hermes", "dashboard", "--port", "8301"]
@@ -685,7 +685,7 @@ class TestFilterDashboardRespawnCandidates:
         fixed port.  Supersedes the old "distinct homes don't share a cap"
         pin — a foreign home is no longer replayed at all.
         """
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         a = ["hermes", "dashboard", "--port", "8300"]
         b = ["hermes", "dashboard", "--port", "8301"]
@@ -700,11 +700,11 @@ class TestFilterDashboardRespawnCandidates:
 
     def test_skips_sidecar_fixed_port_serve_on_foreign_home(self):
         """The reported case: launchd-supervised sidecar serve, fixed port."""
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = [
             "/Users/u/.hermes-sidecar/hermes-agent/venv/bin/python",
-            "-m", "hermes_cli.main",
+            "-m", "sage_cli.main",
             "serve", "--host", "127.0.0.1", "--port", "9118", "--skip-build",
         ]
         out = _filter_dashboard_respawn_candidates(
@@ -714,7 +714,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == []
 
     def test_matching_hermes_home_is_kept(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = ["hermes", "serve", "--host", "127.0.0.1", "--port", "9118"]
         out = _filter_dashboard_respawn_candidates(
@@ -724,7 +724,7 @@ class TestFilterDashboardRespawnCandidates:
         assert out == [argv]
 
     def test_symlinked_hermes_home_compares_equal(self, tmp_path):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         real = tmp_path / "real-home"
         real.mkdir()
@@ -743,7 +743,7 @@ class TestFilterDashboardRespawnCandidates:
 
     def test_unknown_home_stays_eligible(self):
         """Unreadable HERMES_HOME (env probe failed) keeps pre-#94030 behaviour."""
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = ["hermes", "dashboard", "--port", "8300"]
         out = _filter_dashboard_respawn_candidates(
@@ -755,11 +755,11 @@ class TestFilterDashboardRespawnCandidates:
     def test_own_home_defaults_to_get_hermes_home(self, monkeypatch):
         from pathlib import Path
 
-        import hermes_constants
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        import sage_constants
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         monkeypatch.setattr(
-            hermes_constants, "get_hermes_home", lambda: Path("/home/u/.hermes")
+            sage_constants, "get_hermes_home", lambda: Path("/home/u/.hermes")
         )
         argv = ["hermes", "serve", "--port", "9118"]
         foreign = _filter_dashboard_respawn_candidates([
@@ -772,7 +772,7 @@ class TestFilterDashboardRespawnCandidates:
         assert own == [argv]
 
     def test_keeps_fixed_port_serve(self):
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = ["hermes", "serve", "--host", "0.0.0.0", "--port", "9119"]
         assert _filter_dashboard_respawn_candidates([
@@ -781,10 +781,10 @@ class TestFilterDashboardRespawnCandidates:
 
     def test_seventeen_port_zero_orphans_collapse_to_zero(self):
         """The reported accumulation case: many identical serve --port 0 → none."""
-        from hermes_cli.dashboard_procs import _filter_dashboard_respawn_candidates
+        from sage_cli.dashboard_procs import _filter_dashboard_respawn_candidates
 
         argv = [
-            "python", "-m", "hermes_cli.main",
+            "python", "-m", "sage_cli.main",
             "serve", "--host", "127.0.0.1", "--port", "0",
         ]
         candidates = [(i, argv, None) for i in range(17)]
@@ -821,7 +821,7 @@ class TestCmdlineCapture:
              patch("builtins.open", fake_open):
             argv = main_dashboard._dashboard_cmdline_for_pid(777)
 
-        assert argv == ["/usr/bin/python3", "-m", "hermes_cli.main", "serve"]
+        assert argv == ["/usr/bin/python3", "-m", "sage_cli.main", "serve"]
 
     @pytest.mark.skipif(sys.platform == "win32", reason="POSIX ps cmdline fallback")
     def test_falls_back_to_ps_without_proc(self, monkeypatch):
@@ -851,9 +851,9 @@ class TestPostUpdateStaleModuleReload:
     """Regression tests for the post-update stale-module ImportError.
 
     ``hermes update`` runs in the PRE-pull Python process. When the update
-    adds a new symbol to ``hermes_cli._subprocess_compat`` (as #87134 added
+    adds a new symbol to ``sage_cli._subprocess_compat`` (as #87134 added
     ``bounded_probe_run``), the post-update dashboard cleanup's lazy
-    ``from hermes_cli._subprocess_compat import bounded_probe_run`` hits the
+    ``from sage_cli._subprocess_compat import bounded_probe_run`` hits the
     stale cached module and crashes with ImportError — after the code update
     itself already succeeded. The cleanup entry point must force-reload the
     process-scan modules first (PR #87757 + ZIP-path widening).
@@ -863,14 +863,14 @@ class TestPostUpdateStaleModuleReload:
         """_finish_dashboard_update_cleanup must reload the process-scan
         modules BEFORE calling _kill_stale_dashboard_processes, on every
         call path (git update and ZIP fallback both route here)."""
-        from hermes_cli import update_cmd
+        from sage_cli import update_cmd
 
         order: list[str] = []
         with patch.object(
             update_cmd, "_reload_process_scan_modules",
             side_effect=lambda: order.append("reload"),
         ), patch(
-            "hermes_cli.main._kill_stale_dashboard_processes",
+            "sage_cli.main._kill_stale_dashboard_processes",
             side_effect=lambda **kw: order.append("kill") or {"unrecovered": []},
         ):
             update_cmd._finish_dashboard_update_cleanup([])
@@ -880,10 +880,10 @@ class TestPostUpdateStaleModuleReload:
     def test_node_failures_skip_reload_and_kill(self):
         """A failed Node refresh leaves the running dashboard untouched —
         no reload, no kill (existing safety rule preserved)."""
-        from hermes_cli import update_cmd
+        from sage_cli import update_cmd
 
         with patch.object(update_cmd, "_reload_process_scan_modules") as mock_reload, \
-             patch("hermes_cli.main._kill_stale_dashboard_processes") as mock_kill:
+             patch("sage_cli.main._kill_stale_dashboard_processes") as mock_kill:
             update_cmd._finish_dashboard_update_cleanup(["dashboard"])
 
         mock_reload.assert_not_called()
@@ -894,8 +894,8 @@ class TestPostUpdateStaleModuleReload:
         the cached module object (what an old pre-#87134 module looks like)
         and verify the reload restores it from disk — the exact state the
         Windows update crash came from."""
-        import hermes_cli._subprocess_compat as compat
-        from hermes_cli import update_cmd
+        import sage_cli._subprocess_compat as compat
+        from sage_cli import update_cmd
 
         assert hasattr(compat, "bounded_probe_run")
         try:
@@ -904,16 +904,16 @@ class TestPostUpdateStaleModuleReload:
 
             update_cmd._reload_process_scan_modules()
 
-            stale = sys.modules["hermes_cli._subprocess_compat"]
+            stale = sys.modules["sage_cli._subprocess_compat"]
             assert hasattr(stale, "bounded_probe_run")
         finally:
-            importlib.reload(sys.modules["hermes_cli._subprocess_compat"])
-            importlib.reload(sys.modules["hermes_cli.dashboard_procs"])
+            importlib.reload(sys.modules["sage_cli._subprocess_compat"])
+            importlib.reload(sys.modules["sage_cli.dashboard_procs"])
 
     def test_reload_failure_is_nonfatal(self):
         """A reload failure must log and continue, never raise — the cleanup
         step runs after the update already succeeded."""
-        from hermes_cli import update_cmd
+        from sage_cli import update_cmd
 
         with patch("importlib.reload", side_effect=RuntimeError("boom")):
             update_cmd._reload_process_scan_modules()  # must not raise
@@ -921,11 +921,11 @@ class TestPostUpdateStaleModuleReload:
     def test_config_reload_list_includes_process_scan_modules(self):
         """PR #87757's half: the git-path pre-cleanup reload also refreshes
         the process-scan modules (belt to the entry-point suspenders)."""
-        from hermes_cli import update_cmd
+        from sage_cli import update_cmd
 
         reloaded: list[str] = []
         with patch("importlib.reload", side_effect=lambda m: reloaded.append(m.__name__)):
             update_cmd._reload_config_modules()
 
-        assert "hermes_cli._subprocess_compat" in reloaded
-        assert "hermes_cli.dashboard_procs" in reloaded
+        assert "sage_cli._subprocess_compat" in reloaded
+        assert "sage_cli.dashboard_procs" in reloaded

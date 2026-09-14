@@ -14,22 +14,22 @@ import argparse
 
 import pytest
 
-from hermes_cli.subcommands.browser import build_browser_parser
-from hermes_cli.subcommands.bundles import build_bundles_parser
-from hermes_cli.subcommands.checkpoints import build_checkpoints_parser
-from hermes_cli.subcommands.completion import build_completion_parser
-from hermes_cli.subcommands.computer_use import build_computer_use_parser
-from hermes_cli.subcommands.curator import build_curator_parser
-from hermes_cli.subcommands.egress import build_egress_parser
-from hermes_cli.subcommands.fallback import build_fallback_parser
-from hermes_cli.subcommands.journey import build_journey_parser
-from hermes_cli.subcommands.migrate import build_migrate_parser
-from hermes_cli.subcommands.moa import build_moa_parser
-from hermes_cli.subcommands.pets import build_pets_parser
-from hermes_cli.subcommands.secrets import build_secrets_parser
-from hermes_cli.subcommands.sessions import build_sessions_parser
-from hermes_cli.subcommands.whatsapp import build_whatsapp_cloud_parser
-from hermes_cli.subcommands.worktree import build_worktree_parser
+from sage_cli.subcommands.browser import build_browser_parser
+from sage_cli.subcommands.bundles import build_bundles_parser
+from sage_cli.subcommands.checkpoints import build_checkpoints_parser
+from sage_cli.subcommands.completion import build_completion_parser
+from sage_cli.subcommands.computer_use import build_computer_use_parser
+from sage_cli.subcommands.curator import build_curator_parser
+from sage_cli.subcommands.egress import build_egress_parser
+from sage_cli.subcommands.fallback import build_fallback_parser
+from sage_cli.subcommands.journey import build_journey_parser
+from sage_cli.subcommands.migrate import build_migrate_parser
+from sage_cli.subcommands.moa import build_moa_parser
+from sage_cli.subcommands.pets import build_pets_parser
+from sage_cli.subcommands.secrets import build_secrets_parser
+from sage_cli.subcommands.sessions import build_sessions_parser
+from sage_cli.subcommands.whatsapp import build_whatsapp_cloud_parser
+from sage_cli.subcommands.worktree import build_worktree_parser
 
 
 def _tree():
@@ -67,7 +67,7 @@ def test_worktree_aliases_normalize_to_list(monkeypatch):
     parser, sub = _tree()
     build_worktree_parser(sub)
     seen = {}
-    monkeypatch.setattr("hermes_cli.worktree_cmd.cmd_worktree", lambda a: seen.setdefault("action", a.worktree_action))
+    monkeypatch.setattr("sage_cli.worktree_cmd.cmd_worktree", lambda a: seen.setdefault("action", a.worktree_action))
     ns = parser.parse_args(["worktree", "audit"])
     ns.func(ns)
     assert seen["action"] == "list"

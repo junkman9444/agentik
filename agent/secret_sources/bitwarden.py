@@ -92,7 +92,7 @@ def _classify_bws_error(message: str) -> ErrorKind:
 
 def _hermes_bin_dir() -> Path:
     """Where Hermes stores its managed binaries. Profile-aware."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     return get_hermes_home() / "bin"
 
@@ -633,7 +633,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

@@ -1,4 +1,4 @@
-"""Regression tests for the OAuth dispatcher in hermes_cli.web_server.
+"""Regression tests for the OAuth dispatcher in sage_cli.web_server.
 
 Bug history (2026-05-09): the `_OAUTH_PROVIDER_CATALOG` had two entries
 flagged ``flow: "pkce"`` — anthropic and minimax-oauth — and the
@@ -31,9 +31,9 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from hermes_cli.web_server import _SESSION_TOKEN, app
-import hermes_cli.web_routers.oauth as _rt_oauth
-import hermes_cli.web_server_oauth as _web_server_oauth
+from sage_cli.web_server import _SESSION_TOKEN, app
+import sage_cli.web_routers.oauth as _rt_oauth
+import sage_cli.web_server_oauth as _web_server_oauth
 
 client = TestClient(app)
 HEADERS = {"X-Hermes-Session-Token": _SESSION_TOKEN}
@@ -83,13 +83,13 @@ def test_minimax_login_does_not_launch_anthropic_flow():
         "state": "stub-state",
     }
     with patch(
-        "hermes_cli.auth._minimax_request_user_code",
+        "sage_cli.auth._minimax_request_user_code",
         return_value=fake_user_code_resp,
     ), patch(
-        "hermes_cli.auth._minimax_pkce_pair",
+        "sage_cli.auth._minimax_pkce_pair",
         return_value=("verifier-stub", "challenge-stub", "stub-state"),
     ), patch(
-        "hermes_cli.web_server_oauth._minimax_poller",
+        "sage_cli.web_server_oauth._minimax_poller",
         return_value=None,
     ):
         resp = client.post(
@@ -115,8 +115,8 @@ def test_minimax_login_does_not_launch_anthropic_flow():
 
 
 def test_oauth_provider_status_uses_profile_query(tmp_path, monkeypatch):
-    from hermes_cli import web_server as ws
-    from hermes_constants import get_hermes_home
+    from sage_cli import web_server as ws
+    from sage_constants import get_hermes_home
 
     profile_home = _make_profile_home(tmp_path, monkeypatch)
     observed_homes = []
@@ -142,7 +142,7 @@ def test_oauth_provider_status_uses_profile_query(tmp_path, monkeypatch):
 
 
 def test_oauth_start_stores_profile_for_background_completion(tmp_path, monkeypatch):
-    from hermes_cli import web_server as ws
+    from sage_cli import web_server as ws
 
     _make_profile_home(tmp_path, monkeypatch)
     fake_user_code_resp = {
@@ -153,13 +153,13 @@ def test_oauth_start_stores_profile_for_background_completion(tmp_path, monkeypa
         "state": "stub-state",
     }
     with patch(
-        "hermes_cli.auth._minimax_request_user_code",
+        "sage_cli.auth._minimax_request_user_code",
         return_value=fake_user_code_resp,
     ), patch(
-        "hermes_cli.auth._minimax_pkce_pair",
+        "sage_cli.auth._minimax_pkce_pair",
         return_value=("verifier-stub", "challenge-stub", "stub-state"),
     ), patch(
-        "hermes_cli.web_server_oauth._minimax_poller",
+        "sage_cli.web_server_oauth._minimax_poller",
         return_value=None,
     ):
         resp = client.post(
@@ -179,7 +179,7 @@ def test_oauth_session_cannot_be_polled_or_cancelled_from_another_profile(
     tmp_path, monkeypatch
 ):
     """A named-profile OAuth session must reject default-profile retargeting."""
-    from hermes_cli import web_server as ws
+    from sage_cli import web_server as ws
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
     (tmp_path / "profiles" / "worker").mkdir(parents=True)
@@ -220,7 +220,7 @@ def test_oauth_session_cannot_be_polled_or_cancelled_from_another_profile(
 
 
 def test_codex_dashboard_start_rewords_device_authorization_error(monkeypatch):
-    from hermes_cli import web_server as ws
+    from sage_cli import web_server as ws
 
     before_sessions = set(_web_server_oauth._oauth_sessions)
 
@@ -284,8 +284,8 @@ def test_codex_dashboard_worker_stops_polling_after_cancel(tmp_path, monkeypatch
     endpoint/worker race and the real removal from `_oauth_sessions` are
     both under test.
     """
-    from hermes_cli import auth as auth_mod
-    from hermes_cli import web_server as ws
+    from sage_cli import auth as auth_mod
+    from sage_cli import web_server as ws
 
     class _Resp:
         def __init__(self, status_code, payload):
@@ -357,8 +357,8 @@ def test_codex_worker_final_save_is_atomic_with_cancel_delete(tmp_path, monkeypa
     """
     import threading
 
-    from hermes_cli import auth as auth_mod
-    from hermes_cli import web_server as ws
+    from sage_cli import auth as auth_mod
+    from sage_cli import web_server as ws
 
     class _Resp:
         def __init__(self, status_code, payload):
@@ -455,7 +455,7 @@ def test_cancel_oauth_session_marks_dict_cancelled_before_popping(tmp_path, monk
     it can only observe cancellation if the flag is set on that shared
     object prior to (or instead of) removal from the global session map.
     """
-    from hermes_cli import web_server as ws
+    from sage_cli import web_server as ws
 
     _make_profile_home(tmp_path, monkeypatch, profile="coder")
     session_id = "cancel-flag-test"
@@ -482,8 +482,8 @@ def test_cancel_oauth_session_marks_dict_cancelled_before_popping(tmp_path, monk
 
 
 def test_nous_dashboard_poller_preserves_effective_scope_when_token_omits_scope(monkeypatch):
-    from hermes_cli import auth as auth_mod
-    from hermes_cli import web_server as ws
+    from sage_cli import auth as auth_mod
+    from sage_cli import web_server as ws
 
     session_id = "nous-effective-scope-test"
     _web_server_oauth._oauth_sessions[session_id] = {
@@ -545,7 +545,7 @@ def test_xai_oauth_listed_as_device_code_flow():
 
 def test_anthropic_dashboard_oauth_is_removed_and_external():
     """Anthropic subscription OAuth is not minted by the dashboard anymore."""
-    from hermes_cli import web_server as ws
+    from sage_cli import web_server as ws
 
     resp = client.get("/api/providers/oauth", headers=HEADERS)
     assert resp.status_code == 200, resp.text
@@ -578,7 +578,7 @@ def test_accounts_offers_every_oauth_provider_from_catalog():
     the desktop Accounts tab in lockstep with the CLI picker — no provider the
     CLI can sign into may be missing from the GUI.
     """
-    from hermes_cli.provider_catalog import provider_catalog
+    from sage_cli.provider_catalog import provider_catalog
 
     resp = client.get("/api/providers/oauth", headers=HEADERS)
     assert resp.status_code == 200, resp.text
@@ -618,7 +618,7 @@ def test_oauth_catalog_marks_external_providers_not_disconnectable():
 
 def test_external_oauth_disconnect_rejected_before_auth_mutation(monkeypatch):
     """DELETE must not pretend to remove credentials owned by another CLI."""
-    from hermes_cli import auth as auth_mod
+    from sage_cli import auth as auth_mod
 
     def fail_clear_provider_auth(provider_id=None):
         raise AssertionError("external providers must not reach clear_provider_auth")
@@ -663,8 +663,8 @@ def test_xai_dashboard_poller_seeds_single_entry_and_clears_suppression(tmp_path
     ``device_code`` suppression left by a prior ``hermes auth remove
     xai-oauth``.
     """
-    from hermes_cli import auth as auth_mod
-    from hermes_cli import web_server as ws
+    from sage_cli import auth as auth_mod
+    from sage_cli import web_server as ws
     from agent.credential_pool import load_pool
 
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
@@ -752,10 +752,10 @@ def test_status_falls_through_to_generic_dispatcher_for_catalog_only_provider():
     Providers appended to the Accounts tab from the unified provider_catalog()
     carry status_fn=None and may have no explicit branch in
     _resolve_provider_status. Before the fallthrough they rendered permanently
-    logged-out; now they dispatch to hermes_cli.auth.get_auth_status (the
+    logged-out; now they dispatch to sage_cli.auth.get_auth_status (the
     canonical slug dispatcher) so membership AND status both auto-extend.
     """
-    import hermes_cli.web_server as ws
+    import sage_cli.web_server as ws
 
     fake_status = {
         "logged_in": True,
@@ -765,7 +765,7 @@ def test_status_falls_through_to_generic_dispatcher_for_catalog_only_provider():
         "expires_at": "2026-12-01T00:00:00Z",
         "has_refresh_token": True,
     }
-    with patch("hermes_cli.auth.get_auth_status", return_value=fake_status):
+    with patch("sage_cli.auth.get_auth_status", return_value=fake_status):
         out = _rt_oauth._resolve_provider_status("some-future-oauth", None)
 
     assert out["logged_in"] is True

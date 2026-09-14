@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, urlparse
 
-from hermes_constants import secure_parent_dir
+from sage_constants import secure_parent_dir
 from tools.mcp_dashboard_oauth import contextvar_set as _contextvar_set, get_dashboard_oauth_flow
 
 if TYPE_CHECKING:  # annotations only; the SDK is imported lazily at runtime
@@ -96,7 +96,7 @@ _USER_SKIPPED_SENTINEL = "__hermes_user_skipped__"
 
 def _get_token_dir(hermes_home: str | Path | None = None) -> Path:
     """``HERMES_HOME/mcp-tokens/`` — per-profile token directory."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     return Path(hermes_home if hermes_home is not None else get_hermes_home()) / "mcp-tokens"
 

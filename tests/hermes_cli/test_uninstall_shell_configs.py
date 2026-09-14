@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import uninstall
+from sage_cli import uninstall
 
 
 ZSHRC = (

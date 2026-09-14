@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import uninstall
-from hermes_cli._install_repair import _WINDOWS_BIN_LAUNCHERS
+from sage_cli import uninstall
+from sage_cli._install_repair import _WINDOWS_BIN_LAUNCHERS
 
 
 @pytest.fixture

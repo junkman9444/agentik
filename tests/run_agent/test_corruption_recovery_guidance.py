@@ -34,7 +34,7 @@ def test_format_turn_completion_corrupt_includes_recovery_options():
 def test_gateway_corruption_banner_backups_dir_follows_hermes_home(monkeypatch, tmp_path):
     """The gateway broadcast's step 3 must name the live backups dir, not ~/.hermes (#104250).
 
-    Pre-update backups live at ``<hermes_root>/backups`` (``hermes_cli/backup.py``); a
+    Pre-update backups live at ``<hermes_root>/backups`` (``sage_cli/backup.py``); a
     custom-HERMES_HOME gateway must not be told to restore from a directory that never
     held its backups.
     """

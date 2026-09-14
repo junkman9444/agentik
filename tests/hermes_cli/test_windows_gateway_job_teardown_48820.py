@@ -24,12 +24,12 @@ from unittest.mock import patch
 
 import pytest
 
-import hermes_cli.gateway as gateway
-import hermes_cli.gateway_windows as gateway_windows
-import hermes_cli.main as hm
-import hermes_cli.main_install_repair as main_install_repair
-from hermes_cli._subprocess_compat import _WINDOWS_GATEWAY_BREAKAWAY_ENV
-from hermes_cli.update_cmd import _resume_windows_gateways_after_update
+import sage_cli.gateway as gateway
+import sage_cli.gateway_windows as gateway_windows
+import sage_cli.main as hm
+import sage_cli.main_install_repair as main_install_repair
+from sage_cli._subprocess_compat import _WINDOWS_GATEWAY_BREAKAWAY_ENV
+from sage_cli.update_cmd import _resume_windows_gateways_after_update
 
 
 # ---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ def _captured_watcher_source(monkeypatch) -> str:
 
     monkeypatch.setattr(gateway.subprocess, "Popen", fake_popen)
     assert gateway._spawn_gateway_restart_watcher(
-        999999, ["python", "-m", "hermes_cli.main", "gateway", "run"]
+        999999, ["python", "-m", "sage_cli.main", "gateway", "run"]
     )
     argv = captured["argv"]
     assert argv[1] == "-c"

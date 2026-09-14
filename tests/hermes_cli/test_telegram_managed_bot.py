@@ -1,11 +1,11 @@
-"""Tests for hermes_cli.telegram_managed_bot — QR codes, deep links, pairing."""
+"""Tests for sage_cli.telegram_managed_bot — QR codes, deep links, pairing."""
 
 from __future__ import annotations
 
 from pathlib import PureWindowsPath
 from unittest.mock import MagicMock, patch
 
-from hermes_cli.telegram_managed_bot import (
+from sage_cli.telegram_managed_bot import (
     TELEGRAM_ONBOARDING_URL_ENV,
     TelegramPairing,
     create_pairing,
@@ -13,7 +13,7 @@ from hermes_cli.telegram_managed_bot import (
     print_qr_code,
     render_qr_terminal,
 )
-from hermes_cli import setup_platforms
+from sage_cli import setup_platforms
 
 
 VALID_TOKEN = "123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef"
@@ -51,7 +51,7 @@ class TestCreatePairing:
         }
 
         with patch(
-            "hermes_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
+            "sage_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
         ) as post:
             pairing = create_pairing("https://api.example.com", bot_name="Hermes Agent")
 
@@ -73,7 +73,7 @@ class TestCreatePairing:
         mock_resp = MagicMock()
         mock_resp.status_code = 500
         with patch(
-            "hermes_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
+            "sage_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
         ):
             assert create_pairing("https://api.example.com") is None
 
@@ -83,7 +83,7 @@ class TestCreatePairing:
         mock_resp = MagicMock()
         mock_resp.status_code = 500
         with patch(
-            "hermes_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
+            "sage_cli.telegram_managed_bot.httpx.post", return_value=mock_resp
         ) as post:
             create_pairing()
         assert post.call_args.args[0] == "https://worker.example/v1/telegram/pairings"
@@ -110,9 +110,9 @@ class TestPollForToken:
         }
 
         with patch(
-            "hermes_cli.telegram_managed_bot.httpx.get", return_value=mock_resp
+            "sage_cli.telegram_managed_bot.httpx.get", return_value=mock_resp
         ) as get:
-            with patch("hermes_cli.telegram_managed_bot.time.sleep"):
+            with patch("sage_cli.telegram_managed_bot.time.sleep"):
                 result = poll_for_setup_result(
                     "https://api.example.com", self.pairing(), timeout=5
                 )
@@ -147,8 +147,8 @@ class TestPollForToken:
                 return not_ready
             return ready
 
-        with patch("hermes_cli.telegram_managed_bot.httpx.get", side_effect=fake_get):
-            with patch("hermes_cli.telegram_managed_bot.time.sleep"):
+        with patch("sage_cli.telegram_managed_bot.httpx.get", side_effect=fake_get):
+            with patch("sage_cli.telegram_managed_bot.time.sleep"):
                 result = poll_for_setup_result(
                     "https://api.example.com", self.pairing(), timeout=30
                 )
@@ -157,7 +157,7 @@ class TestPollForToken:
 
 class TestSetupTelegramAuto:
     def test_setup_result_passes_profile_name_for_profile_home(self, monkeypatch, tmp_path):
-        from hermes_cli import setup
+        from sage_cli import setup
 
         seen = {}
         profile_home = tmp_path / ".hermes" / "profiles" / "oracle"
@@ -170,7 +170,7 @@ class TestSetupTelegramAuto:
             return None
 
         monkeypatch.setattr(
-            "hermes_cli.telegram_managed_bot.auto_setup_telegram_bot_result",
+            "sage_cli.telegram_managed_bot.auto_setup_telegram_bot_result",
             fake_auto_setup_telegram_bot_result,
         )
 
@@ -178,7 +178,7 @@ class TestSetupTelegramAuto:
         assert seen["profile_name"] == "oracle"
 
     def test_profile_name_from_home_path_handles_windows_separators(self):
-        from hermes_cli.setup_platforms import _profile_name_from_hermes_home
+        from sage_cli.setup_platforms import _profile_name_from_hermes_home
 
         assert (
             _profile_name_from_hermes_home(

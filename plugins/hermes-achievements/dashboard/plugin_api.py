@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Set
 
 from fastapi import APIRouter
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 router = APIRouter()
 
@@ -549,7 +549,7 @@ def scan_sessions(limit: Optional[int] = None, progress_callback: Optional[Any] 
     intermediate snapshots.
     """
     try:
-        from hermes_state import SessionDB
+        from sage_state import SessionDB
     except Exception as exc:
         return {"sessions": [], "aggregate": {}, "error": f"Could not import SessionDB: {exc}", "scan_meta": _scan_meta("failed", 0)}
 

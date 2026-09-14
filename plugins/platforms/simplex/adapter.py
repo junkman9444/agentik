@@ -665,9 +665,9 @@ def interactive_setup() -> None:
         "  1. simplex-chat daemon running (e.g. `simplex-chat -p 5225`).\n"
         "  2. Python package `websockets` installed (`pip install websockets`).\n")
     try:
-        from hermes_cli.config import get_env_value, save_env_value
+        from sage_cli.config import get_env_value, save_env_value
     except ImportError:
-        print("hermes_cli.config not available; set SIMPLEX_* vars manually in ~/.hermes/.env")
+        print("sage_cli.config not available; set SIMPLEX_* vars manually in ~/.hermes/.env")
         return
 
     for var, prompt in _SETUP_PROMPTS:

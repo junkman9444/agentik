@@ -62,4 +62,4 @@ def test_gateway_start_inside_a_container_exec_is_not_blocked():
 
 def test_gateway_start_on_the_host_is_still_blocked():
     with pytest.raises(RuntimeError, match="REAL.*gateway runtime"):
-        subprocess.run(["python", "-m", "hermes_cli.main", "gateway", "start"])
+        subprocess.run(["python", "-m", "sage_cli.main", "gateway", "start"])

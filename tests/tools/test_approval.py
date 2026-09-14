@@ -12,7 +12,7 @@ import pytest
 import tools.approval as approval_module
 from tools import approval_context
 from tools import approval_smart
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from tools.approval import approve_session, detect_dangerous_command, detect_hardline_command, is_approved, load_permanent, prompt_dangerous_approval
 from tools.approval_context import _get_approval_mode
 from tools.approval_context import _normalize_approval_mode
@@ -32,7 +32,7 @@ class TestApprovalModeParsing:
 
 
     def test_config_bool_false_maps_to_off(self):
-        with mock_patch("hermes_cli.config.load_config_readonly", return_value={"approvals": {"mode": False}}):
+        with mock_patch("sage_cli.config.load_config_readonly", return_value={"approvals": {"mode": False}}):
             assert _get_approval_mode() == "off"
 
 
@@ -671,13 +671,13 @@ class TestGatewayProtection:
     """Prevent agents from starting the gateway outside systemd management."""
 
     def test_gateway_run_backgrounded_detected(self):
-        cmd = "kill 1605 && cd ~/.hermes/hermes-agent && source venv/bin/activate && python -m hermes_cli.main gateway run --replace &disown; echo done"
+        cmd = "kill 1605 && cd ~/.hermes/hermes-agent && source venv/bin/activate && python -m sage_cli.main gateway run --replace &disown; echo done"
         dangerous, key, desc = detect_dangerous_command(cmd)
         assert dangerous is True
         assert "systemctl" in desc
         for variant in (
-            "python -m hermes_cli.main gateway run --replace &",
-            "nohup python -m hermes_cli.main gateway run --replace",
+            "python -m sage_cli.main gateway run --replace &",
+            "nohup python -m sage_cli.main gateway run --replace",
         ):
             assert detect_dangerous_command(variant)[0] is True, variant
 
@@ -966,7 +966,7 @@ class TestPgrepKillExpansion:
         """`kill $(pidof hermes)` is the BSD/Linux equivalent of the
         pgrep expansion and bypasses the pkill/killall name pattern
         in the same way. See issue #33071."""
-        dangerous, _, desc = detect_dangerous_command("kill -TERM $(pidof hermes_cli.main)")
+        dangerous, _, desc = detect_dangerous_command("kill -TERM $(pidof sage_cli.main)")
         assert dangerous is True
         assert "pidof" in desc.lower() or "pgrep" in desc.lower()
         assert detect_dangerous_command("kill -9 `pidof hermes`")[0] is True
@@ -1762,7 +1762,7 @@ class TestTirithImportErrorFailOpenPolicy:
         }
         real_import = builtins.__import__
         with _patch("builtins.__import__", side_effect=self._make_failing_import(real_import)):
-            with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+            with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
                 with _patch("tools.approval.detect_dangerous_command", return_value=(False, None, None)):
                     with mock_patch.dict("os.environ", {"HERMES_INTERACTIVE": "1"}, clear=False):
                         result = check_all_command_guards("echo hello", "local")
@@ -1787,7 +1787,7 @@ class TestTirithImportErrorFailOpenPolicy:
 
         real_import = builtins.__import__
         with _patch("builtins.__import__", side_effect=self._make_failing_import(real_import)):
-            with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+            with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
                 with _patch("tools.approval.detect_dangerous_command", return_value=(False, None, None)):
                     with mock_patch.dict("os.environ", {"HERMES_INTERACTIVE": "1"}, clear=False):
                         result = check_all_command_guards(
@@ -1866,7 +1866,7 @@ class TestApprovalPromptRedaction:
             "print(api_key)"
         )
         cfg = {"approvals": {"mode": "manual"}}
-        with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+        with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
             with _patch("tools.approval._is_gateway_approval_context",
                         return_value=True):
                 with _patch("tools.approval_context._get_approval_mode",
@@ -1926,7 +1926,7 @@ class TestCliApprovalTimeoutClassifiedSeparately:
 
         cfg = {"approvals": {"mode": "manual"}}
         with self._interactive_env():
-            with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+            with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
                 result = mod.check_all_command_guards(
                     "rm -rf /var/data", "local",
                     approval_callback=lambda *a, **kw: "timeout",
@@ -1950,7 +1950,7 @@ class TestCliApprovalTimeoutClassifiedSeparately:
 
         cfg = {"approvals": {"mode": "manual"}}
         with self._interactive_env():
-            with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+            with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
                 result = mod.check_all_command_guards(
                     "rm -rf /var/data", "local",
                     approval_callback=lambda *a, **kw: "deny",
@@ -1973,7 +1973,7 @@ class TestCliApprovalTimeoutClassifiedSeparately:
 
         cfg = {"approvals": {"mode": "manual"}}
         with self._interactive_env():
-            with _patch("hermes_cli.config.load_config_readonly", return_value=cfg):
+            with _patch("sage_cli.config.load_config_readonly", return_value=cfg):
                 result = mod.request_tool_approval(
                     "write_file", "plugin flagged this write",
                     approval_callback=lambda *a, **kw: "timeout",

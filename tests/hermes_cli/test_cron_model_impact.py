@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from hermes_cli.config import (
+from sage_cli.config import (
     build_cron_model_impact,
     cron_model_drift_axes,
     resolve_cron_model_drift_defaults,

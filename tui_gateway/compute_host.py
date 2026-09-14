@@ -302,9 +302,9 @@ class ComputeHost:
         owns_db = False
         try:
             if profile_home:
-                from hermes_constants import set_hermes_home_override
+                from sage_constants import set_hermes_home_override
                 from agent.secret_scope import build_profile_secret_scope, set_secret_scope
-                from hermes_state_registry import acquire
+                from sage_state_registry import acquire
                 home_token = set_hermes_home_override(profile_home)
                 secret_token = set_secret_scope(build_profile_secret_scope(Path(profile_home)))
                 # DEDICATED handle — ours only until _make_agent succeeds, then the agent owns
@@ -324,11 +324,11 @@ class ComputeHost:
         finally:
             if owns_db and session_db is not None:
                 with contextlib.suppress(Exception):
-                    from hermes_state_registry import release_or_close
+                    from sage_state_registry import release_or_close
                     release_or_close(session_db)
             if home_token is not None:
                 with contextlib.suppress(Exception):
-                    from hermes_constants import reset_hermes_home_override
+                    from sage_constants import reset_hermes_home_override
                     from agent.secret_scope import reset_secret_scope
                     reset_hermes_home_override(home_token)
                     reset_secret_scope(secret_token)
@@ -616,7 +616,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

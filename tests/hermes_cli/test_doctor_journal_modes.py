@@ -13,14 +13,14 @@ import sqlite3
 
 import pytest
 
-import hermes_cli.doctor as doctor
-from hermes_cli.sqlite_safe_read import (
+import sage_cli.doctor as doctor
+from sage_cli.sqlite_safe_read import (
     connect_tracked,
     has_live_connection,
     track_connection,
     untrack_connection,
 )
-from hermes_cli import doctor_platform
+from sage_cli import doctor_platform
 
 VULNERABLE = (3, 50, 4)
 FIXED_VERSIONS = [(3, 51, 3), (3, 52, 0), (3, 50, 7), (3, 44, 6)]
@@ -54,7 +54,7 @@ def clean_registry():
     fixture) would otherwise leave the registry dirty and make the *next*
     test's refusal assertion pass for the wrong reason.
     """
-    import hermes_cli.sqlite_safe_read as mod
+    import sage_cli.sqlite_safe_read as mod
 
     def _clear():
         with mod._live_lock:

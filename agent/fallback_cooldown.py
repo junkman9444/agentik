@@ -80,5 +80,5 @@ def _is_entitlement_rejected(agent, provider: str, model: str) -> bool:
         return False
     if (provider, model) in rejected:
         return True
-    from hermes_cli.model_normalize import normalize_model_for_provider
+    from sage_cli.model_normalize import normalize_model_for_provider
     return (provider, normalize_model_for_provider(model, provider)) in rejected

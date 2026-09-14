@@ -21,7 +21,7 @@ from agent.repetition_guard import is_repetition_dominated
 from agent.turn_api_call import stop_thinking_spinner
 from agent.turn_retry_state import TurnRetryState
 from agent.usage_pricing import normalize_usage
-from hermes_constants import PARTIAL_STREAM_STUB_ID
+from sage_constants import PARTIAL_STREAM_STUB_ID
 
 logger = logging.getLogger("agent.conversation_loop")
 

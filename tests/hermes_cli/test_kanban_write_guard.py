@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli import kanban_db
-from hermes_cli import kanban_db_connect as kbc
+from sage_cli import kanban_db
+from sage_cli import kanban_db_connect as kbc
 
 
 def test_connect_succeeds_under_test_home(tmp_path, monkeypatch):

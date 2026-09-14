@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from hermes_cli.session_export import (
+from sage_cli.session_export import (
     SAVE_FORMATS,
     default_save_filename,
     normalize_save_format,

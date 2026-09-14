@@ -812,7 +812,7 @@ class LineAdapter(BasePlatformAdapter):
         if not path.is_file():
             return web.Response(status=404, text="not found")
         try:
-            from hermes_constants import get_hermes_home
+            from sage_constants import get_hermes_home
             hermes_home = Path(get_hermes_home()).resolve()
         except Exception:
             hermes_home = Path.home().joinpath(".sage").resolve()
@@ -974,9 +974,9 @@ def interactive_setup() -> None:
     print("\nLINE Messaging API setup\n------------------------\n"
           "Create a Messaging API channel at https://developers.line.biz/console/\nthen copy the values below.\n")
     try:
-        from hermes_cli.config import get_env_value as _get_env, save_env_value as _set_env
+        from sage_cli.config import get_env_value as _get_env, save_env_value as _set_env
     except ImportError:
-        print("hermes_cli.config not available; set LINE_* vars manually in ~/.hermes/.env")
+        print("sage_cli.config not available; set LINE_* vars manually in ~/.hermes/.env")
         return
 
     for var, prompt, secret in _SETUP_PROMPTS:
@@ -984,7 +984,7 @@ def interactive_setup() -> None:
         suffix = " [keep current]" if existing else ""
         try:
             if secret:
-                from hermes_cli.secret_prompt import masked_secret_prompt
+                from sage_cli.secret_prompt import masked_secret_prompt
                 value = masked_secret_prompt(f"{prompt}{suffix}: ")
             else:
                 value = input(f"{prompt}{suffix}: ").strip()

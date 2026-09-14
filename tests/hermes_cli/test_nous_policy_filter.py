@@ -11,11 +11,11 @@ import json
 
 import pytest
 
-import hermes_cli.models as models_mod
-from hermes_cli import models_pricing
-import hermes_cli.nous_account as account_mod
-from hermes_cli.models_pricing import _NOUS_POLICY_APPEND_MAX, nous_policy_allowed_ids, restrict_to_nous_policy
-from hermes_cli.nous_account import nous_policy_present
+import sage_cli.models as models_mod
+from sage_cli import models_pricing
+import sage_cli.nous_account as account_mod
+from sage_cli.models_pricing import _NOUS_POLICY_APPEND_MAX, nous_policy_allowed_ids, restrict_to_nous_policy
+from sage_cli.nous_account import nous_policy_present
 
 
 def _jwt(claims: dict) -> str:
@@ -120,7 +120,7 @@ class TestNousPolicyAllowedIds:
 
 class TestNousPolicyPresent:
     def _patch_token(self, monkeypatch, token):
-        import hermes_cli.auth as auth_mod
+        import sage_cli.auth as auth_mod
 
         monkeypatch.setattr(
             auth_mod,
@@ -224,7 +224,7 @@ class TestPolicyRunsBeforeTierSplit:
     """
 
     def test_a_rescued_paid_model_stays_unavailable_for_a_free_tier_user(self):
-        from hermes_cli.models import partition_nous_models_by_tier
+        from sage_cli.models import partition_nous_models_by_tier
 
         pricing = {
             "vendor/free": {"prompt": "0", "completion": "0"},

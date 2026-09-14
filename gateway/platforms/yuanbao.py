@@ -70,7 +70,7 @@ logger = logging.getLogger(__name__)
 
 # AUTH_BIND / sign-token header values
 try:
-    from hermes_cli import __version__ as _HERMES_VERSION
+    from sage_cli import __version__ as _HERMES_VERSION
 except ImportError:
     _HERMES_VERSION = "0.0.0"
 _APP_VERSION = _BOT_VERSION = _HERMES_VERSION
@@ -779,8 +779,8 @@ class AutoSetHomeMiddleware(InboundMiddleware):
     @staticmethod
     def _persist_home(adapter, ctx: InboundContext) -> None:
         try:
-            from hermes_constants import get_hermes_home
-            from hermes_cli.config import atomic_config_write, read_user_config_raw
+            from sage_constants import get_hermes_home
+            from sage_cli.config import atomic_config_write, read_user_config_raw
             config_path = get_hermes_home() / "config.yaml"
             # Raw read: merged defaults must not be persisted to the user's file.
             user_config: dict = read_user_config_raw(config_path)

@@ -10,14 +10,14 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli.psutil_android import (
+from sage_cli.psutil_android import (
     MARKER,
     REPLACEMENT,
     PSUTIL_URL,
     PsutilAndroidInstallError,
     prepare_patched_psutil_sdist,
 )
-from hermes_cli import update_cmd
+from sage_cli import update_cmd
 
 
 def _add_dir(tf: tarfile.TarFile, name: str) -> None:
@@ -69,7 +69,7 @@ def test_install_psutil_android_compat_uses_patched_tree(tmp_path):
     archive = tmp_path / "psutil.tar.gz"
     _build_psutil_archive(archive, malicious_symlink=False)
 
-    from hermes_cli import main as hermes_main
+    from sage_cli import main as hermes_main
 
     captured: dict[str, object] = {}
 

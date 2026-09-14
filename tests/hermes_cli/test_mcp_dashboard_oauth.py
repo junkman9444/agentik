@@ -3,14 +3,14 @@
 from unittest.mock import patch
 
 import pytest
-import hermes_cli.web_server_mcp as _web_server_mcp
-import hermes_cli.web_server_profiles as _web_server_profiles
+import sage_cli.web_server_mcp as _web_server_mcp
+import sage_cli.web_server_profiles as _web_server_profiles
 
 
 def _client():
     from starlette.testclient import TestClient
 
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
     client = TestClient(app)
     client.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
@@ -19,7 +19,7 @@ def _client():
 
 @pytest.fixture(autouse=True)
 def _clear_flows():
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     _web_server_mcp._mcp_oauth_flows.clear()
     web_server.app.state.auth_required = False
@@ -29,7 +29,7 @@ def _clear_flows():
 
 
 def test_hosted_auth_start_returns_public_authorization_url(monkeypatch):
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     client = _client()
     client.post(
@@ -44,7 +44,7 @@ def test_hosted_auth_start_returns_public_authorization_url(monkeypatch):
 
     monkeypatch.setattr(_web_server_mcp, "_run_dashboard_mcp_oauth", fake_worker)
     with patch(
-        "hermes_cli.dashboard_auth.prefix.resolve_public_url",
+        "sage_cli.dashboard_auth.prefix.resolve_public_url",
         return_value="https://agent.example",
     ):
         response = client.post("/api/mcp/servers/reports/auth")
@@ -62,7 +62,7 @@ def test_hosted_callback_bypasses_gated_cookie_auth(monkeypatch):
 
     from starlette.testclient import TestClient
 
-    from hermes_cli import web_server
+    from sage_cli import web_server
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow
 
     flow = DashboardOAuthFlow(
@@ -89,7 +89,7 @@ def test_hosted_callback_bypasses_gated_cookie_auth(monkeypatch):
 
 
 def test_hosted_auth_allows_same_server_name_in_different_profiles(tmp_path, monkeypatch):
-    from hermes_cli import web_server
+    from sage_cli import web_server
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow
 
     profile_home = tmp_path / "profiles" / "work"
@@ -110,7 +110,7 @@ def test_hosted_auth_allows_same_server_name_in_different_profiles(tmp_path, mon
 
         asyncio.run(flow.publish_authorization_url("https://idp.example/authorize?state=work"))
 
-    with patch("hermes_cli.mcp_config._get_mcp_servers", return_value={"reports": {"url": "https://mcp.example"}}), \
+    with patch("sage_cli.mcp_config._get_mcp_servers", return_value={"reports": {"url": "https://mcp.example"}}), \
          patch.object(_web_server_mcp, "_run_dashboard_mcp_oauth", fake_worker):
         response = _client().post("/api/mcp/servers/reports/auth?profile=work")
 
@@ -120,7 +120,7 @@ def test_hosted_auth_allows_same_server_name_in_different_profiles(tmp_path, mon
 
 
 def test_flow_status_does_not_expose_authorization_code():
-    from hermes_cli import web_server
+    from sage_cli import web_server
     from tools.mcp_dashboard_oauth import DashboardOAuthFlow
 
     flow = DashboardOAuthFlow(

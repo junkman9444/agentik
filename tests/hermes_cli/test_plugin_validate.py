@@ -1,4 +1,4 @@
-"""Tests for ``hermes plugins validate`` (hermes_cli/plugin_validate.py).
+"""Tests for ``hermes plugins validate`` (sage_cli/plugin_validate.py).
 
 Static manifest checks + subprocess-isolated capability probing against a
 recording stub context.
@@ -10,7 +10,7 @@ from pathlib import Path
 
 import yaml
 
-from hermes_cli.plugin_validate import validate_plugin_dir
+from sage_cli.plugin_validate import validate_plugin_dir
 
 
 def _make_plugin(

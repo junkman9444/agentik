@@ -20,8 +20,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Callable
 
-from hermes_constants import get_hermes_home
-from hermes_cli.relay_plugin_cutover import (RELAY_PLUGINS_CONFIG_ENV, configured_legacy_relay_env_vars)
+from sage_constants import get_hermes_home
+from sage_cli.relay_plugin_cutover import (RELAY_PLUGINS_CONFIG_ENV, configured_legacy_relay_env_vars)
 
 logger = logging.getLogger(__name__)
 

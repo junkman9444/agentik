@@ -1,6 +1,6 @@
 """Regression tests for startup model/provider routing (#87189)."""
 
-from hermes_cli import model_switch
+from sage_cli import model_switch
 
 
 def test_startup_route_uses_configured_nous_provider(monkeypatch):
@@ -39,7 +39,7 @@ def test_startup_route_aggregator_native_slug_stays_on_aggregator(monkeypatch):
     """
     monkeypatch.setattr(model_switch, "DIRECT_ALIASES", {})
     monkeypatch.setattr(
-        "hermes_cli.models._find_openrouter_slug",
+        "sage_cli.models._find_openrouter_slug",
         lambda name: "anthropic/claude-opus-4.6",
     )
     route = model_switch.resolve_startup_model_route(
@@ -132,7 +132,7 @@ def test_startup_route_explicit_provider_wins_over_alias_label(monkeypatch):
 
 def test_model_aliases_dict_entries_are_loaded(monkeypatch):
     monkeypatch.setattr(
-        "hermes_cli.config.load_config",
+        "sage_cli.config.load_config",
         lambda: {
             "model": {
                 "aliases": {

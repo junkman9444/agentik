@@ -97,7 +97,7 @@ def test_auth_add_api_key_persists_manual_entry(tmp_path, monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "openrouter"
@@ -124,7 +124,7 @@ def test_auth_add_configured_provider_uses_canonical_pool_key(tmp_path, monkeypa
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
     _write_groq_provider_config(tmp_path)
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "groq"
@@ -166,7 +166,7 @@ def test_auth_add_migrates_legacy_prefixed_key_for_configured_provider(
     )
     _write_groq_provider_config(tmp_path)
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "groq"
@@ -210,7 +210,7 @@ def test_auth_add_migrates_display_name_derived_legacy_pool_key(
     )
     _write_groq_provider_config(tmp_path, provider_key="groq-cloud", name="Groq")
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "groq-cloud"
@@ -218,7 +218,7 @@ def test_auth_add_migrates_display_name_derived_legacy_pool_key(
         api_key = "gsk-new"
         label = "new"
 
-    with patch("hermes_cli.models.clear_provider_models_cache") as clear_cache:
+    with patch("sage_cli.models.clear_provider_models_cache") as clear_cache:
         auth_add_command(_Args())
 
     payload = json.loads((hermes_home / "auth.json").read_text(encoding="utf-8"))
@@ -242,7 +242,7 @@ def test_auth_add_non_registry_configured_provider_preserves_endpoint(
         base_url="https://private.example/v1",
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     auth_add_command(
         type(
@@ -287,7 +287,7 @@ def test_auth_list_includes_non_registry_configured_provider(
         },
     )
 
-    from hermes_cli.auth_commands import auth_list_command
+    from sage_cli.auth_commands import auth_list_command
 
     auth_list_command(type("Args", (), {"provider": None})())
 
@@ -324,7 +324,7 @@ def test_auth_list_shows_entry_id_and_priority(tmp_path, monkeypatch, capsys):
         },
     )
 
-    from hermes_cli.auth_commands import auth_list_command
+    from sage_cli.auth_commands import auth_list_command
 
     auth_list_command(type("Args", (), {"provider": "openrouter"})())
 
@@ -341,7 +341,7 @@ def test_interactive_auth_add_accepts_non_registry_configured_provider(
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
     _write_groq_provider_config(tmp_path, provider_key="private-groq")
 
-    from hermes_cli import auth_commands
+    from sage_cli import auth_commands
 
     monkeypatch.setattr(auth_commands, "_pick_provider", lambda _prompt: "private-groq")
     monkeypatch.setattr(auth_commands, "line_input", lambda _prompt: "private")
@@ -363,7 +363,7 @@ def test_interactive_auth_add_normalizes_display_name_to_provider_key(
         tmp_path, provider_key="groq-cloud", name="Groq Enterprise"
     )
 
-    from hermes_cli import auth_commands
+    from sage_cli import auth_commands
 
     answers = iter(["Groq Enterprise", "primary"])
     monkeypatch.setattr(auth_commands, "line_input", lambda _prompt: next(answers))
@@ -388,7 +388,7 @@ def test_auth_add_explicit_custom_provider_keeps_prefixed_pool_key(
         base_url="https://proxy.example/v1",
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "custom:groq"
@@ -408,7 +408,7 @@ def test_auth_add_nous_oauth_persists_pool_entry(tmp_path, monkeypatch):
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
     token = _jwt_with_email("nous@example.com")
     monkeypatch.setattr(
-        "hermes_cli.auth._nous_device_code_login",
+        "sage_cli.auth._nous_device_code_login",
         lambda **kwargs: {
             "portal_base_url": "https://portal.example.com",
             "inference_base_url": "https://inference.example.com/v1",
@@ -430,7 +430,7 @@ def test_auth_add_nous_oauth_persists_pool_entry(tmp_path, monkeypatch):
         },
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "nous"
@@ -485,7 +485,7 @@ def test_auth_add_nous_oauth_honors_custom_label(tmp_path, monkeypatch):
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
     token = _jwt_with_email("nous@example.com")
     monkeypatch.setattr(
-        "hermes_cli.auth._nous_device_code_login",
+        "sage_cli.auth._nous_device_code_login",
         lambda **kwargs: {
             "portal_base_url": "https://portal.example.com",
             "inference_base_url": "https://inference.example.com/v1",
@@ -507,7 +507,7 @@ def test_auth_add_nous_oauth_honors_custom_label(tmp_path, monkeypatch):
         },
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "nous"
@@ -571,9 +571,9 @@ def test_auth_add_codex_oauth_keeps_distinct_pool_accounts(tmp_path, monkeypatch
             },
         ]
     )
-    monkeypatch.setattr("hermes_cli.auth._codex_device_code_login", lambda: next(logins))
+    monkeypatch.setattr("sage_cli.auth._codex_device_code_login", lambda: next(logins))
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
     from agent.credential_pool import load_pool
 
     class _Args:
@@ -613,7 +613,7 @@ def test_codex_auth_status_reports_pool_only_credential(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, _codex_pool_only_store())
 
-    from hermes_cli.auth import get_codex_auth_status
+    from sage_cli.auth import get_codex_auth_status
 
     status = get_codex_auth_status()
 
@@ -625,7 +625,7 @@ def test_codex_runtime_pool_only_rate_limit_is_not_missing_auth(tmp_path, monkey
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, _codex_pool_only_store(exhausted=True))
 
-    from hermes_cli.auth import AuthError, CODEX_RATE_LIMITED_CODE, resolve_codex_runtime_credentials
+    from sage_cli.auth import AuthError, CODEX_RATE_LIMITED_CODE, resolve_codex_runtime_credentials
 
     with pytest.raises(AuthError) as exc_info:
         resolve_codex_runtime_credentials()
@@ -649,7 +649,7 @@ def test_auth_add_xai_oauth_sets_active_provider(tmp_path, monkeypatch):
     _write_auth_store(tmp_path, {"version": 1, "providers": {}})
     access_token = "xai-test-access-token"
     monkeypatch.setattr(
-        "hermes_cli.auth._xai_oauth_device_code_login",
+        "sage_cli.auth._xai_oauth_device_code_login",
         lambda **kwargs: {
             "tokens": {
                 "access_token": access_token,
@@ -665,7 +665,7 @@ def test_auth_add_xai_oauth_sets_active_provider(tmp_path, monkeypatch):
         },
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
 
     class _Args:
         provider = "xai-oauth"
@@ -732,11 +732,11 @@ def test_auth_add_xai_oauth_keeps_distinct_pool_accounts(tmp_path, monkeypatch):
         ]
     )
     monkeypatch.setattr(
-        "hermes_cli.auth._xai_oauth_device_code_login",
+        "sage_cli.auth._xai_oauth_device_code_login",
         lambda **kwargs: next(logins),
     )
 
-    from hermes_cli.auth_commands import auth_add_command
+    from sage_cli.auth_commands import auth_add_command
     from agent.credential_pool import load_pool
 
     class _Args:
@@ -815,7 +815,7 @@ def test_auth_remove_reindexes_priorities(tmp_path, monkeypatch):
         },
     )
 
-    from hermes_cli.auth_commands import auth_remove_command
+    from sage_cli.auth_commands import auth_remove_command
 
     class _Args:
         provider = "anthropic"
@@ -839,7 +839,7 @@ def test_auth_remove_codex_migrates_legacy_dict_suppression(tmp_path, monkeypatc
     store["suppressed_sources"] = {"openai-codex": {"legacy": True}}
     _write_auth_store(tmp_path, store)
 
-    from hermes_cli.auth_commands import auth_remove_command
+    from sage_cli.auth_commands import auth_remove_command
 
     class _Args:
         provider = "openai-codex"
@@ -895,7 +895,7 @@ def test_clear_provider_auth_removes_provider_pool_entries(tmp_path, monkeypatch
         },
     )
 
-    from hermes_cli.auth import clear_provider_auth
+    from sage_cli.auth import clear_provider_auth
 
     assert clear_provider_auth("anthropic") is True
 
@@ -924,7 +924,7 @@ def test_logout_resets_codex_config_when_auth_state_already_cleared(tmp_path, mo
     )
 
     from types import SimpleNamespace
-    from hermes_cli.auth import logout_command
+    from sage_cli.auth import logout_command
 
     logout_command(SimpleNamespace(provider="openai-codex"))
 
@@ -942,7 +942,7 @@ def test_unsuppress_credential_source_clears_marker(tmp_path, monkeypatch):
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, {"version": 1})
 
-    from hermes_cli.auth import suppress_credential_source, unsuppress_credential_source, is_source_suppressed
+    from sage_cli.auth import suppress_credential_source, unsuppress_credential_source, is_source_suppressed
 
     suppress_credential_source("openai-codex", "device_code")
     assert is_source_suppressed("openai-codex", "device_code") is True
@@ -961,7 +961,7 @@ def test_unsuppress_credential_source_preserves_other_markers(tmp_path, monkeypa
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / "hermes"))
     _write_auth_store(tmp_path, {"version": 1})
 
-    from hermes_cli.auth import (
+    from sage_cli.auth import (
         suppress_credential_source,
         unsuppress_credential_source,
         is_source_suppressed,
@@ -1090,14 +1090,14 @@ def test_auth_remove_copilot_suppresses_all_variants(tmp_path, monkeypatch):
     )
 
     from types import SimpleNamespace
-    from hermes_cli.auth import is_source_suppressed
-    from hermes_cli.auth_commands import auth_remove_command
+    from sage_cli.auth import is_source_suppressed
+    from sage_cli.auth_commands import auth_remove_command
 
     with patch(
-        "hermes_cli.copilot_auth.resolve_copilot_token",
+        "sage_cli.copilot_auth.resolve_copilot_token",
         return_value=("ghp_fake", "gh"),
     ), patch(
-        "hermes_cli.copilot_auth.get_copilot_api_token",
+        "sage_cli.copilot_auth.get_copilot_api_token",
         return_value=("ghu_fake_api", None),
     ):
         auth_remove_command(SimpleNamespace(provider="copilot", target="1"))
@@ -1143,7 +1143,7 @@ def test_auth_remove_env_seeded_dotenv_with_bom_no_shell_hint(tmp_path, monkeypa
     )
 
     from types import SimpleNamespace
-    from hermes_cli.auth_commands import auth_remove_command
+    from sage_cli.auth_commands import auth_remove_command
     auth_remove_command(SimpleNamespace(provider="deepseek", target="1"))
 
     out = capsys.readouterr().out
@@ -1154,8 +1154,8 @@ def test_auth_remove_env_seeded_dotenv_with_bom_no_shell_hint(tmp_path, monkeypa
 def test_qwen_oauth_login_marks_active_through_moved_owner(monkeypatch):
     """`_mark_qwen_oauth_active` lives in `auth_qwen`; the login flow must reach it
     without depending on a re-export from the `auth` facade (AttributeError on head before)."""
-    import hermes_cli.auth_commands as auth_commands
-    import hermes_cli.auth_qwen as auth_qwen
+    import sage_cli.auth_commands as auth_commands
+    import sage_cli.auth_qwen as auth_qwen
 
     creds = {"access_token": "tok"}
     marked = []

@@ -10,10 +10,10 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import main as cli_main
-from hermes_cli import main_desktop
-from hermes_cli import main_install_repair
-from hermes_cli import main_web_build
+from sage_cli import main as cli_main
+from sage_cli import main_desktop
+from sage_cli import main_install_repair
+from sage_cli import main_web_build
 
 
 @pytest.fixture(autouse=True)
@@ -147,14 +147,14 @@ def test_gui_installs_packages_and_launches_desktop_app(tmp_path, monkeypatch):
     pack_ok = subprocess.CompletedProcess(["npm", "run", "pack"], 0)
     launch_ok = subprocess.CompletedProcess([str(packaged_exe)], 0)
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok) as mock_install, \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.main_desktop._register_linux_desktop_entry"), \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok) as mock_install, \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.main_desktop._register_linux_desktop_entry"), \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns())
 
@@ -190,7 +190,7 @@ def test_gui_install_env_prepends_managed_node_on_bare_path(tmp_path, monkeypatc
     """
     import os
 
-    from hermes_constants import iter_hermes_node_dirs
+    from sage_constants import iter_hermes_node_dirs
 
     root = _make_desktop_tree(tmp_path)
     monkeypatch.setattr(cli_main, "PROJECT_ROOT", root)
@@ -212,13 +212,13 @@ def test_gui_install_env_prepends_managed_node_on_bare_path(tmp_path, monkeypatc
     # cmd_gui legitimately shells out one extra time — e.g. the Linux sandbox
     # fixup, which fires on hosts where chrome-sandbox isn't already
     # root-owned+4755. Assert on the install env, not on a call count.
-    with patch("hermes_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok) as mock_install, \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.main.subprocess.run", return_value=launch_ok), \
+    with patch("sage_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok) as mock_install, \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.main.subprocess.run", return_value=launch_ok), \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns(skip_build=False))
 
@@ -312,12 +312,12 @@ def test_gui_does_not_retry_after_packaged_executable_exists(tmp_path, monkeypat
     # discriminator reads the staging dir, so the fake pack lays it down there.
     pack_fail = _pack_into_staging(root, content="half-signed", returncode=1)
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._purge_electron_build_cache", return_value=[Path("/c/electron.zip")]) as mock_purge, \
-         patch("hermes_cli.main_desktop._redownload_electron_dist", return_value=True) as mock_dl, \
-         patch("hermes_cli.main.subprocess.run", side_effect=pack_fail) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=install_ok), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._purge_electron_build_cache", return_value=[Path("/c/electron.zip")]) as mock_purge, \
+         patch("sage_cli.main_desktop._redownload_electron_dist", return_value=True) as mock_dl, \
+         patch("sage_cli.main.subprocess.run", side_effect=pack_fail) as mock_run, \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns())
 
@@ -589,7 +589,7 @@ def test_setup_tcc_identity_creates_cert_imports_trusts_and_configures(tmp_path,
     monkeypatch.setattr(main_desktop, "_desktop_packaged_executable", lambda d: None)
     monkeypatch.setattr(main_desktop, "_desktop_macos_relaunchable_fixup", lambda d: True)
     # Avoid writing the real user config.
-    monkeypatch.setattr("hermes_cli.config.set_config_value", lambda key, value: None)
+    monkeypatch.setattr("sage_cli.config.set_config_value", lambda key, value: None)
 
     assert main_desktop._desktop_macos_setup_tcc_identity(identity) is True
 
@@ -647,7 +647,7 @@ def test_setup_tcc_identity_retries_pkcs12_with_legacy_on_mac_verification_failu
     monkeypatch.setattr(cli_main.subprocess, "run", fake_run)
     monkeypatch.setattr(main_desktop, "_desktop_packaged_executable", lambda d: None)
     monkeypatch.setattr(main_desktop, "_desktop_macos_relaunchable_fixup", lambda d: True)
-    monkeypatch.setattr("hermes_cli.config.set_config_value", lambda key, value: None)
+    monkeypatch.setattr("sage_cli.config.set_config_value", lambda key, value: None)
 
     assert main_desktop._desktop_macos_setup_tcc_identity(identity) is True
 
@@ -726,7 +726,7 @@ def test_setup_tcc_identity_skips_generation_when_already_valid(tmp_path, monkey
     monkeypatch.setattr(cli_main.subprocess, "run", fake_run)
     monkeypatch.setattr(main_desktop, "_desktop_packaged_executable", lambda d: None)
     monkeypatch.setattr(main_desktop, "_desktop_macos_relaunchable_fixup", lambda d: True)
-    monkeypatch.setattr("hermes_cli.config.set_config_value", lambda key, value: None)
+    monkeypatch.setattr("sage_cli.config.set_config_value", lambda key, value: None)
 
     assert main_desktop._desktop_macos_setup_tcc_identity("Hermes Local Signing") is True
 
@@ -768,7 +768,7 @@ def test_setup_tcc_identity_untrusted_existing_cert_is_repaired(tmp_path, monkey
     monkeypatch.setattr(cli_main.subprocess, "run", fake_run)
     monkeypatch.setattr(main_desktop, "_desktop_packaged_executable", lambda d: None)
     monkeypatch.setattr(main_desktop, "_desktop_macos_relaunchable_fixup", lambda d: True)
-    monkeypatch.setattr("hermes_cli.config.set_config_value", lambda key, value: None)
+    monkeypatch.setattr("sage_cli.config.set_config_value", lambda key, value: None)
 
     assert main_desktop._desktop_macos_setup_tcc_identity("Hermes Local Signing") is True
     assert any(c[0] == "/usr/bin/security" and c[1] == "add-trusted-cert" for c in calls)
@@ -789,8 +789,8 @@ def test_cmd_gui_setup_tcc_identity_exits_before_build(tmp_path, monkeypatch):
     monkeypatch.setattr(cli_main, "PROJECT_ROOT", root)
     _make_packaged_executable(root, monkeypatch)
 
-    with patch("hermes_cli.main_desktop._desktop_macos_setup_tcc_identity", return_value=True) as mock_setup, \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic") as mock_install, \
+    with patch("sage_cli.main_desktop._desktop_macos_setup_tcc_identity", return_value=True) as mock_setup, \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic") as mock_install, \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns(setup_tcc_identity=True, identity="Hermes Local Signing"))
 
@@ -980,18 +980,18 @@ def test_gui_registers_linux_desktop_entry_before_launch(tmp_path, monkeypatch):
     packaged_exe = _make_packaged_executable(root, monkeypatch)
 
     registered: list[Path] = []
-    monkeypatch.setattr("hermes_cli.linux_desktop_entry.is_supported", lambda: True)
+    monkeypatch.setattr("sage_cli.linux_desktop_entry.is_supported", lambda: True)
     monkeypatch.setattr(
-        "hermes_cli.linux_desktop_entry.install_desktop_entry",
+        "sage_cli.linux_desktop_entry.install_desktop_entry",
         lambda project_root: registered.append(project_root) or (tmp_path / "hermes.desktop"),
     )
 
     launch_ok = subprocess.CompletedProcess([str(packaged_exe)], 0)
 
-    with patch("hermes_cli.main_desktop._desktop_build_needed", return_value=False), \
-         patch("hermes_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.main.subprocess.run", return_value=launch_ok), \
+    with patch("sage_cli.main_desktop._desktop_build_needed", return_value=False), \
+         patch("sage_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.main.subprocess.run", return_value=launch_ok), \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1008,15 +1008,15 @@ def test_gui_launches_even_when_desktop_entry_install_fails(tmp_path, monkeypatc
     def boom(_project_root):
         raise OSError("read-only /home")
 
-    monkeypatch.setattr("hermes_cli.linux_desktop_entry.is_supported", lambda: True)
-    monkeypatch.setattr("hermes_cli.linux_desktop_entry.install_desktop_entry", boom)
+    monkeypatch.setattr("sage_cli.linux_desktop_entry.is_supported", lambda: True)
+    monkeypatch.setattr("sage_cli.linux_desktop_entry.install_desktop_entry", boom)
 
     launch_ok = subprocess.CompletedProcess([str(packaged_exe)], 0)
 
-    with patch("hermes_cli.main_desktop._desktop_build_needed", return_value=False), \
-         patch("hermes_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.main.subprocess.run", return_value=launch_ok) as mock_run, \
+    with patch("sage_cli.main_desktop._desktop_build_needed", return_value=False), \
+         patch("sage_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.main.subprocess.run", return_value=launch_ok) as mock_run, \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns())
 
@@ -1034,19 +1034,19 @@ def test_gui_skips_desktop_entry_off_linux(tmp_path, monkeypatch):
     monkeypatch.setattr(cli_main, "PROJECT_ROOT", root)
     packaged_exe = _make_packaged_executable(root, monkeypatch)
 
-    monkeypatch.setattr("hermes_cli.linux_desktop_entry.is_supported", lambda: False)
+    monkeypatch.setattr("sage_cli.linux_desktop_entry.is_supported", lambda: False)
 
     def fail(_project_root):
         raise AssertionError("must not install a desktop entry off Linux")
 
-    monkeypatch.setattr("hermes_cli.linux_desktop_entry.install_desktop_entry", fail)
+    monkeypatch.setattr("sage_cli.linux_desktop_entry.install_desktop_entry", fail)
 
     launch_ok = subprocess.CompletedProcess([str(packaged_exe)], 0)
 
-    with patch("hermes_cli.main_desktop._desktop_build_needed", return_value=False), \
-         patch("hermes_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main.subprocess.run", return_value=launch_ok), \
+    with patch("sage_cli.main_desktop._desktop_build_needed", return_value=False), \
+         patch("sage_cli.main_install_repair._resolve_node_runtime_npm", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main.subprocess.run", return_value=launch_ok), \
          pytest.raises(SystemExit) as exc:
         cli_main.cmd_gui(_ns())
 
@@ -1065,7 +1065,7 @@ def test_gui_skips_desktop_entry_off_linux(tmp_path, monkeypatch):
 )
 def test_desktop_launch_options_normalizes_password_store(raw, expected):
     cfg = {"desktop": {"password_store": raw}}
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("sage_cli.config.load_config", return_value=cfg):
         _, _, store, _ = main_desktop._desktop_launch_options()
     assert store == expected
 
@@ -1083,13 +1083,13 @@ def test_desktop_launch_options_normalizes_password_store(raw, expected):
 def test_desktop_launch_options_normalizes_ozone_hint(raw, expected):
     """``desktop.ozone_platform_hint`` normalizes to x11/wayland/auto."""
     cfg = {"desktop": {"ozone_platform_hint": raw}}
-    with patch("hermes_cli.config.load_config", return_value=cfg):
+    with patch("sage_cli.config.load_config", return_value=cfg):
         _, _, _, hint = main_desktop._desktop_launch_options()
     assert hint == expected
 
 
 def test_desktop_launch_options_ozone_hint_defaults_auto():
-    with patch("hermes_cli.config.load_config", return_value={}):
+    with patch("sage_cli.config.load_config", return_value={}):
         assert main_desktop._desktop_launch_options()[3] == "auto"
 
 
@@ -1103,15 +1103,15 @@ def test_gui_bridges_ozone_hint_to_launch_env(tmp_path, monkeypatch):
     ok = subprocess.CompletedProcess([], 0)
     cfg = {"desktop": {"ozone_platform_hint": "x11"}}
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.config.load_config", return_value=cfg), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.config.load_config", return_value=cfg), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1119,15 +1119,15 @@ def test_gui_bridges_ozone_hint_to_launch_env(tmp_path, monkeypatch):
     assert launch_env.get("ELECTRON_OZONE_PLATFORM_HINT") == "x11"
 
     monkeypatch.setenv("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.config.load_config", return_value=cfg), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run2, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.config.load_config", return_value=cfg), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run2, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1177,7 +1177,7 @@ def test_detect_linux_password_store_gnome_keyring(monkeypatch):
 def test_detect_linux_password_store_via_dbus_secret_service(monkeypatch):
     _clear_keychain_env(monkeypatch)
     ping_ok = subprocess.CompletedProcess(["dbus-send"], 0)
-    with patch("hermes_cli.main.subprocess.run", return_value=ping_ok) as mock_run:
+    with patch("sage_cli.main.subprocess.run", return_value=ping_ok) as mock_run:
         assert main_desktop._detect_linux_password_store() == "gnome-libsecret"
     assert "--dest=org.freedesktop.secrets" in mock_run.call_args.args[0]
 
@@ -1185,9 +1185,9 @@ def test_detect_linux_password_store_via_dbus_secret_service(monkeypatch):
 def test_detect_linux_password_store_none_when_no_keychain(monkeypatch):
     _clear_keychain_env(monkeypatch)
     ping_fail = subprocess.CompletedProcess(["dbus-send"], 1)
-    with patch("hermes_cli.main.subprocess.run", return_value=ping_fail):
+    with patch("sage_cli.main.subprocess.run", return_value=ping_fail):
         assert main_desktop._detect_linux_password_store() is None
-    with patch("hermes_cli.main.subprocess.run", side_effect=FileNotFoundError):
+    with patch("sage_cli.main.subprocess.run", side_effect=FileNotFoundError):
         assert main_desktop._detect_linux_password_store() is None
 
 
@@ -1200,16 +1200,16 @@ def test_gui_linux_packaged_launch_bridges_detected_password_store(tmp_path, mon
 
     ok = subprocess.CompletedProcess([], 0)
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.config.load_config", return_value={}), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main_desktop._detect_linux_password_store", return_value="gnome-libsecret"), \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.config.load_config", return_value={}), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main_desktop._detect_linux_password_store", return_value="gnome-libsecret"), \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1225,14 +1225,14 @@ def test_gui_linux_source_launch_bridges_detected_password_store(tmp_path, monke
 
     ok = subprocess.CompletedProcess([], 0)
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.config.load_config", return_value={}), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main_desktop._detect_linux_password_store", return_value="kwallet6"), \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.config.load_config", return_value={}), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main_desktop._detect_linux_password_store", return_value="kwallet6"), \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns(source=True))
 
@@ -1251,16 +1251,16 @@ def test_gui_config_password_store_skips_detection(tmp_path, monkeypatch):
     ok = subprocess.CompletedProcess([], 0)
     cfg = {"desktop": {"password_store": "kwallet6"}}
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.config.load_config", return_value=cfg), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main_desktop._detect_linux_password_store") as mock_detect, \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.config.load_config", return_value=cfg), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main_desktop._detect_linux_password_store") as mock_detect, \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1280,16 +1280,16 @@ def test_gui_explicit_password_store_env_wins_over_config_and_detection(tmp_path
     ok = subprocess.CompletedProcess([], 0)
     cfg = {"desktop": {"password_store": "kwallet6"}}
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
-         patch("hermes_cli.config.load_config", return_value=cfg), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main_desktop._detect_linux_password_store") as mock_detect, \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.main_desktop._desktop_linux_sandbox_fixup", return_value=True), \
+         patch("sage_cli.config.load_config", return_value=cfg), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main_desktop._detect_linux_password_store") as mock_detect, \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1307,15 +1307,15 @@ def test_gui_password_store_bridge_is_linux_only(tmp_path, monkeypatch):
 
     ok = subprocess.CompletedProcess([], 0)
 
-    with patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"), \
-         patch("hermes_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
-         patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True), \
-         patch("hermes_cli.main_desktop._write_desktop_build_stamp"), \
-         patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
-         patch("hermes_cli.config.load_config", return_value={}), \
-         patch("hermes_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
-         patch("hermes_cli.main_desktop._detect_linux_password_store") as mock_detect, \
-         patch("hermes_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
+    with patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"), \
+         patch("sage_cli.main_web_build._run_npm_install_deterministic", return_value=ok), \
+         patch("sage_cli.main_desktop._desktop_build_needed", return_value=True), \
+         patch("sage_cli.main_desktop._write_desktop_build_stamp"), \
+         patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"), \
+         patch("sage_cli.config.load_config", return_value={}), \
+         patch("sage_cli.linux_desktop_entry.install_desktop_entry", return_value=None), \
+         patch("sage_cli.main_desktop._detect_linux_password_store") as mock_detect, \
+         patch("sage_cli.main.subprocess.run", side_effect=_pack_into_staging(root)) as mock_run, \
          pytest.raises(SystemExit):
         cli_main.cmd_gui(_ns())
 
@@ -1334,17 +1334,17 @@ def test_gui_password_store_bridge_is_linux_only(tmp_path, monkeypatch):
 
 def _gui_build_patches(root: Path, run_side_effect):
     return [
-        patch("hermes_cli.main.shutil.which", return_value="/usr/bin/npm"),
-        patch("hermes_cli.main_web_build._run_npm_install_deterministic",
+        patch("sage_cli.main.shutil.which", return_value="/usr/bin/npm"),
+        patch("sage_cli.main_web_build._run_npm_install_deterministic",
               return_value=subprocess.CompletedProcess(["npm", "ci"], 0)),
-        patch("hermes_cli.main_desktop._desktop_build_needed", return_value=True),
-        patch("hermes_cli.main_desktop._write_desktop_build_stamp"),
-        patch("hermes_cli.main_desktop._desktop_macos_relaunchable_fixup"),
-        patch("hermes_cli.main_desktop._register_linux_desktop_entry"),
-        patch("hermes_cli.main_desktop._stop_desktop_processes_locking_build", return_value=[]),
-        patch("hermes_cli.main_desktop._purge_electron_build_cache", return_value=[]),
-        patch("hermes_cli.main_desktop._redownload_electron_dist", return_value=False),
-        patch("hermes_cli.main.subprocess.run", side_effect=run_side_effect),
+        patch("sage_cli.main_desktop._desktop_build_needed", return_value=True),
+        patch("sage_cli.main_desktop._write_desktop_build_stamp"),
+        patch("sage_cli.main_desktop._desktop_macos_relaunchable_fixup"),
+        patch("sage_cli.main_desktop._register_linux_desktop_entry"),
+        patch("sage_cli.main_desktop._stop_desktop_processes_locking_build", return_value=[]),
+        patch("sage_cli.main_desktop._purge_electron_build_cache", return_value=[]),
+        patch("sage_cli.main_desktop._redownload_electron_dist", return_value=False),
+        patch("sage_cli.main.subprocess.run", side_effect=run_side_effect),
     ]
 
 

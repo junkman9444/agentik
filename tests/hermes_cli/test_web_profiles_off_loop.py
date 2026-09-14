@@ -1,6 +1,6 @@
 """Regression tests: ``/api/profiles`` handlers must not block the event loop.
 
-``hermes_cli/web_routers/profiles.py`` holds handler bodies that were extracted
+``sage_cli/web_routers/profiles.py`` holds handler bodies that were extracted
 verbatim from ``web_server.py``, so the blocking library calls they inherited
 run inline on the ASGI event loop. The worst of them are unbounded from the
 dashboard's point of view: deleting a profile whose gateway is up sleeps up to
@@ -13,7 +13,7 @@ Two complementary assertions per site:
 
 * a **loop probe** — the stubbed callee records whether an event loop is
   running in its own thread, mirroring
-  ``tests/hermes_cli/test_cron_dashboard_off_loop.py``; and
+  ``tests/sage_cli/test_cron_dashboard_off_loop.py``; and
 * a **concurrency proof** — the stubbed callee blocks on a ``threading.Event``
   while an unrelated request is timed, which fails if the loop is parked.
 
@@ -45,7 +45,7 @@ CONCURRENT_BUDGET = BLOCK_SECONDS / 2
 def profile_dir(tmp_path, monkeypatch) -> Path:
     """A real profile directory under a throwaway HERMES_HOME."""
     monkeypatch.setenv("HERMES_HOME", str(tmp_path))
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     d = profiles_mod.get_profile_dir("demo")
     d.mkdir(parents=True, exist_ok=True)
@@ -61,7 +61,7 @@ def client(profile_dir):
     concurrent request below. A bare ``TestClient(app)`` spins up a fresh loop
     per request and would pass these tests even unfixed.
     """
-    from hermes_cli import web_server
+    from sage_cli import web_server
 
     with TestClient(web_server.app, raise_server_exceptions=False) as c:
         # web_server resolves _SESSION_TOKEN once, at import, so read it back
@@ -138,7 +138,7 @@ def assert_serves_concurrently(client, blocker: _Blocker, fire) -> None:
 
 def test_delete_profile_runs_off_loop(client, monkeypatch, loop_probe, tmp_path):
     seen, probe = loop_probe
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_delete(name, yes=False):
         probe("delete_profile")
@@ -158,7 +158,7 @@ def test_delete_profile_does_not_block_the_dashboard(client, monkeypatch, tmp_pa
     That is longer than the desktop's WebSocket ready-probe tolerates, so it
     must not hold the loop.
     """
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     blocker = _Blocker(result=tmp_path / "profiles" / "demo")
     monkeypatch.setattr(profiles_mod, "delete_profile", blocker)
@@ -172,14 +172,14 @@ def test_delete_profile_does_not_block_the_dashboard(client, monkeypatch, tmp_pa
 
 
 def _outcome(ok=True, reason="described", description="a demo profile"):
-    from hermes_cli.profile_describer import DescribeOutcome
+    from sage_cli.profile_describer import DescribeOutcome
 
     return DescribeOutcome("demo", ok, reason, description=description)
 
 
 def test_describe_auto_runs_off_loop(client, monkeypatch, loop_probe):
     seen, probe = loop_probe
-    from hermes_cli import profile_describer
+    from sage_cli import profile_describer
 
     def fake_describe(name, overwrite=False, timeout=None):
         probe("describe_profile")
@@ -197,7 +197,7 @@ def test_describe_auto_runs_off_loop(client, monkeypatch, loop_probe):
 def test_describe_auto_does_not_block_the_dashboard(client, monkeypatch):
     """The auxiliary provider call has a 60 s ceiling — six times the
     desktop's disconnect threshold."""
-    from hermes_cli import profile_describer
+    from sage_cli import profile_describer
 
     blocker = _Blocker(result=_outcome())
     monkeypatch.setattr(profile_describer, "describe_profile", blocker)
@@ -216,7 +216,7 @@ def test_describe_auto_does_not_block_the_dashboard(client, monkeypatch):
 
 def test_rename_profile_runs_off_loop(client, monkeypatch, loop_probe, tmp_path):
     seen, probe = loop_probe
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_rename(old, new):
         probe("rename_profile")
@@ -231,7 +231,7 @@ def test_rename_profile_runs_off_loop(client, monkeypatch, loop_probe, tmp_path)
 
 
 def test_rename_profile_does_not_block_the_dashboard(client, monkeypatch, tmp_path):
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     blocker = _Blocker(result=tmp_path / "profiles" / "renamed")
     monkeypatch.setattr(profiles_mod, "rename_profile", blocker)
@@ -248,7 +248,7 @@ def test_rename_profile_does_not_block_the_dashboard(client, monkeypatch, tmp_pa
 
 def test_get_active_profile_runs_off_loop(client, monkeypatch, loop_probe):
     seen, probe = loop_probe
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_get_active():
         probe("get_active_profile")
@@ -271,7 +271,7 @@ def test_get_active_profile_runs_off_loop(client, monkeypatch, loop_probe):
 
 def test_set_active_profile_runs_off_loop(client, monkeypatch, loop_probe):
     seen, probe = loop_probe
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_set_active(name):
         probe("set_active_profile")
@@ -290,7 +290,7 @@ def test_set_active_profile_runs_off_loop(client, monkeypatch, loop_probe):
 
 def test_update_description_runs_off_loop(client, monkeypatch, loop_probe):
     seen, probe = loop_probe
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_write_meta(profile_dir, **kwargs):
         probe("write_profile_meta")
@@ -361,7 +361,7 @@ def test_desktop_overlay_unreadable_document_is_a_500(client, profile_dir):
 
 
 def test_delete_missing_profile_is_still_404(client, monkeypatch):
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_delete(name, yes=False):
         raise FileNotFoundError(f"Profile '{name}' does not exist.")
@@ -372,7 +372,7 @@ def test_delete_missing_profile_is_still_404(client, monkeypatch):
 
 
 def test_rename_to_existing_profile_is_still_400(client, monkeypatch):
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_rename(old, new):
         raise FileExistsError(f"Profile '{new}' already exists.")
@@ -384,7 +384,7 @@ def test_rename_to_existing_profile_is_still_400(client, monkeypatch):
 
 
 def test_set_active_missing_profile_is_still_404(client, monkeypatch):
-    from hermes_cli import profiles as profiles_mod
+    from sage_cli import profiles as profiles_mod
 
     def fake_set_active(name):
         raise FileNotFoundError(f"Profile '{name}' does not exist.")
@@ -407,7 +407,7 @@ def test_describe_auto_unknown_profile_is_still_404(client):
 
 def test_update_profile_model_runs_off_loop(client, monkeypatch, loop_probe):
     seen, probe = loop_probe
-    from hermes_cli.web_routers import profiles as router_mod
+    from sage_cli.web_routers import profiles as router_mod
 
     def fake_write_model(profile_dir, provider, model):
         probe("write_profile_model")

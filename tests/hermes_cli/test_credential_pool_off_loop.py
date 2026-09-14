@@ -16,8 +16,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import copilot_auth
-import hermes_cli.web_routers.ops as _rt_ops
+from sage_cli import copilot_auth
+import sage_cli.web_routers.ops as _rt_ops
 
 
 # ---------------------------------------------------------------------------
@@ -179,8 +179,8 @@ class TestExchangeSingleFlight:
 
 @pytest.mark.asyncio
 async def test_list_credential_pool_runs_off_event_loop(monkeypatch):
-    import hermes_cli.auth as auth_mod
-    from hermes_cli import web_server
+    import sage_cli.auth as auth_mod
+    from sage_cli import web_server
 
     loop_thread = threading.get_ident()
     seen = {}
@@ -199,8 +199,8 @@ async def test_list_credential_pool_runs_off_event_loop(monkeypatch):
 @pytest.mark.asyncio
 async def test_list_credential_pool_keeps_loop_responsive(monkeypatch):
     """A 200 ms blocking pool read must not freeze a concurrent ticker."""
-    import hermes_cli.auth as auth_mod
-    from hermes_cli import web_server
+    import sage_cli.auth as auth_mod
+    from sage_cli import web_server
 
     def slow_read(*args, **kwargs):
         time.sleep(0.5)

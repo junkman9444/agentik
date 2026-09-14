@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import time
 
-import hermes_cli.local_runtime.load_progress as lp
+import sage_cli.local_runtime.load_progress as lp
 
 
 def setup_function(_fn):
@@ -102,7 +102,7 @@ def test_load_notice_for_managed_model(tmp_path, monkeypatch):
     state = tmp_path / "server.json"
     state.write_text(json.dumps({"base_url": "http://127.0.0.1:18434/v1",
                                  "api_key": "k"}), encoding="utf-8")
-    monkeypatch.setattr("hermes_cli.local_runtime.supervisor.state_path",
+    monkeypatch.setattr("sage_cli.local_runtime.supervisor.state_path",
                         lambda: state)
     lp._apply_event("Qwen-Test", "status_change", _loading_event(0.5))
     monkeypatch.setattr(lp, "_ensure_watcher", lambda: None)
@@ -156,7 +156,7 @@ def test_prefill_notice_for_managed_model(tmp_path, monkeypatch):
     state = tmp_path / "server.json"
     state.write_text(json.dumps({"base_url": "http://127.0.0.1:18434/v1",
                                  "api_key": "k"}), encoding="utf-8")
-    monkeypatch.setattr("hermes_cli.local_runtime.supervisor.state_path",
+    monkeypatch.setattr("sage_cli.local_runtime.supervisor.state_path",
                         lambda: state)
     monkeypatch.setattr(lp, "_ensure_watcher", lambda: None)
     # No load in flight; a prefill counter is live.
@@ -189,7 +189,7 @@ def test_load_notice_outranks_prefill(tmp_path, monkeypatch):
     state = tmp_path / "server.json"
     state.write_text(json.dumps({"base_url": "http://127.0.0.1:18434/v1",
                                  "api_key": "k"}), encoding="utf-8")
-    monkeypatch.setattr("hermes_cli.local_runtime.supervisor.state_path",
+    monkeypatch.setattr("sage_cli.local_runtime.supervisor.state_path",
                         lambda: state)
     monkeypatch.setattr(lp, "_ensure_watcher", lambda: None)
     lp._apply_event("Qwen-Test", "status_change", _loading_event(0.5))
@@ -247,14 +247,14 @@ def test_endpoint_respects_ownership_guard(monkeypatch):
     Regression: a raw state-file read attached the SSE watcher to a
     foreign install's server on the shared stable port (health answers
     for anyone; only the dead-pid check proves ownership)."""
-    import hermes_cli.local_runtime.load_progress as lp
+    import sage_cli.local_runtime.load_progress as lp
 
     # Guard says "not ours": no endpoint, regardless of state on disk.
-    monkeypatch.setattr("hermes_cli.local_runtime.endpoint._state_endpoint",
+    monkeypatch.setattr("sage_cli.local_runtime.endpoint._state_endpoint",
                         lambda: None)
     assert lp._endpoint() is None
 
     monkeypatch.setattr(
-        "hermes_cli.local_runtime.endpoint._state_endpoint",
+        "sage_cli.local_runtime.endpoint._state_endpoint",
         lambda: {"base_url": "http://127.0.0.1:18434/v1", "api_key": "k"})
     assert lp._endpoint() == ("http://127.0.0.1:18434", "k")

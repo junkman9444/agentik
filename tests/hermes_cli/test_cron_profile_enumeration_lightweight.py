@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from hermes_cli import web_server
-import hermes_cli.web_server_cron as _web_server_cron
+from sage_cli import web_server
+import sage_cli.web_server_cron as _web_server_cron
 
 
 class CronProfileEnumerationTests(unittest.TestCase):
@@ -18,11 +18,11 @@ class CronProfileEnumerationTests(unittest.TestCase):
             ]
             with (
                 mock.patch(
-                    "hermes_cli.profiles.profiles_to_serve",
+                    "sage_cli.profiles.profiles_to_serve",
                     return_value=homes,
                 ) as lightweight,
                 mock.patch(
-                    "hermes_cli.profiles.list_profiles",
+                    "sage_cli.profiles.list_profiles",
                     side_effect=AssertionError("full profile scan is forbidden"),
                 ),
             ):

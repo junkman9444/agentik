@@ -947,7 +947,7 @@ class TestCallTimeDirResolution:
     """
 
     def test_accessors_follow_hermes_home_override(self, tmp_path):
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+        from sage_constants import set_hermes_home_override, reset_hermes_home_override
         import tools.skills_sync as ss
 
         profile_home = tmp_path / "profiles" / "research"
@@ -960,7 +960,7 @@ class TestCallTimeDirResolution:
             reset_hermes_home_override(token)
 
     def test_explicit_module_patch_wins_over_override(self, tmp_path):
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+        from sage_constants import set_hermes_home_override, reset_hermes_home_override
         import tools.skills_sync as ss
 
         patched = tmp_path / "patched-skills"
@@ -979,7 +979,7 @@ class TestCallTimeDirResolution:
         was computed against the wrong home (#65828's sharpest edge): a
         legitimate delete in the scoped profile would be refused, and a stale
         path under the import-time home would pass the guard."""
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
+        from sage_constants import set_hermes_home_override, reset_hermes_home_override
         import tools.skills_sync as ss
 
         profile_home = tmp_path / "profiles" / "worker"

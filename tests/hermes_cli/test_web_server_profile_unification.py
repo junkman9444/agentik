@@ -12,18 +12,18 @@ from contextlib import contextmanager
 import pytest
 import yaml
 import gateway.status as _gw_status
-import hermes_cli.config as _cfg_mod
-import hermes_cli.web_server_chat as _web_server_chat
-import hermes_cli.web_server_gateway as _web_server_gateway
-import hermes_cli.web_server_messaging as _web_server_messaging
-import hermes_cli.web_server_profiles as _web_server_profiles
+import sage_cli.config as _cfg_mod
+import sage_cli.web_server_chat as _web_server_chat
+import sage_cli.web_server_gateway as _web_server_gateway
+import sage_cli.web_server_messaging as _web_server_messaging
+import sage_cli.web_server_profiles as _web_server_profiles
 
 
 @pytest.fixture
 def isolated_profiles(tmp_path, monkeypatch, _isolate_hermes_home):
     """Isolated default home + one named profile, each with config + .env."""
-    from hermes_constants import get_hermes_home
-    from hermes_cli import profiles
+    from sage_constants import get_hermes_home
+    from sage_cli import profiles
 
     default_home = get_hermes_home()
     profiles_root = default_home / "profiles"
@@ -45,11 +45,11 @@ def client(monkeypatch, isolated_profiles):
     except ImportError:
         pytest.skip("fastapi/starlette not installed")
 
-    import hermes_state
-    from hermes_constants import get_hermes_home
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    import sage_state
+    from sage_constants import get_hermes_home
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+    monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
     c = TestClient(app)
     c.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
     return c
@@ -145,7 +145,7 @@ class TestProfileScopedMcp:
     ):
         """An `auth: oauth` server that serves tools/list anonymously must not
         false-green: a successful probe with no token on disk reports needs-auth."""
-        import hermes_cli.mcp_config as mcp_config
+        import sage_cli.mcp_config as mcp_config
 
         (isolated_profiles["worker_beta"] / "config.yaml").write_text(
             "mcp_servers:\n  oauth-srv:\n    url: http://x/sse\n    auth: oauth\n",
@@ -179,7 +179,7 @@ class TestProfileScopedMcp:
         """The probe's per-tool `schema_chars` (details out-param) surfaces as an
         ADDITIVE per-tool field on the wire; tools without a size stay bare so
         older/partial probes degrade to 'no estimate' in the renderer."""
-        import hermes_cli.mcp_config as mcp_config
+        import sage_cli.mcp_config as mcp_config
 
         (isolated_profiles["worker_beta"] / "config.yaml").write_text(
             "mcp_servers:\n  sized-srv:\n    url: http://x/mcp\n",
@@ -209,7 +209,7 @@ class TestProfileScopedMcp:
     ):
         """A probe that never fills schema_chars (older code path) produces the
         exact pre-overlay tool objects — nothing new for old renderers."""
-        import hermes_cli.mcp_config as mcp_config
+        import sage_cli.mcp_config as mcp_config
 
         (isolated_profiles["worker_beta"] / "config.yaml").write_text(
             "mcp_servers:\n  plain-srv:\n    url: http://x/mcp\n",
@@ -368,7 +368,7 @@ class TestProfileScopedModel:
         /api/config on the same lock. The handler must scope the worker
         through _config_profile_scope (contextvar only, no lock) for the
         selected profile."""
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         scopes = []
 
@@ -387,10 +387,10 @@ class TestProfileScopedModel:
         )
         monkeypatch.setattr(_web_server_profiles, "_profile_scope", _recording_profile_scope)
         monkeypatch.setattr(
-            "hermes_cli.inventory.load_picker_context", lambda: object()
+            "sage_cli.inventory.load_picker_context", lambda: object()
         )
         monkeypatch.setattr(
-            "hermes_cli.inventory.build_model_options_payload",
+            "sage_cli.inventory.build_model_options_payload",
             lambda _ctx, **kwargs: {"providers": [], "model": "", "provider": ""},
         )
 
@@ -414,7 +414,7 @@ class TestProfileScopedPostSetup:
         """Post-setup runs in a -p scoped subprocess so hooks that read
         config / write per-profile state see the same HERMES_HOME the rest
         of the drawer's writes targeted."""
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         calls = []
 
@@ -427,7 +427,7 @@ class TestProfileScopedPostSetup:
             lambda subcommand, name: calls.append(list(subcommand)) or _FakeProc(),
         )
         monkeypatch.setattr(
-            "hermes_cli.tools_config.valid_post_setup_keys",
+            "sage_cli.tools_config.valid_post_setup_keys",
             lambda: {"agent_browser"},
         )
         resp = client.post(
@@ -442,7 +442,7 @@ class TestProfileScopedPostSetup:
     def test_post_setup_without_profile_keeps_legacy_argv(
         self, client, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         calls = []
 
@@ -455,7 +455,7 @@ class TestProfileScopedPostSetup:
             lambda subcommand, name: calls.append(list(subcommand)) or _FakeProc(),
         )
         monkeypatch.setattr(
-            "hermes_cli.tools_config.valid_post_setup_keys",
+            "sage_cli.tools_config.valid_post_setup_keys",
             lambda: {"agent_browser"},
         )
         resp = client.post(
@@ -471,8 +471,8 @@ class TestProfileScopedGateway:
     def test_status_reads_requested_profile_home(
         self, client, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
-        from hermes_constants import get_hermes_home
+        import sage_cli.web_server as web_server
+        from sage_constants import get_hermes_home
 
         seen_homes = []
 
@@ -502,7 +502,7 @@ class TestProfileScopedGateway:
     def test_status_uses_runtime_pid_when_profile_pid_file_is_missing(
         self, client, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         worker_home = isolated_profiles["worker_beta"]
         (worker_home / ".env").write_text(
@@ -560,7 +560,7 @@ class TestProfileScopedGateway:
         Non-fatal leftovers (e.g. a platform that connected before the crash)
         are still dropped — only fatals survive.
         """
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         runtime = {
             "pid": 4242,
@@ -600,7 +600,7 @@ class TestProfileScopedGateway:
         self, client, isolated_profiles, monkeypatch
     ):
         """A cleanly stopped gateway still reports no platforms (stale-noise rule)."""
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         runtime = {
             "pid": 4242,
@@ -629,7 +629,7 @@ class TestProfileScopedTelegramOnboarding:
         self, client, isolated_profiles, monkeypatch
     ):
         import time
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         with _web_server_messaging._telegram_onboarding_lock:
             _web_server_messaging._telegram_onboarding_pairings.clear()
@@ -684,10 +684,10 @@ class TestProfileScopedTelegramOnboarding:
 
 class TestProfileScopedChatPty:
     def test_chat_argv_scopes_hermes_home(self, isolated_profiles, monkeypatch):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         monkeypatch.setattr(
-            "hermes_cli.main_tui_launch._make_tui_argv",
+            "sage_cli.main_tui_launch._make_tui_argv",
             lambda root, tui_dev=False: (["cat"], None),
             raising=False,
         )
@@ -700,7 +700,7 @@ class TestProfileScopedChatPty:
     def test_chat_argv_bridges_selected_profile_terminal_config(
         self, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         (isolated_profiles["default"] / "config.yaml").write_text(
             "terminal:\n"
@@ -719,7 +719,7 @@ class TestProfileScopedChatPty:
         monkeypatch.setenv("TERMINAL_DOCKER_IMAGE", "launch-profile-image")
         monkeypatch.setenv("TERMINAL_SSH_USER", "operator-user")
         monkeypatch.setattr(
-            "hermes_cli.main_tui_launch._make_tui_argv",
+            "sage_cli.main_tui_launch._make_tui_argv",
             lambda root, tui_dev=False: (["cat"], None),
             raising=False,
         )
@@ -737,7 +737,7 @@ class TestProfileScopedChatPty:
     def test_chat_argv_default_profile_preserves_exported_terminal_values(
         self, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         (isolated_profiles["default"] / "config.yaml").write_text(
             "terminal:\n  backend: docker\n",
@@ -746,7 +746,7 @@ class TestProfileScopedChatPty:
         monkeypatch.setenv("TERMINAL_ENV", "docker")
         monkeypatch.setenv("TERMINAL_SSH_USER", "operator-user")
         monkeypatch.setattr(
-            "hermes_cli.main_tui_launch._make_tui_argv",
+            "sage_cli.main_tui_launch._make_tui_argv",
             lambda root, tui_dev=False: (["cat"], None),
             raising=False,
         )
@@ -761,7 +761,7 @@ class TestProfileScopedChatPty:
     def test_chat_argv_placeholder_cwd_preserves_exported_value(
         self, isolated_profiles, monkeypatch, placeholder
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         (isolated_profiles["default"] / "config.yaml").write_text(
             f"terminal:\n  backend: docker\n  cwd: {placeholder}\n",
@@ -774,7 +774,7 @@ class TestProfileScopedChatPty:
         monkeypatch.setenv("TERMINAL_ENV", "docker")
         monkeypatch.setenv("TERMINAL_CWD", "/operator/work")
         monkeypatch.setattr(
-            "hermes_cli.main_tui_launch._make_tui_argv",
+            "sage_cli.main_tui_launch._make_tui_argv",
             lambda root, tui_dev=False: (["cat"], None),
             raising=False,
         )
@@ -790,8 +790,8 @@ class TestProfileScopedChatPty:
     ):
         import logging
 
-        import hermes_cli.config as config_mod
-        import hermes_cli.web_server as web_server
+        import sage_cli.config as config_mod
+        import sage_cli.web_server as web_server
 
         (isolated_profiles["default"] / "config.yaml").write_text(
             "terminal:\n  backend: docker\n",
@@ -799,7 +799,7 @@ class TestProfileScopedChatPty:
         )
         monkeypatch.setenv("TERMINAL_ENV", "docker")
         monkeypatch.setattr(
-            "hermes_cli.main_tui_launch._make_tui_argv",
+            "sage_cli.main_tui_launch._make_tui_argv",
             lambda root, tui_dev=False: (["cat"], None),
             raising=False,
         )
@@ -839,7 +839,7 @@ class TestProfileScopedAudio:
         seen = {}
 
         def _fake_transcribe(path):
-            from hermes_constants import get_hermes_home
+            from sage_constants import get_hermes_home
 
             seen["home"] = str(get_hermes_home())
             return {"success": True, "transcript": "hi", "provider": "fake"}

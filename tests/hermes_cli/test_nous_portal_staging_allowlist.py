@@ -31,7 +31,7 @@ from __future__ import annotations
 import json
 import logging
 
-from hermes_cli.auth import (
+from sage_cli.auth import (
     DEFAULT_NOUS_PORTAL_URL,
     _NOUS_PORTAL_ALLOWED_HOSTS,
     _nous_portal_env_override,
@@ -85,7 +85,7 @@ class TestResolveAccessTokenEnvOverrideWins:
         return auth_file
 
     def _run_and_capture(self, monkeypatch, auth):
-        import hermes_cli.auth_nous as auth_nous
+        import sage_cli.auth_nous as auth_nous
         seen_portal_urls = []
 
         # The resolve memo is module-level state; clear it so each test's
@@ -105,7 +105,7 @@ class TestResolveAccessTokenEnvOverrideWins:
         monkeypatch.setattr(auth_nous, "_refresh_access_token", _fake_refresh)
 
         caplog_records = []
-        logger = logging.getLogger("hermes_cli.auth")
+        logger = logging.getLogger("sage_cli.auth")
         handler = logging.Handler()
         handler.emit = lambda record: caplog_records.append(record.getMessage())
         logger.addHandler(handler)
@@ -122,7 +122,7 @@ class TestResolveAccessTokenEnvOverrideWins:
         a prior HERMES_AUTH_JSON_BOOTSTRAP seed), and the env var is set to
         the same staging host. Both must resolve to staging, and the
         allowlist-rejection warning must never fire."""
-        import hermes_cli.auth as auth
+        import sage_cli.auth as auth
 
         staging_portal = "https://portal.staging-nousresearch.com"
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
@@ -143,7 +143,7 @@ class TestResolveAccessTokenEnvOverrideWins:
     ):
         """Baseline: no override, no staging state — prod is used and the
         allowlist never even logs a warning (nothing was rejected)."""
-        import hermes_cli.auth as auth
+        import sage_cli.auth as auth
 
         monkeypatch.setenv("HERMES_HOME", str(tmp_path))
         monkeypatch.delenv("HERMES_PORTAL_BASE_URL", raising=False)

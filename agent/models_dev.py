@@ -115,7 +115,7 @@ PROVIDER_TO_MODELS_DEV: Dict[str, str] = {
     "alibaba": "alibaba", "qwen-oauth": "alibaba", "copilot": "github-copilot",
     "ai-gateway": "vercel", "opencode-zen": "opencode",
     "opencode-go": "opencode-go",
-    # opencode-free is Zen-hosted (hermes_cli/models.py) and models.dev's "opencode" catalog lists
+    # opencode-free is Zen-hosted (sage_cli/models.py) and models.dev's "opencode" catalog lists
     # its *-contributor-free SKUs; without this alias every opencode-free lookup missed models.dev.
     "opencode-free": "opencode",
     "kilocode": "kilo", "fireworks": "fireworks-ai",
@@ -151,14 +151,14 @@ def _dict_or_empty(value: Any) -> Dict[str, Any]:
 def _cfg_get(*keys: str, default: Any) -> Any:
     """``cfg_get`` over the read-only config; *default* on any failure."""
     try:
-        from hermes_cli.config import cfg_get, load_config_readonly
+        from sage_cli.config import cfg_get, load_config_readonly
         return cfg_get(load_config_readonly(), *keys, default=default)
     except Exception:
         return default
 
 
 def _hermes_path(name: str) -> Path:
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return get_hermes_home() / name
 
 
@@ -701,7 +701,7 @@ def get_model_capabilities(provider: str, model: str, *, allow_network: bool = F
 def list_provider_models(provider: str, *, allow_network: bool = True) -> List[str]:
     """All model IDs for a provider ([] if unknown). ``allow_network`` defaults to True: the model
     picker is interactive and a fresh catalog is worth a short wait."""
-    from hermes_cli.models import normalize_provider
+    from sage_cli.models import normalize_provider
     provider = normalize_provider(provider) or provider
     models = _get_provider_models(provider, allow_network=allow_network)
     return [mid for mid in models if not _should_hide_from_provider_catalog(provider, mid)] if models is not None else []

@@ -15,7 +15,7 @@ from typing import Any
 
 import yaml
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 
 # Hermes UI surfaces, not app/vendor buckets.  Long-running-only: regular tool/thinking/interim
 # chatter is deliberately not rewritten (too noisy in chat).

@@ -22,9 +22,9 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import main as cli_main
-from hermes_cli import update_cmd
-from hermes_cli import main_install_repair
+from sage_cli import main as cli_main
+from sage_cli import update_cmd
+from sage_cli import main_install_repair
 
 SHIM_NAMES = ["hermes.exe", "hermes-agent.exe", "hermes-acp.exe", "hermes-gateway.exe"]
 
@@ -35,7 +35,7 @@ def venv(tmp_path, monkeypatch):
     scripts = tmp_path / "venv" / "Scripts"
     scripts.mkdir(parents=True)
     (scripts / "python.exe").write_bytes(b"")
-    # update_cmd reads these off hermes_cli.main (frozen ``_m()`` surface); the
+    # update_cmd reads these off sage_cli.main (frozen ``_m()`` surface); the
     # install-repair helpers read their own module globals — patch both.
     for target in (cli_main, main_install_repair):
         monkeypatch.setattr(target, "_is_windows", lambda: True)
@@ -142,7 +142,7 @@ def test_reexec_runs_same_args_under_venv_python(venv, monkeypatch, capsys):
     assert cli_main._reexec_dependency_sync_off_windows_shim() is True
     cmd, env, kwargs = calls[0]
     assert cmd == [
-        str(venv / "python.exe"), "-m", "hermes_cli.main", "update", "--yes",
+        str(venv / "python.exe"), "-m", "sage_cli.main", "update", "--yes",
     ]
     assert env[cli_main._UPDATE_REEXEC_ENV] == "1"
     assert "under the venv Python" in capsys.readouterr().out
@@ -177,7 +177,7 @@ def test_reexec_falls_through_when_venv_python_is_missing(venv, monkeypatch, cap
     monkeypatch.setattr(sys, "argv", [str(venv / "hermes.exe"), "update"])
 
     assert cli_main._reexec_dependency_sync_off_windows_shim() is False
-    assert "-m hermes_cli.main update" not in capsys.readouterr().out
+    assert "-m sage_cli.main update" not in capsys.readouterr().out
 
 
 def test_reexec_falls_through_when_spawn_fails(venv, monkeypatch, capsys):
@@ -185,7 +185,7 @@ def test_reexec_falls_through_when_spawn_fails(venv, monkeypatch, capsys):
     _capture_popen(monkeypatch, raises=OSError("no exec"))
 
     assert cli_main._reexec_dependency_sync_off_windows_shim() is False
-    assert "-m hermes_cli.main update" in capsys.readouterr().out
+    assert "-m sage_cli.main update" in capsys.readouterr().out
 
 
 # ---------------------------------------------------------------------------
@@ -214,7 +214,7 @@ def test_up_to_date_run_never_hands_off(venv, monkeypatch, capsys):
 
 def test_sync_guard_hands_off_when_only_the_shim_is_held(venv, monkeypatch):
     """No native module mapped, but we ARE the shim: hand off and exit 0."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     monkeypatch.setattr(sys, "argv", [str(venv / "hermes.exe"), "update"])
     monkeypatch.setattr(cli_main, "_detect_self_loaded_native_modules", lambda: [])
@@ -229,7 +229,7 @@ def test_sync_guard_hands_off_when_only_the_shim_is_held(venv, monkeypatch):
 
 def test_sync_guard_defers_native_lock_before_considering_the_shim(venv, monkeypatch):
     """A mapped .pyd still exits 2 — the marker recovery owns that case."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     monkeypatch.setattr(sys, "argv", [str(venv / "hermes.exe"), "update"])
     monkeypatch.setattr(
@@ -247,7 +247,7 @@ def test_sync_guard_defers_native_lock_before_considering_the_shim(venv, monkeyp
 
 def test_sync_guard_is_a_noop_when_nothing_is_held(venv, monkeypatch):
     """Off the shim with nothing mapped, the sync just proceeds in-process."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     monkeypatch.setattr(cli_main, "_detect_self_loaded_native_modules", lambda: [])
     calls = _capture_popen(monkeypatch)

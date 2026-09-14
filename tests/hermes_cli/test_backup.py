@@ -21,14 +21,14 @@ def _no_real_gateway_service(monkeypatch):
     """run_import() auto-installs the gateway service post-restore; tests must
     never touch the host's systemd/launchd. Individual tests re-patch these to
     assert the wiring."""
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
 
     monkeypatch.setattr(gateway_mod, "ensure_gateway_service", lambda **kw: False)
     monkeypatch.setattr(gateway_mod, "_is_service_running", lambda: False)
 
 
 def _advance_backup_clock(seconds: float = 1.1) -> None:
-    """Skew hermes_cli.backup's datetime forward instead of sleeping.
+    """Skew sage_cli.backup's datetime forward instead of sleeping.
 
     Snapshot ids have 1-second resolution; tests that need two distinct
     timestamps previously slept >1s. This installs (once) a datetime shim in
@@ -36,7 +36,7 @@ def _advance_backup_clock(seconds: float = 1.1) -> None:
     """
     import datetime as _dt
 
-    import hermes_cli.backup as _backup
+    import sage_cli.backup as _backup
 
     shim = getattr(_backup.datetime, "_hermes_test_shim", None)
     if shim is None:
@@ -59,7 +59,7 @@ def _make_hermes_tree(root: Path) -> None:
     """Create a realistic ~/.hermes directory structure for testing."""
     (root / "config.yaml").write_text("model:\n  provider: openrouter\n")
     (root / ".env").write_text("OPENROUTER_API_KEY=sk-test-123\n")
-    for db_name in ("memory_store.db", "hermes_state.db"):
+    for db_name in ("memory_store.db", "sage_state.db"):
         with sqlite3.connect(root / db_name) as conn:
             conn.execute("CREATE TABLE sample (value TEXT)")
             conn.execute("INSERT INTO sample VALUES ('test')")
@@ -123,21 +123,21 @@ def _symlink_file_or_skip(link: Path, target: Path) -> None:
 
 class TestShouldExclude:
     def test_excludes_hermes_agent(self):
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert _should_exclude(Path("hermes-agent/run_agent.py"))
         assert _should_exclude(Path("hermes-agent/.git/HEAD"))
 
 
     def test_excludes_backups_dir(self):
         """backups/ is excluded so pre-update backups don't nest exponentially."""
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert _should_exclude(Path("backups/pre-update-2026-04-27-063400.zip"))
 
     def test_excludes_state_snapshots_dir(self):
         """state-snapshots/ is excluded for the same reason as backups/: every
         quick / pre-update snapshot holds its own copy of state.db, so zipping
         the tree would ship the DB once per retained snapshot."""
-        from hermes_cli.backup import _EXCLUDED_DIRS, _QUICK_SNAPSHOTS_DIR, _should_exclude
+        from sage_cli.backup import _EXCLUDED_DIRS, _QUICK_SNAPSHOTS_DIR, _should_exclude
         assert _QUICK_SNAPSHOTS_DIR in _EXCLUDED_DIRS
         assert _should_exclude(Path(_QUICK_SNAPSHOTS_DIR) / "20260814-203829-2026-08-15" / "state.db")
         assert _should_exclude(Path(_QUICK_SNAPSHOTS_DIR) / "20260814-203829-2026-08-15" / "manifest.json")
@@ -150,7 +150,7 @@ class TestShouldExclude:
         """SQLite WAL/SHM/journal sidecars must not ship alongside the
         safe-copied .db — pairing a fresh snapshot with stale sidecar state
         produces a torn restore."""
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert _should_exclude(Path("state.db-wal"))
         assert _should_exclude(Path("state.db-shm"))
         assert _should_exclude(Path("state.db-journal"))
@@ -162,7 +162,7 @@ class TestShouldExclude:
         """models/, runtimes/, and node/ at a profile-home root hold
         re-downloadable GGUF weights and runtime binaries that reach
         hundreds of GB — zipping them is the 20-minute-hang symptom."""
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert _should_exclude(Path("models/Qwen3.6-27B-Q4_K_M.gguf"))
         assert _should_exclude(Path("models/assets/mmproj.gguf"))
         assert _should_exclude(Path("runtimes/llamacpp/b10362/cuda/ggml-cuda.dll"))
@@ -174,7 +174,7 @@ class TestShouldExclude:
     def test_keeps_nested_dirs_named_like_runtime_trees(self):
         """A deeper directory that happens to be called models/ or node/ is
         user data (a skill's assets, project files) and must survive."""
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert not _should_exclude(Path("skills/mlops/models/notes.md"))
         assert not _should_exclude(Path("scratch/node/index.js"))
         assert not _should_exclude(Path("profiles/clean/skills/x/models/a.txt"))
@@ -184,7 +184,7 @@ class TestShouldExclude:
         state.db.pre-update-emergency-*.bak files at the HERMES_HOME root —
         backup artifacts in the same class as backups/, so a full backup
         must not re-ship them."""
-        from hermes_cli.backup import _should_exclude
+        from sage_cli.backup import _should_exclude
         assert _should_exclude(
             Path("state.db.pre-update-emergency-2026-08-15T04-55-33-619Z.bak")
         )
@@ -208,7 +208,7 @@ class TestIterBackupFiles:
         like ``skills/autonomous-ai-agents/hermes-agent/`` that the manual
         path preserved. One shared iterator makes that drift impossible;
         this test pins the contract."""
-        from hermes_cli.backup import _iter_backup_files
+        from sage_cli.backup import _iter_backup_files
 
         root = tmp_path / ".hermes"
         root.mkdir()
@@ -233,7 +233,7 @@ class TestIterBackupFiles:
         assert not any(s.startswith("hermes-agent") for s in selected)
 
     def test_skipped_dirs_collected_for_summary(self, tmp_path):
-        from hermes_cli.backup import _iter_backup_files
+        from sage_cli.backup import _iter_backup_files
 
         root = tmp_path / ".hermes"
         root.mkdir()
@@ -270,7 +270,7 @@ class TestBackup:
         out_zip = out_dir / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
         staged_dirs = []
         real_ntf = backup_mod.tempfile.NamedTemporaryFile
 
@@ -299,7 +299,7 @@ class TestBackup:
         out_zip = hermes_home / "backups" / "pre-update-test.zip"
         out_zip.parent.mkdir(parents=True, exist_ok=True)
 
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
         staged_dirs = []
         real_ntf = backup_mod.tempfile.NamedTemporaryFile
 
@@ -334,7 +334,7 @@ class TestBackup:
         out_zip = tmp_path / "backup.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from sage_cli.backup import run_backup
         run_backup(args)
 
         with zipfile.ZipFile(out_zip, "r") as zf:
@@ -353,7 +353,7 @@ class TestBackup:
             conn.execute("CREATE TABLE sessions (id TEXT PRIMARY KEY)")
             conn.execute("INSERT INTO sessions VALUES ('s1')")
 
-        from hermes_cli.backup import _QUICK_SNAPSHOTS_DIR, create_quick_snapshot, run_backup
+        from sage_cli.backup import _QUICK_SNAPSHOTS_DIR, create_quick_snapshot, run_backup
 
         # Real producer, so the layout under state-snapshots/ is whatever the
         # code actually writes (manifest.json + state.db copy + ...).
@@ -384,7 +384,7 @@ class TestValidateBackupZip:
 
     def test_state_db_passes(self, tmp_path):
         """A zip containing state.db is accepted as a valid Hermes backup."""
-        from hermes_cli.backup import _validate_backup_zip
+        from sage_cli.backup import _validate_backup_zip
         zip_path = tmp_path / "backup.zip"
         self._make_zip(zip_path, ["state.db", "sessions/abc.json"])
         with zipfile.ZipFile(zip_path, "r") as zf:
@@ -410,7 +410,7 @@ class TestImport:
         """After a restore, run_import brings the gateway service up without
         prompting — restored cron jobs and bot tokens must not sit dormant
         (the install-then-import dead-gateway bug)."""
-        import hermes_cli.gateway as gateway_mod
+        import sage_cli.gateway as gateway_mod
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
@@ -427,14 +427,14 @@ class TestImport:
         zip_path = tmp_path / "backup.zip"
         self._make_backup_zip(zip_path, {"config.yaml": "model: test\n"})
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert calls and calls[0].get("context") == "import"
 
     def test_import_skips_service_when_already_running(self, tmp_path, monkeypatch):
         """A live gateway is left alone — no reinstall churn during import."""
-        import hermes_cli.gateway as gateway_mod
+        import sage_cli.gateway as gateway_mod
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir()
@@ -451,7 +451,7 @@ class TestImport:
         zip_path = tmp_path / "backup.zip"
         self._make_backup_zip(zip_path, {"config.yaml": "model: test\n"})
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert not calls
@@ -464,7 +464,7 @@ class TestImport:
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        import hermes_cli.gateway as gateway_mod
+        import sage_cli.gateway as gateway_mod
 
         def boom():
             raise RuntimeError("service layer unavailable")
@@ -474,7 +474,7 @@ class TestImport:
         zip_path = tmp_path / "backup.zip"
         self._make_backup_zip(zip_path, {"config.yaml": "model: test\n"})
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         out = capsys.readouterr().out
@@ -508,7 +508,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(args)
 
         # Profile config is restored, but its live gateway state is preserved.
@@ -541,7 +541,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(args)
 
         # Live runtime files are untouched; the backup's foreign ones never land.
@@ -572,7 +572,7 @@ class TestImport:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(args)
 
         for rel in (".env", "auth.json", "state.db", "profiles/coder/.env"):
@@ -597,7 +597,7 @@ class TestRoundTrip:
 
         # Backup
         out_zip = tmp_path / "roundtrip.zip"
-        from hermes_cli.backup import run_backup, run_import
+        from sage_cli.backup import run_backup, run_import
 
         run_backup(Namespace(output=str(out_zip)))
         assert out_zip.exists()
@@ -632,16 +632,16 @@ class TestRoundTrip:
 
 class TestFormatSize:
     def test_bytes(self):
-        from hermes_cli.sizefmt import format_bytes as _format_size
+        from sage_cli.sizefmt import format_bytes as _format_size
         assert _format_size(512) == "512 B"
 
     def test_kilobytes(self):
-        from hermes_cli.sizefmt import format_bytes as _format_size
+        from sage_cli.sizefmt import format_bytes as _format_size
         assert "KB" in _format_size(2048)
 
 
     def test_terabytes(self):
-        from hermes_cli.sizefmt import format_bytes as _format_size
+        from sage_cli.sizefmt import format_bytes as _format_size
         assert "TB" in _format_size(2 * 1024 ** 4)
 
 
@@ -649,7 +649,7 @@ class TestValidation:
     def test_validate_with_config(self):
         """Zip with config.yaml passes validation."""
         import io
-        from hermes_cli.backup import _validate_backup_zip
+        from sage_cli.backup import _validate_backup_zip
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -664,7 +664,7 @@ class TestValidation:
     def test_detect_prefix_only_dirs(self):
         """Prefix detection returns empty for zip with only directory entries."""
         import io
-        from hermes_cli.backup import _detect_prefix
+        from sage_cli.backup import _detect_prefix
 
         buf = io.BytesIO()
         with zipfile.ZipFile(buf, "w") as zf:
@@ -696,7 +696,7 @@ class TestBackupEdgeCases:
 
         args = Namespace(output=str(tmp_path / "out.zip"))
 
-        from hermes_cli.backup import run_backup
+        from sage_cli.backup import run_backup
         run_backup(args)
 
         # No zip should be created
@@ -720,7 +720,7 @@ class TestBackupEdgeCases:
         out_zip = tmp_path / "out.zip"
         args = Namespace(output=str(out_zip))
 
-        from hermes_cli.backup import run_backup
+        from sage_cli.backup import run_backup
         run_backup(args)
 
         # Zip should still be created with the valid files
@@ -753,7 +753,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=False)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         with patch("builtins.input", side_effect=EOFError):
             with pytest.raises(SystemExit):
                 run_import(args)
@@ -776,7 +776,7 @@ class TestImportEdgeCases:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(args)
 
         assert (hermes_home / "config.yaml").exists()
@@ -845,7 +845,7 @@ class TestImportAtomicWrites:
         self._zip(zip_path, {"config.yaml": "model: replacement\n", "state.db": ""})
         _break_member(monkeypatch, "config.yaml")
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         # Pre-fix this file is 0 bytes: the truncate landed, the write did not.
@@ -874,7 +874,7 @@ class TestImportAtomicWrites:
         monkeypatch.setattr(Path, "home", lambda: dst_home)
         _break_member(monkeypatch, "_external/.honcho/config.json")
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert (honcho / "config.json").read_text() == original
@@ -903,7 +903,7 @@ class TestImportAtomicWrites:
         zip_path = tmp_path / "backup.zip"
         self._zip(zip_path, {"config.yaml": "model: restored\n", "state.db": ""})
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert link.is_symlink(), "import replaced the symlink with a regular file"
@@ -934,7 +934,7 @@ class TestImportAtomicWrites:
             "_external/.honcho/config.json": '{"peer":"restored"}',
         })
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert link.is_symlink(), "import replaced the symlink with a regular file"
@@ -959,7 +959,7 @@ class TestImportAtomicWrites:
         zip_path = tmp_path / "backup.zip"
         self._zip(zip_path, {"config.yaml": "model: restored\n", "state.db": ""})
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert target.read_text() == "model: restored\n"
@@ -986,7 +986,7 @@ class TestImportAtomicWrites:
 
         chown_calls: list[tuple[Path, int, int]] = []
         monkeypatch.setattr(
-            "hermes_cli.backup._preserve_file_owner",
+            "sage_cli.backup._preserve_file_owner",
             lambda p: (123, 456) if Path(p).exists() else None,
         )
         monkeypatch.setattr(
@@ -994,7 +994,7 @@ class TestImportAtomicWrites:
             lambda path, uid, gid: chown_calls.append((Path(path), uid, gid)),
         )
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         assert target.read_text() == "model: restored\n"
@@ -1023,7 +1023,7 @@ class TestImportAtomicWrites:
         zip_path = tmp_path / "backup.zip"
         self._zip(zip_path, {"config.yaml": "model: restored\n", "state.db": ""})
 
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
 
         real_replace = backup_mod.atomic_replace
         staged_modes: list[int] = []
@@ -1036,7 +1036,7 @@ class TestImportAtomicWrites:
         monkeypatch.delattr(os, "fchmod")
         monkeypatch.setattr(backup_mod, "atomic_replace", spying_replace)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         # Without the pre-replace chmod this reads 0o600 (mkstemp's mode).
@@ -1078,7 +1078,7 @@ class TestImportAtomicWrites:
             {"helper.sh": "#!/bin/sh\necho attacker\n", "state.db": ""},
         )
 
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
 
         real_replace = backup_mod.atomic_replace
         staged_modes: list[int] = []
@@ -1090,7 +1090,7 @@ class TestImportAtomicWrites:
 
         monkeypatch.setattr(backup_mod, "atomic_replace", spying_replace)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         published = stat.S_IMODE(target.stat().st_mode)
@@ -1141,7 +1141,7 @@ class TestProfileRestoration:
 
         args = Namespace(zipfile=str(zip_path), force=True)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(args)
 
         # Only valid profile should get a wrapper
@@ -1155,7 +1155,7 @@ class TestProfileRestoration:
 
 class TestSafeCopyDb:
     def test_copies_valid_database(self, tmp_path):
-        from hermes_cli.backup import _safe_copy_db
+        from sage_cli.backup import _safe_copy_db
         src = tmp_path / "test.db"
         dst = tmp_path / "copy.db"
 
@@ -1176,7 +1176,7 @@ class TestSafeCopyDb:
     def test_aborts_when_source_remains_busy_past_deadline(
         self, tmp_path, monkeypatch
     ):
-        from hermes_cli import backup as backup_mod
+        from sage_cli import backup as backup_mod
 
         src = tmp_path / "locked.db"
         dst = tmp_path / "copy.db"
@@ -1228,7 +1228,7 @@ class TestSafeCopyDb:
         import sys
         import time
 
-        from hermes_cli.backup import _safe_copy_db
+        from sage_cli.backup import _safe_copy_db
         src = tmp_path / "locked.db"
         dst = tmp_path / "copy.db"
 
@@ -1269,7 +1269,7 @@ class TestSafeCopyDb:
 
 
     def test_is_zeroed_sqlite_file_detects_nul_header(self, tmp_path):
-        from hermes_cli.backup import is_zeroed_sqlite_file
+        from sage_cli.backup import is_zeroed_sqlite_file
         p = tmp_path / "state.db"
         p.write_bytes(bytes(4096))  # all NULs
         assert is_zeroed_sqlite_file(p) is True
@@ -1306,7 +1306,7 @@ class TestQuickSnapshot:
 
 
     def test_state_db_safely_copied(self, hermes_home):
-        from hermes_cli.backup import create_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         db_copy = hermes_home / "state-snapshots" / snap_id / "state.db"
         assert db_copy.exists()
@@ -1318,7 +1318,7 @@ class TestQuickSnapshot:
 
     def test_failed_state_db_copy_is_loud(self, hermes_home, monkeypatch, capsys):
         """#68474: unreadable state.db must not look like a silent success."""
-        from hermes_cli import backup as backup_mod
+        from sage_cli import backup as backup_mod
 
         def boom(src, dst):
             return False
@@ -1340,8 +1340,8 @@ class TestQuickSnapshot:
         """A refused live-safe restore (holder detected, backup leg failed) must
         not be counted as a restored file — `hermes import` reports it, and
         /snapshot restore must not claim success for that file either."""
-        import hermes_cli.backup as backup_mod
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        import sage_cli.backup as backup_mod
+        from sage_cli.backup import create_quick_snapshot, restore_quick_snapshot
 
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
         monkeypatch.setattr(backup_mod, "_safe_restore_db", lambda src, dst: False)
@@ -1371,7 +1371,7 @@ class TestQuickSnapshot:
         live connection sees the restored data instead of stale cached pages
         from a replaced inode.
         """
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot, restore_quick_snapshot
         snap_id = create_quick_snapshot(hermes_home=hermes_home)
 
         # Open a live connection (simulating gateway/dashboard).
@@ -1414,7 +1414,7 @@ class TestQuickSnapshot:
         """Pairing JSONs live outside state.db — snapshot must capture them
         recursively (generic + per-platform) so approved-user lists survive
         disasters like #15733."""
-        from hermes_cli.backup import create_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot
 
         # Generic pairing store (new location)
         (hermes_home / "platforms" / "pairing").mkdir(parents=True)
@@ -1478,7 +1478,7 @@ class TestQuickSnapshot:
         pruned — losing the only recovery copy.
         """
         import json
-        from hermes_cli.backup import create_quick_snapshot, list_quick_snapshots
+        from sage_cli.backup import create_quick_snapshot, list_quick_snapshots
 
         # First snapshot: complete (state.db is small, under any cap)
         first_id = create_quick_snapshot(label="complete", hermes_home=hermes_home)
@@ -1549,7 +1549,7 @@ class TestQuickSnapshotProjectsKanban:
         <root>/kanban/boards/<slug>/kanban.db, not <root>/kanban.db. The
         ``kanban/boards`` dir entry must capture them too, or multi-board
         users still lose every board except ``default`` on upgrade."""
-        from hermes_cli.backup import create_quick_snapshot, restore_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot, restore_quick_snapshot
 
         board_dir = hermes_home / "kanban" / "boards" / "work"
         board_dir.mkdir(parents=True)
@@ -1584,8 +1584,8 @@ class TestQuickSnapshotProjectsKanban:
         """#52889 W2: a non-default board's .db (dir-branch) must go through the
         WAL-safe _safe_copy_db, not a raw shutil.copy2, so an open WAL doesn't
         produce an inconsistent copy."""
-        import hermes_cli.backup as bk
-        from hermes_cli.backup import create_quick_snapshot
+        import sage_cli.backup as bk
+        from sage_cli.backup import create_quick_snapshot
 
         board = hermes_home / "kanban" / "boards" / "work"
         board.mkdir(parents=True)
@@ -1628,7 +1628,7 @@ class TestPreUpdateBackup:
     def test_backup_contents_match_full_backup(self, hermes_home):
         """Pre-update backup should include the same user data that
         ``hermes backup`` would, and should exclude the same directories."""
-        from hermes_cli.backup import create_pre_update_backup
+        from sage_cli.backup import create_pre_update_backup
         out = create_pre_update_backup(hermes_home=hermes_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
@@ -1650,7 +1650,7 @@ class TestPreUpdateBackup:
         """``hermes update`` in ``full`` mode takes the quick snapshot *before*
         the full zip, so the zip walk sees the snapshot it just made. It must
         skip it — otherwise every pre-update zip ships state.db twice."""
-        from hermes_cli.backup import (
+        from sage_cli.backup import (
             _QUICK_SNAPSHOTS_DIR,
             create_pre_update_backup,
             create_quick_snapshot,
@@ -1672,7 +1672,7 @@ class TestPreUpdateBackup:
     def test_rotation_keeps_only_n(self, hermes_home):
         """After more than ``keep`` backups are created, older ones are
         pruned automatically."""
-        from hermes_cli.backup import create_pre_update_backup
+        from sage_cli.backup import create_pre_update_backup
 
         created = []
         for _ in range(5):
@@ -1698,7 +1698,7 @@ class TestPreUpdateBackup:
 
     def test_skips_symlinked_files(self, hermes_home, tmp_path):
         """Pre-update backups must not dereference symlinks outside HERMES_HOME."""
-        from hermes_cli.backup import create_pre_update_backup
+        from sage_cli.backup import create_pre_update_backup
 
         outside = tmp_path / "outside-secret.txt"
         outside.write_text("outside secret\n")
@@ -1756,7 +1756,7 @@ class TestRunPreUpdateBackup:
         """pre_update_backup: off — an explicit opt-out disables the quick
         snapshot too (it previously ran unconditionally), with no output."""
         self._set_mode(hermes_home, "off")
-        from hermes_cli.update_cmd import _run_pre_update_backup
+        from sage_cli.update_cmd import _run_pre_update_backup
         snap_id = _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert snap_id is None
@@ -1768,7 +1768,7 @@ class TestRunPreUpdateBackup:
 
     def test_config_full_mode(self, hermes_home, capsys):
         self._set_mode(hermes_home, "full")
-        from hermes_cli.update_cmd import _run_pre_update_backup
+        from sage_cli.update_cmd import _run_pre_update_backup
         snap_id = _run_pre_update_backup(Namespace(no_backup=False, backup=False))
         out = capsys.readouterr().out
         assert snap_id is not None
@@ -1798,7 +1798,7 @@ class TestPreMigrationBackup:
     def test_restorable_with_hermes_import(self, hermes_home, tmp_path):
         """The zip produced by pre-migration backup must be a valid Hermes
         backup — `hermes import` should accept it."""
-        from hermes_cli.backup import create_pre_migration_backup, _validate_backup_zip
+        from sage_cli.backup import create_pre_migration_backup, _validate_backup_zip
         out = create_pre_migration_backup(hermes_home=hermes_home)
         assert out is not None
         with zipfile.ZipFile(out) as zf:
@@ -1811,7 +1811,7 @@ class TestPreMigrationBackup:
     def test_does_not_touch_pre_update_backups(self, hermes_home):
         """Pre-migration rotation must only prune pre-migration-*.zip files,
         leaving pre-update-*.zip backups untouched."""
-        from hermes_cli.backup import create_pre_update_backup, create_pre_migration_backup
+        from sage_cli.backup import create_pre_update_backup, create_pre_migration_backup
         update_backup = create_pre_update_backup(hermes_home=hermes_home, keep=5)
         assert update_backup is not None and update_backup.exists()
         # Spin up a lot of migration backups with keep=1
@@ -1838,11 +1838,11 @@ class TestRestoreCronJobsIfEmptied:
         path.write_text(json.dumps({"jobs": jobs}))
 
     def _make_snapshot(self, hermes_home: Path, label="pre-update"):
-        from hermes_cli.backup import create_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot
         return create_quick_snapshot(label=label, hermes_home=hermes_home, keep=5)
 
     def test_restores_when_emptied_after_migration(self, tmp_path):
-        from hermes_cli.backup import restore_cron_jobs_if_emptied
+        from sage_cli.backup import restore_cron_jobs_if_emptied
         hermes_home = tmp_path / ".hermes"
         jobs_path = hermes_home / "cron" / "jobs.json"
         # Pre-update: 3 real jobs.
@@ -1867,7 +1867,7 @@ class TestRestoreCronJobsIfEmptied:
     def test_restores_when_partial_job_loss(self, tmp_path):
         """Desktop scheduler overwrites jobs.json with its own small set,
         losing tool-created crons while keeping desktop-tracked ones."""
-        from hermes_cli.backup import restore_cron_jobs_if_emptied
+        from sage_cli.backup import restore_cron_jobs_if_emptied
         hermes_home = tmp_path / ".hermes"
         jobs_path = hermes_home / "cron" / "jobs.json"
         # Pre-update: 19 jobs (18 tool-created + 1 desktop watchdog).
@@ -1918,7 +1918,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
     )
 
     def _make_snapshot(self, hermes_home: Path, label="pre-update"):
-        from hermes_cli.backup import create_quick_snapshot
+        from sage_cli.backup import create_quick_snapshot
         return create_quick_snapshot(label=label, hermes_home=hermes_home, keep=5)
 
     def _seed(self, hermes_home: Path) -> Path:
@@ -1929,7 +1929,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
 
     def test_restores_rewritten_provider_and_dropped_moa(self, tmp_path):
         import yaml
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         hermes_home = tmp_path / ".hermes"
         cfg = self._seed(hermes_home)
@@ -1963,7 +1963,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
         )
 
     def test_noop_when_config_untouched(self, tmp_path):
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         hermes_home = tmp_path / ".hermes"
         cfg = self._seed(hermes_home)
@@ -1980,7 +1980,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
         """Only protected keys are restored — a version bump or a new section
         the migration legitimately wrote must survive the restore."""
         import yaml
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         hermes_home = tmp_path / ".hermes"
         cfg = self._seed(hermes_home)
@@ -2005,7 +2005,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
     def test_noop_when_user_never_set_protected_keys(self, tmp_path):
         """A config that never had model.provider/moa set gets no restore even
         if the update writes those keys fresh — nothing of the user's was lost."""
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         hermes_home = tmp_path / ".hermes"
         hermes_home.mkdir(parents=True)
@@ -2024,7 +2024,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
     def test_noop_on_unreadable_live_config(self, tmp_path):
         """An unparseable live config is a different failure the user must see;
         the safety net leaves it alone (mirrors the cron net's posture)."""
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         hermes_home = tmp_path / ".hermes"
         cfg = self._seed(hermes_home)
@@ -2038,7 +2038,7 @@ class TestRestoreConfigModelSettingsIfRewritten:
         assert cfg.read_text(encoding="utf-8") == ": not [valid yaml"
 
     def test_noop_without_snapshot_id(self, tmp_path):
-        from hermes_cli.backup import restore_config_model_settings_if_rewritten
+        from sage_cli.backup import restore_config_model_settings_if_rewritten
 
         assert restore_config_model_settings_if_rewritten(
             "", hermes_home=tmp_path / ".hermes"
@@ -2076,7 +2076,7 @@ class TestMemoryProviderExternalPaths:
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
         monkeypatch.setattr(Path, "home", lambda: tmp_path)
 
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
         monkeypatch.setattr(
             backup_mod, "_collect_memory_provider_external_paths", lambda: [outside]
         )
@@ -2109,7 +2109,7 @@ class TestMemoryProviderExternalPaths:
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
         monkeypatch.setattr(Path, "home", lambda: dst_home)
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
         run_import(Namespace(zipfile=str(zip_path), force=True))
 
         restored = dst_home / ".honcho" / "config.json"
@@ -2158,7 +2158,7 @@ class TestImportHonorsHermesHomeOverride:
         (root / "config.yaml").write_text("model:\n  provider: openai\n")
 
         monkeypatch.setenv("HERMES_HOME", str(profile))
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         assert get_hermes_home() == profile
 
@@ -2166,7 +2166,7 @@ class TestImportHonorsHermesHomeOverride:
 
         import argparse
 
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         args = argparse.Namespace(zipfile=str(zip_path), force=True)
         run_import(args)
@@ -2193,8 +2193,8 @@ class TestImportHonorsHermesHomeOverride:
 
         import argparse
 
-        import hermes_constants
-        from hermes_cli import backup as backup_mod
+        import sage_constants
+        from sage_cli import backup as backup_mod
 
         monkeypatch.setattr(
             backup_mod,
@@ -2204,11 +2204,11 @@ class TestImportHonorsHermesHomeOverride:
 
         calls = []
         monkeypatch.setattr(
-            "hermes_cli.gateway.ensure_gateway_service",
+            "sage_cli.gateway.ensure_gateway_service",
             lambda *a, **kw: calls.append(kw),
         )
         monkeypatch.setattr(
-            "hermes_cli.gateway._is_service_running",
+            "sage_cli.gateway._is_service_running",
             lambda: False,
         )
 
@@ -2228,7 +2228,7 @@ class TestImportHonorsHermesHomeOverride:
 
         import argparse
 
-        from hermes_cli import backup as backup_mod
+        from sage_cli import backup as backup_mod
 
         monkeypatch.setattr(
             backup_mod,
@@ -2238,11 +2238,11 @@ class TestImportHonorsHermesHomeOverride:
 
         calls = []
         monkeypatch.setattr(
-            "hermes_cli.gateway.ensure_gateway_service",
+            "sage_cli.gateway.ensure_gateway_service",
             lambda *a, **kw: calls.append(kw),
         )
         monkeypatch.setattr(
-            "hermes_cli.gateway._is_service_running",
+            "sage_cli.gateway._is_service_running",
             lambda: False,
         )
 
@@ -2313,7 +2313,7 @@ class TestImportLiveSessionDatabase:
 
     def test_live_holder_sees_imported_rows(self, tmp_path, monkeypatch):
         """A connection open across the import converges on the imported data."""
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         home, live_db, zip_path = self._prepare(tmp_path, monkeypatch)
 
@@ -2333,7 +2333,7 @@ class TestImportLiveSessionDatabase:
 
     def test_older_backup_reports_replaced_sessions(self, tmp_path, monkeypatch, capsys):
         """Importing a backup that predates recorded work says what it dropped."""
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         home, live_db, zip_path = self._prepare(tmp_path, monkeypatch)
         run_import(Namespace(zipfile=str(zip_path), force=True))
@@ -2344,7 +2344,7 @@ class TestImportLiveSessionDatabase:
 
     def test_newer_backup_reports_nothing(self, tmp_path, monkeypatch, capsys):
         """No warning when the import does not shrink the database."""
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         home, live_db, zip_path = self._prepare(
             tmp_path, monkeypatch, live=(1, 1), backup=(3, 4)
@@ -2358,7 +2358,7 @@ class TestImportLiveSessionDatabase:
         self, tmp_path, monkeypatch, capsys
     ):
         """A refused live-safe restore is a warning, not a counted success."""
-        import hermes_cli.backup as backup_mod
+        import sage_cli.backup as backup_mod
 
         home, live_db, zip_path = self._prepare(tmp_path, monkeypatch)
         monkeypatch.setattr(backup_mod, "_safe_restore_db", lambda src, dst: False)
@@ -2377,7 +2377,7 @@ class TestImportLiveSessionDatabase:
         """A `state.db-wal` member from an old/hand-built archive must not be
         os.replace'd next to the page-restored database: it describes a
         different image and SQLite would replay it on the next open."""
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         home, live_db, zip_path = self._prepare(tmp_path, monkeypatch)
         with zipfile.ZipFile(zip_path, "a") as zf:
@@ -2398,7 +2398,7 @@ class TestImportLiveSessionDatabase:
 
     def test_missing_target_takes_the_plain_publish(self, tmp_path, monkeypatch):
         """A fresh install has no inode to preserve; the member still lands."""
-        from hermes_cli.backup import run_import
+        from sage_cli.backup import run_import
 
         home = tmp_path / ".hermes"
         home.mkdir()
@@ -2429,7 +2429,7 @@ def test_run_backup_prunes_older_default_named_zips_but_not_others(tmp_path, mon
     """Hourly `hermes backup` callers accumulated 150+ zips; --keep bounds the default-named
     ones and leaves custom-named or foreign zips alone (#81317)."""
     from argparse import Namespace
-    from hermes_cli import backup as backup_mod
+    from sage_cli import backup as backup_mod
 
     home = tmp_path / ".hermes"
     home.mkdir()

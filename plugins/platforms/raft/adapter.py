@@ -527,8 +527,8 @@ def _env_enablement() -> Optional[dict]:
 def interactive_setup() -> None:
     """``hermes gateway setup`` flow: persists ``RAFT_PROFILE`` to the Hermes env file.
     CLI helpers are lazy-imported so the plugin stays importable in gateway runtime and tests."""
-    from hermes_cli.cli_output import print_header, print_info, print_success, print_warning, prompt, prompt_yes_no
-    from hermes_cli.config import get_env_value, save_env_value
+    from sage_cli.cli_output import print_header, print_info, print_success, print_warning, prompt, prompt_yes_no
+    from sage_cli.config import get_env_value, save_env_value
     print_header("Raft")
     existing_profile = get_env_value("RAFT_PROFILE")
     if existing_profile:

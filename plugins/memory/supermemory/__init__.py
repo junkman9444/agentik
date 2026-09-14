@@ -342,12 +342,12 @@ class SupermemoryMemoryProvider(MemoryProvider):
         _save_supermemory_config(sanitized, hermes_home)
 
     def get_status_config(self, provider_config: dict) -> dict:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         return {"summary": _format_connection_summary(_probe_supermemory_connection(get_secret("SUPERMEMORY_API_KEY", "") or "", str(get_hermes_home())))}
 
     def post_setup(self, hermes_home: str, config: dict) -> None:
-        from hermes_cli.config import save_config
-        from hermes_cli.memory_setup import _prompt, _write_env_vars
+        from sage_cli.config import save_config
+        from sage_cli.memory_setup import _prompt, _write_env_vars
         print(f"\n  Configuring supermemory:\n\n  Get your API key at {_API_KEY_URL}\n")
         existing = os.environ.get("SUPERMEMORY_API_KEY", "")
         masked = f"...{existing[-4:]}" if len(existing) > 4 else "set"
@@ -369,7 +369,7 @@ class SupermemoryMemoryProvider(MemoryProvider):
         print("\n  Start a new session to activate.\n")
 
     def initialize(self, session_id: str, **kwargs) -> None:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         self._hermes_home = kwargs.get("hermes_home") or str(get_hermes_home())
         self._session_id, self._turn_count, self._session_turns = session_id, 0, []
         config = _load_supermemory_config(self._hermes_home)

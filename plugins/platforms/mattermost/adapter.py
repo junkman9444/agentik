@@ -659,8 +659,8 @@ async def _standalone_send(pconfig, chat_id: str, message: str, *, thread_id: Op
 
 def interactive_setup() -> None:
     """Guide the user through Mattermost bot setup (URL + token, allowlist, home channel)."""
-    from hermes_cli.config import get_env_value, remove_env_value, save_env_value
-    from hermes_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success
+    from sage_cli.config import get_env_value, remove_env_value, save_env_value
+    from sage_cli.cli_output import prompt, prompt_yes_no, print_header, print_info, print_success
 
     def info(*lines: str) -> None:
         for line in lines:
@@ -738,7 +738,7 @@ def _apply_yaml_config(yaml_cfg: dict, mattermost_cfg: dict) -> dict | None:
 def _is_connected(config) -> bool:
     """Connected when BOTH MATTERMOST_TOKEN and MATTERMOST_URL are set (``get_env_value`` looked up at
     call time so tests patching ``gateway_mod.get_env_value`` can suppress ambient env vars)."""
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
     return bool(
         (gateway_mod.get_env_value("MATTERMOST_TOKEN") or "").strip()
         and (gateway_mod.get_env_value("MATTERMOST_URL") or "").strip())

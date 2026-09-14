@@ -16,7 +16,7 @@ import threading
 
 import pytest
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from tools.mcp_dashboard_oauth import DashboardOAuthFlow
 from tui_gateway import mcp_oauth_sessions
 from tui_gateway.mcp_oauth_sessions import (

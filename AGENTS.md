@@ -187,13 +187,13 @@ hermes-agent/
 ├── run_agent.py          # AIAgent facade; the turn loop lives in agent/turn_*.py
 ├── model_tools.py        # Tool orchestration, discover_builtin_tools(), handle_function_call()
 ├── toolsets.py           # TOOLSETS dict, _HERMES_CORE_TOOLS
-├── cli.py                # HermesCLI (REPL, slash dispatch) + hermes_cli/cli_*_mixin.py
-├── hermes_state.py       # SessionDB facade; hermes_state_*.py siblings
-├── hermes_constants.py   # get_hermes_home(), display_hermes_home() — profile-aware paths
-├── hermes_logging.py     # agent.log / errors.log / gateway.log (profile-aware)
+├── cli.py                # HermesCLI (REPL, slash dispatch) + sage_cli/cli_*_mixin.py
+├── sage_state.py       # SessionDB facade; sage_state_*.py siblings
+├── sage_constants.py   # get_hermes_home(), display_hermes_home() — profile-aware paths
+├── sage_logging.py     # agent.log / errors.log / gateway.log (profile-aware)
 ├── batch_runner.py       # Parallel batch processing
 ├── agent/                # turn_*.py loop phases, providers, memory, compression, prompt builder
-├── hermes_cli/           # CLI subcommands, setup, config, plugins loader, skins, updater
+├── sage_cli/           # CLI subcommands, setup, config, plugins loader, skins, updater
 │   └── web_routers/      # Dashboard FastAPI routers (one per surface); web_server.py mounts them
 ├── tools/                # Tool implementations, auto-discovered via tools/registry.py
 │   └── environments/     # Terminal backends (local, docker, ssh, modal, daytona, singularity)
@@ -224,9 +224,9 @@ profile-aware via `get_hermes_home()`. Browse logs with `hermes logs [--follow] 
 
 Every former god file is a **facade** (public entry points + the names other packages import)
 plus **siblings** `<stem>_<topic>.py` in the same directory, each owning one topic. Largest
-families: `hermes_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15),
-`hermes_cli/kanban.py` (14), `hermes_cli/web_server.py` (13 + 24 routers), `hermes_cli/auth.py`
-(12), `tools/browser_tool.py` (11), `cli.py` (12 `hermes_cli/cli_*_mixin.py`), `run_agent.py`
+families: `sage_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15),
+`sage_cli/kanban.py` (14), `sage_cli/web_server.py` (13 + 24 routers), `sage_cli/auth.py`
+(12), `tools/browser_tool.py` (11), `cli.py` (12 `sage_cli/cli_*_mixin.py`), `run_agent.py`
 (`agent/turn_*.py`, `agent_init.py`, `conversation_loop.py`).
 
 - **Find code by topic, not by facade:** `grep -rn "def name" <dir>/<stem>_*.py`. Reading the
@@ -240,7 +240,7 @@ families: `hermes_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15
 - **Compat pointers are OFF LIMITS in-tree.** Old import paths kept alive for external plugins
   (`PLUGIN-COMPAT` blocks, `COMPAT_MANIFEST.md`, `compat_manifest.json`) must not be used by
   in-tree code or tests; `scripts/check_compat_pointers.py` runs in CI, and
-  `-W error::hermes_cli.plugin_compat.HermesPluginCompatWarning` catches them in the suite.
+  `-W error::sage_cli.plugin_compat.HermesPluginCompatWarning` catches them in the suite.
   They are removed 2026-09-14 by reverting one commit. Import from the defining module.
 - **Don't recreate god files.** A file passing ~2,000 lines or a function passing ~300 lines /
   cyclomatic complexity 30 is the signal to split along `<stem>_<topic>` FIRST, in its own
@@ -261,11 +261,11 @@ families: `hermes_state.py` (21), `gateway/run.py` (15), `tools/mcp_tool.py` (15
 - **Never infer process identity from argv substrings** (`"serve" in cmdline`) — the bug class
   behind ~10 fleet-update issues (#90778, #87594, #78089, #76129, #91964). Use the canonical
   matchers `gateway.status.looks_like_gateway_command_line` and
-  `hermes_cli.update_cmd._hermes_holder_subcommand`; flag sets are DERIVED from the parser
+  `sage_cli.update_cmd._hermes_holder_subcommand`; flag sets are DERIVED from the parser
   (`_holder_value_flags()`), never hand-written; match FULL cmdlines and truncate only for
-  display. Details: `hermes_cli/AGENTS.md`.
+  display. Details: `sage_cli/AGENTS.md`.
 - **Never hardcode `~/.hermes`.** `get_hermes_home()` for code paths, `display_hermes_home()`
-  for user-facing text (both from `hermes_constants`). Hardcoding breaks profiles (5 bugs in
+  for user-facing text (both from `sage_constants`). Hardcoding breaks profiles (5 bugs in
   PR #3575). Module-level constants are fine — they cache after `_apply_profile_override()`
   sets `HERMES_HOME`. Profile operations themselves are HOME-anchored
   (`_get_profiles_root()` = `Path.home()/.hermes/profiles`) so `hermes -p x profile list`
@@ -334,7 +334,7 @@ scripts/run_tests.sh -v --tb=long                       # pytest flags pass thro
 - **Tests must not write to `~/.hermes/`.** The autouse `_isolate_hermes_home` fixture in
   `tests/conftest.py` redirects `HERMES_HOME`; never hardcode `~/.hermes/` in tests. Profile
   tests also mock `Path.home()` so `_get_profiles_root()` / `_get_default_hermes_home()` stay
-  in the temp dir (pattern: `tests/hermes_cli/test_profiles.py`):
+  in the temp dir (pattern: `tests/sage_cli/test_profiles.py`):
   ```python
   @pytest.fixture
   def profile_env(tmp_path, monkeypatch):
@@ -365,7 +365,7 @@ nowhere, silently. A file-local alias (`windows_only = pytest.mark.skipif(...)`)
 rows of a platform `@parametrize` — split into one marked test per OS.
 
 **Live Windows process-topology E2E (`wine2e` lane):** `windows-venv-e2e.yml` runs
-`tests/hermes_cli/test_venv_holder_windows_live.py` on a real `windows-latest` runner (real
+`tests/sage_cli/test_venv_holder_windows_live.py` on a real `windows-latest` runner (real
 processes, no mocked psutil) ONLY on pushes to `wine2e/**` branches. Workflow: write probes
 pinning CORRECT behavior, push to `wine2e/` to reproduce live on unfixed code, fix, iterate to
 green, then open the PR with the live receipt. Extend it when touching that subsystem; assert
@@ -407,15 +407,15 @@ extract, not to regex around it.
 | Area | Read | Covers |
 |---|---|---|
 | `run_agent.py`, `agent/` | `agent/AGENTS.md` | AIAgent + mixins, turn phases, caching integrity, message-flow invariants, compression, model/aux resolution |
-| `cli.py`, `hermes_cli/`, `main.py` | `hermes_cli/AGENTS.md` | CLI mixins, `_SLASH_DISPATCH`, slash registry, config system + loaders, skins, `hermes update` pipeline, profiles / multiplex |
+| `cli.py`, `sage_cli/`, `main.py` | `sage_cli/AGENTS.md` | CLI mixins, `_SLASH_DISPATCH`, slash registry, config system + loaders, skins, `hermes update` pipeline, profiles / multiplex |
 | `gateway/` | `gateway/AGENTS.md` | Adapters, two message guards, streaming contract, background notifications, gateway vs desktop lifecycle, token locks, scoped secrets |
 | `tools/`, `toolsets.py`, `model_tools.py` | `tools/AGENTS.md` | Adding tools, registry, toolsets, delegation, cross-tool references, backends |
-| `plugins/`, `hermes_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy, Sep-2026 compat window |
+| `plugins/`, `sage_cli/plugins*.py` | `plugins/AGENTS.md` | Plugin kinds, native compat contract, in-tree policy, Sep-2026 compat window |
 | `tui_gateway/`, `ui-tui/` | `tui_gateway/AGENTS.md` | Process model, JSON-RPC transport, key surfaces, slash flow, dev commands |
-| `web/`, `hermes_cli/web_routers/` | `web/AGENTS.md` | Dashboard embeds the real TUI; what React may and may not rebuild |
+| `web/`, `sage_cli/web_routers/` | `web/AGENTS.md` | Dashboard embeds the real TUI; what React may and may not rebuild |
 | `apps/desktop/` | `apps/desktop/AGENTS.md`, `apps/desktop/src/AGENTS.md` | Desktop judgment guide; `serve` backend, slash palette curation, Bot Mode canonical chat |
 | `skills/`, `optional-skills/`, `agent/curator*.py` | `skills/AGENTS.md` | Frontmatter, HARDLINE authoring standards, curator |
-| `cron/`, kanban (`hermes_cli/kanban*.py`, `tools/kanban_tools.py`, `plugins/kanban/`) | `cron/AGENTS.md` | Scheduler invariants, job fields, kanban board/dispatcher |
+| `cron/`, kanban (`sage_cli/kanban*.py`, `tools/kanban_tools.py`, `plugins/kanban/`) | `cron/AGENTS.md` | Scheduler invariants, job fields, kanban board/dispatcher |
 | `gateway/platforms/` new adapter | `gateway/platforms/ADDING_A_PLATFORM.md` | Step-by-step adapter guide |
 
 Long-form background lives in `website/docs/developer-guide/` (agent-loop, prompt-assembly,

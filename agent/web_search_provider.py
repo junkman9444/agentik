@@ -30,7 +30,7 @@ def get_provider_env(name: str) -> str:
     import contexts). See #40190.
     """
     try:
-        from hermes_cli.config import get_env_value
+        from sage_cli.config import get_env_value
 
         val = get_env_value(name)
     except Exception:  # noqa: BLE001 — config layer optional here

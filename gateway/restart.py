@@ -4,7 +4,7 @@ import math
 import os
 from collections.abc import Mapping
 
-from hermes_cli.config import DEFAULT_CONFIG
+from sage_cli.config import DEFAULT_CONFIG
 
 # EX_TEMPFAIL (sysexits.h): ask the service manager to restart after a graceful drain/reload.
 GATEWAY_SERVICE_RESTART_EXIT_CODE = 75

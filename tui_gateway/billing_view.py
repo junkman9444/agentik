@@ -2,7 +2,7 @@
 
 STRUCTURED envelopes (result.ok / result.error) rather than JSON-RPC errors, so
 rpc() always resolves and the client branches on the typed billing code.
-Data-building lives in agent/billing_view.py + hermes_cli/nous_billing.py.
+Data-building lives in agent/billing_view.py + sage_cli/nous_billing.py.
 Bodies are rebound onto server.py's globals at install time (method_ctx.bind_module),
 so tests may still monkeypatch e.g. ``server._usage_payload``.
 """
@@ -72,7 +72,7 @@ def _serialize_billing_state(state, *, free_tier: bool = False) -> dict:
     Nous free tier: no account, no balance, nothing to pay; the renderer branches on it before
     ``logged_in``."""
     from agent.billing_view import format_money
-    from hermes_cli.anon_auth import GUEST_MODEL
+    from sage_cli.anon_auth import GUEST_MODEL
 
     card = mc = None
     if state.card is not None:

@@ -4,8 +4,8 @@
 
 from .method_ctx import HandlerRegistry, bind_module
 
-from hermes_constants import DEFAULT_INDICATOR_STYLE, INDICATOR_STYLES
-from hermes_constants import display_hermes_home as _display_hermes_home
+from sage_constants import DEFAULT_INDICATOR_STYLE, INDICATOR_STYLES
+from sage_constants import display_hermes_home as _display_hermes_home
 
 _registry = HandlerRegistry()
 method = _registry.method
@@ -35,7 +35,7 @@ def _(rid, params: dict) -> dict:
     with _profile_db(params) as db:
         if db is None:
             return _ok(rid, {"repos": []})
-        from hermes_cli import projects_db as pdb
+        from sage_cli import projects_db as pdb
         policy = _repo_discovery_policy()
         with pdb.connect_closing() as conn:
             _reconcile_repo_discovery(pdb, conn, policy, _repo_discovery_policy_key(policy))
@@ -51,7 +51,7 @@ def _(rid, params: dict) -> dict:
 @_projects_handler("projects.record_repos")
 def _(rid, params: dict) -> dict:
     """Persist repo roots found by the client's (desktop-side) scan; return the merged list."""
-    from hermes_cli import projects_db as pdb
+    from sage_cli import projects_db as pdb
     policy = _repo_discovery_policy()
     policy_key = _repo_discovery_policy_key(policy)
     incoming = params.get("discovery_policy")
@@ -129,7 +129,7 @@ _THINKING_MODES = frozenset({"collapsed", "truncated", "full"})
 
 
 def _cfg_get_provider(params):
-    from hermes_cli.models import list_available_providers, normalize_provider
+    from sage_cli.models import list_available_providers, normalize_provider
     model = _resolve_model()
     parts = model.split("/", 1)
     return {"model": model, "provider": normalize_provider(parts[0]) if len(parts) > 1 else "unknown",
@@ -144,7 +144,7 @@ def _cfg_get_project(params):
 
 def _cfg_get_personality(params):
     # EFFECTIVE personality via the single owner — a stale/unknown name must not show as active.
-    from hermes_cli.personality import active_personality_name
+    from sage_cli.personality import active_personality_name
     return {"value": active_personality_name(_load_cfg()) or "none"}
 
 
@@ -252,7 +252,7 @@ def _readiness_check(rid, params, probe):
     profile = str(params.get("profile") or "").strip() if isinstance(params, dict) else ""
     scope = contextlib.nullcontext()
     if profile:
-        from hermes_cli import profiles as profiles_mod
+        from sage_cli import profiles as profiles_mod
         if not profiles_mod.profile_exists(profile):
             return _ok(rid, {"ok": False, "profile": params.get("profile"),
                              "error": f"Profile '{profile}' does not exist on this backend."})
@@ -274,8 +274,8 @@ def _(rid, params: dict) -> dict:
     is still missing after the wait, or a named profile is asked about, today's live probe answers.
     The record's fields ride along additively (``ready``, ``free_tier``, ``other_providers``)."""
     try:
-        from hermes_cli.main import _has_any_provider_configured
-        from hermes_cli.free_tier_bootstrap import wait_for_record
+        from sage_cli.main import _has_any_provider_configured
+        from sage_cli.free_tier_bootstrap import wait_for_record
 
         def probe(profile, scoped):
             record = None if profile else wait_for_record()
@@ -297,9 +297,9 @@ def _(rid, params: dict) -> dict:
     error when the model can't be served, so UIs surface onboarding before a doomed prompt.
     ``profile`` answers for THAT profile's pin and ``.env``; unknown -> ``ok=False``."""
     try:
-        from hermes_cli.runtime_provider import resolve_runtime_provider
-        from hermes_cli.auth import has_usable_secret
-        from hermes_cli.main import _has_any_provider_configured
+        from sage_cli.runtime_provider import resolve_runtime_provider
+        from sage_cli.auth import has_usable_secret
+        from sage_cli.main import _has_any_provider_configured
         requested = str(params.get("provider") or "").strip() or None
 
         def probe(profile, scoped):
@@ -319,7 +319,7 @@ def _(rid, params: dict) -> dict:
             if not (callable(api_key) or api_key_text in {"aws-sdk", "no-key-required"}
                     or has_usable_secret(api_key_text) or bool(runtime.get("command"))):
                 return fail(f"No usable credentials found for {provider}.", runtime.get("source"))
-            from hermes_cli.anon_auth import route_is_welcome_host
+            from sage_cli.anon_auth import route_is_welcome_host
             # free_tier is keyed on the SELECTED route (the welcome host serves only nous/welcome), not
             # on profile state: a paid Nous key beside a free-tier identity must not read as free.
             return {"ok": True, "provider": runtime.get("provider"), "model": runtime.get("model"),
@@ -347,8 +347,8 @@ def _(rid, params: dict) -> dict:
     upload failures render inline. Optional: ``error_context`` (-> ``error-context.txt``),
     ``extra_files`` ({label -> text}), ``log_lines`` (default 200); all force-redacted."""
     try:
-        from hermes_cli.debug import _redact_log_text, build_nous_bundle, collect_share_bundle
-        from hermes_cli.diagnostics_upload import share_to_nous
+        from sage_cli.debug import _redact_log_text, build_nous_bundle, collect_share_bundle
+        from sage_cli.diagnostics_upload import share_to_nous
         log_lines = params.get("log_lines")
         if not isinstance(log_lines, int) or not (10 <= log_lines <= 2000):
             log_lines = 200

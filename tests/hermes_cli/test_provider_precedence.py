@@ -8,19 +8,19 @@ OPENAI_API_KEY exported (or model.provider set) got routed to Anthropic.
 """
 import pytest
 
-from hermes_cli.auth import resolve_provider, AuthError
+from sage_cli.auth import resolve_provider, AuthError
 
 
 def _login(monkeypatch, provider_id):
     """Simulate a logged-in OAuth active_provider in auth.json."""
-    monkeypatch.setattr("hermes_cli.auth._load_auth_store",
+    monkeypatch.setattr("sage_cli.auth._load_auth_store",
                         lambda: {"active_provider": provider_id})
-    monkeypatch.setattr("hermes_cli.auth.get_auth_status",
+    monkeypatch.setattr("sage_cli.auth.get_auth_status",
                         lambda p: {"logged_in": p == provider_id})
 
 
 def _config(monkeypatch, model_cfg):
-    monkeypatch.setattr("hermes_cli.config.load_config", lambda: {"model": model_cfg})
+    monkeypatch.setattr("sage_cli.config.load_config", lambda: {"model": model_cfg})
 
 
 def _no_aws(monkeypatch):
@@ -71,7 +71,7 @@ class TestProviderPrecedence:
         _no_aws(monkeypatch)
         _login(monkeypatch, "anthropic")
         _config(monkeypatch, {"default": "claude-x"})  # populated, no provider
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.auth"):
+        with caplog.at_level(logging.WARNING, logger="sage_cli.auth"):
             assert resolve_provider("auto") == "anthropic"
         assert any("no `provider` key" in r.message for r in caplog.records)
 
@@ -93,16 +93,16 @@ class TestProviderPrecedence:
 
 
 def _logged_out(monkeypatch):
-    monkeypatch.setattr("hermes_cli.auth._load_auth_store", lambda: {})
-    monkeypatch.setattr("hermes_cli.auth.get_auth_status", lambda p: {"logged_in": False})
+    monkeypatch.setattr("sage_cli.auth._load_auth_store", lambda: {})
+    monkeypatch.setattr("sage_cli.auth.get_auth_status", lambda p: {"logged_in": False})
 
 
 def _free_tier(monkeypatch, *, on=True, identity=False):
     """Free tier switch + whether a free-tier identity already exists. The resolver is a READ: any
     call into the creator from inside it is a bug, so the stub fails loudly."""
-    monkeypatch.setattr("hermes_cli.anon_auth.guest_enabled", lambda: on)
-    monkeypatch.setattr("hermes_cli.anon_auth.has_guest", lambda: identity)
-    monkeypatch.setattr("hermes_cli.anon_auth.ensure_portal_identity",
+    monkeypatch.setattr("sage_cli.anon_auth.guest_enabled", lambda: on)
+    monkeypatch.setattr("sage_cli.anon_auth.has_guest", lambda: identity)
+    monkeypatch.setattr("sage_cli.anon_auth.ensure_portal_identity",
                         lambda **kw: (_ for _ in ()).throw(AssertionError("resolve_provider must not mint")))
 
 

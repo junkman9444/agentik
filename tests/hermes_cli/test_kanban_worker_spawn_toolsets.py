@@ -59,8 +59,8 @@ agent:
     root.joinpath("config.yaml").write_text("toolsets:\n  - kanban\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(root))
 
-    from hermes_cli import kanban_db as kb
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db as kb
+    from sage_cli import kanban_db_dispatch as kbd
 
     monkeypatch.setattr(kbd, "_resolve_hermes_argv", lambda: ["hermes"])
 
@@ -102,9 +102,9 @@ def test_default_spawn_model_override_survives_real_cli_parse(monkeypatch, tmp_p
     root.joinpath("config.yaml").write_text("{}\n", encoding="utf-8")
     monkeypatch.setenv("HERMES_HOME", str(root))
 
-    from hermes_cli import kanban_db as kb
-    from hermes_cli import kanban_db_dispatch as kbd
-    from hermes_cli._parser import build_top_level_parser
+    from sage_cli import kanban_db as kb
+    from sage_cli import kanban_db_dispatch as kbd
+    from sage_cli._parser import build_top_level_parser
 
     monkeypatch.setattr(kbd, "_resolve_hermes_argv", lambda: ["hermes"])
     captured = {}
@@ -154,8 +154,8 @@ toolsets:
     )
     monkeypatch.setenv("HERMES_HOME", str(root))
 
-    from hermes_cli import kanban_db as kb
-    from hermes_cli import kanban_db_dispatch as kbd
+    from sage_cli import kanban_db as kb
+    from sage_cli import kanban_db_dispatch as kbd
 
     resolved = kbd._resolve_worker_cli_toolsets(str(profile))
 

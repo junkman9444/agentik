@@ -14,8 +14,8 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-import hermes_cli.web_server as web_server
-import hermes_cli.web_server_gateway as _web_server_gateway
+import sage_cli.web_server as web_server
+import sage_cli.web_server_gateway as _web_server_gateway
 
 
 class TestDashboardSpawnExecutable:

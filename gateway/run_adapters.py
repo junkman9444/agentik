@@ -832,7 +832,7 @@ class GatewayAdapterLifecycleMixin:
         if not self._multiplex_on():
             return 0
         try:
-            from hermes_cli.profiles import get_active_profile_name
+            from sage_cli.profiles import get_active_profile_name
         except Exception:
             return 0
         active = get_active_profile_name() or "default"
@@ -894,12 +894,12 @@ class GatewayAdapterLifecycleMixin:
             _own_policy_open_startup_violation, _profile_runtime_scope,
         )
         from gateway.config import load_gateway_config
-        from hermes_cli.env_loader import hydrate_profile_secret_sources
+        from sage_cli.env_loader import hydrate_profile_secret_sources
         # Hydrate external secret sources off-loop ONCE: sync hydration would stall every heartbeat.
         await asyncio.to_thread(hydrate_profile_secret_sources, profile_home)
         with _profile_runtime_scope(profile_home, hydrate_secrets=False):
             profile_runtime_cfg = _load_gateway_runtime_config()
-            from hermes_cli.plugins import discover_plugins
+            from sage_cli.plugins import discover_plugins
             discover_plugins()
             # This profile's `hooks:` block: start() registered before any profile scope existed.
             self._register_config_hooks(
@@ -1089,8 +1089,8 @@ class GatewayAdapterLifecycleMixin:
         tears down a RETURNED adapter; one whose configure/connect raised is torn down here."""
         from gateway.run import _platform_has_bot_credential, _profile_runtime_scope
         # Lazy + per-attempt: keeps test monkeypatches on these modules live.
-        from hermes_cli.profiles import get_profile_dir
-        from hermes_cli.env_loader import hydrate_profile_secret_sources
+        from sage_cli.profiles import get_profile_dir
+        from sage_cli.env_loader import hydrate_profile_secret_sources
         from gateway.config import load_gateway_config
         profile_home = get_profile_dir(profile_name)
         # Hydrate external secret sources off-loop so they cannot starve heartbeats.
@@ -1272,7 +1272,7 @@ class GatewayAdapterLifecycleMixin:
 
     @staticmethod
     def _profile_home_or_none(profile_name: str):
-        from hermes_cli.profiles import get_profile_dir
+        from sage_cli.profiles import get_profile_dir
         try:
             return get_profile_dir(profile_name)
         except Exception:
@@ -1357,7 +1357,7 @@ class GatewayAdapterLifecycleMixin:
         """Authorize and publish one normalized adapter event to plugin hooks."""
         # Observer failures must never break the adapter's update loop.
         with _log_suppressed(logging.DEBUG, "gateway_platform_event hook dispatch failed", exc_info=True):
-            from hermes_cli.lifecycle import has_hook, invoke_hook
+            from sage_cli.lifecycle import has_hook, invoke_hook
             if has_hook("gateway_platform_event") and self._is_user_authorized_for_source(source):
                 invoke_hook("gateway_platform_event", **event)
 

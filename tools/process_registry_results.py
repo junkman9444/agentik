@@ -11,7 +11,7 @@ import re
 import sqlite3
 import time
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from utils import atomic_json_write
 
 logger = logging.getLogger("tools.process_registry")
@@ -70,7 +70,7 @@ def _owns_result(owner: str, parent: str | None) -> bool:
         return False
     if owner == parent:
         return True
-    from hermes_state import SessionDB
+    from sage_state import SessionDB
 
     db = SessionDB()
     try:

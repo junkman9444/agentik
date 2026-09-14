@@ -3,19 +3,19 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from hermes_cli import update_cmd
-import hermes_cli.update_cmd_maint as update_cmd_maint
-import hermes_cli.update_cmd_deps as update_cmd_deps
+from sage_cli import update_cmd
+import sage_cli.update_cmd_maint as update_cmd_maint
+import sage_cli.update_cmd_deps as update_cmd_deps
 
 
 def test_runtime_status_probes_running_venv_outside_checkout(tmp_path, monkeypatch):
     running_python = tmp_path / "venv312" / "bin" / "python"
     observed = []
     vulnerable = SimpleNamespace(wal_reset_vulnerable=True)
-    monkeypatch.setattr("hermes_constants.project_venv_dir", lambda _root: None)
+    monkeypatch.setattr("sage_constants.project_venv_dir", lambda _root: None)
     monkeypatch.setattr(update_cmd.sys, "executable", str(running_python))
     monkeypatch.setattr(
-        "hermes_cli.sqlite_runtime.probe_sqlite_runtime",
+        "sage_cli.sqlite_runtime.probe_sqlite_runtime",
         lambda python: observed.append(Path(python)) or vulnerable,
     )
 

@@ -8,7 +8,7 @@ cache, lock file, taps and audit log. Install/uninstall/update live in
 ``skills_hub_search``, and the adapters in the other ``tools.skills_hub_*``
 siblings; import each name from its defining module.
 
-Used by hermes_cli/skills_hub.py for CLI commands and the /skills slash command.
+Used by sage_cli/skills_hub.py for CLI commands and the /skills slash command.
 """
 
 import json
@@ -21,7 +21,7 @@ from urllib.parse import urljoin
 
 import httpx
 
-from hermes_constants import get_hermes_home
+from sage_constants import get_hermes_home
 from tools.url_safety import is_safe_url
 from tools.website_policy import check_website_access
 from tools.skills_hub_models import _normalize_lock_install_path, _validate_skill_name
@@ -372,7 +372,7 @@ _PLUGIN_COMPAT_LAZY = {
     'source_url_for_bundle': ('tools.skills_hub_models', 'source_url_for_bundle'),
     'unified_search': ('tools.skills_hub_search', 'unified_search'),
     'uninstall_skill': ('tools.skills_hub_install', 'uninstall_skill'),
-    'windows_hide_flags': ('hermes_cli._subprocess_compat', 'windows_hide_flags'),
+    'windows_hide_flags': ('sage_cli._subprocess_compat', 'windows_hide_flags'),
 }
 
 _plugin_compat_prev_getattr = __getattr__
@@ -383,7 +383,7 @@ def __getattr__(name):  # PEP 562 — chained onto the module's own __getattr__
     if target is None:
         return _plugin_compat_prev_getattr(name)
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

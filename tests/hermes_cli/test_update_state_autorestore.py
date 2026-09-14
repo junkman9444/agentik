@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli.update_cmd import (
+from sage_cli.update_cmd import (
     _clear_stale_sqlite_sidecars,
     _restore_state_db_from_snapshot,
 )
@@ -136,7 +136,7 @@ def test_torn_restore_is_what_the_guard_prevents(live_db_with_hot_wal, snapshot_
     that reports ``integrity_check`` clean — so the CLI's ``_restored_ok`` test
     passes and it prints success — while serving the OLD row set.
     """
-    from hermes_cli.backup import verify_sqlite_integrity
+    from sage_cli.backup import verify_sqlite_integrity
 
     shutil.copy2(snapshot_db, live_db_with_hot_wal)  # no sidecar clearing
 
@@ -237,8 +237,8 @@ def test_post_update_guard_covers_sibling_profiles(tmp_path, monkeypatch, capsys
     """#97994: the guard must verify + auto-restore EVERY profile's state.db,
     not just the root home's. Pre-update snapshots already cover siblings
     (#66140); the guard was the missing half."""
-    from hermes_cli import update_cmd
-    from hermes_cli.backup import _sibling_profile_homes
+    from sage_cli import update_cmd
+    from sage_cli.backup import _sibling_profile_homes
 
     root_home = tmp_path / "default-home"
     root_home.mkdir()
@@ -256,7 +256,7 @@ def test_post_update_guard_covers_sibling_profiles(tmp_path, monkeypatch, capsys
 
     monkeypatch.setattr(update_cmd, "get_hermes_home", lambda: root_home)
     monkeypatch.setattr(
-        "hermes_cli.backup._sibling_profile_homes",
+        "sage_cli.backup._sibling_profile_homes",
         lambda invoking_home: [("work", sibling_home)],
     )
 
@@ -274,7 +274,7 @@ def test_post_update_guard_covers_sibling_profiles(tmp_path, monkeypatch, capsys
 def test_post_update_guard_leaves_valid_sibling_dbs_alone(tmp_path, monkeypatch, capsys):
     """A healthy sibling profile must not be touched — the guard only acts
     on corruption."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     root_home = tmp_path / "default-home"
     root_home.mkdir()
@@ -287,7 +287,7 @@ def test_post_update_guard_leaves_valid_sibling_dbs_alone(tmp_path, monkeypatch,
 
     monkeypatch.setattr(update_cmd, "get_hermes_home", lambda: root_home)
     monkeypatch.setattr(
-        "hermes_cli.backup._sibling_profile_homes",
+        "sage_cli.backup._sibling_profile_homes",
         lambda invoking_home: [("work", sibling_home)],
     )
 
@@ -301,7 +301,7 @@ def test_post_update_guard_leaves_valid_sibling_dbs_alone(tmp_path, monkeypatch,
 def test_post_update_guard_survives_missing_sibling_snapshot(tmp_path, monkeypatch, capsys):
     """Corrupt sibling with NO snapshot: guard must report and continue,
     never raise into the update tail."""
-    from hermes_cli import update_cmd
+    from sage_cli import update_cmd
 
     root_home = tmp_path / "default-home"
     root_home.mkdir()
@@ -313,7 +313,7 @@ def test_post_update_guard_survives_missing_sibling_snapshot(tmp_path, monkeypat
 
     monkeypatch.setattr(update_cmd, "get_hermes_home", lambda: root_home)
     monkeypatch.setattr(
-        "hermes_cli.backup._sibling_profile_homes",
+        "sage_cli.backup._sibling_profile_homes",
         lambda invoking_home: [("work", sibling_home)],
     )
 

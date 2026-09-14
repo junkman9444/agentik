@@ -6,11 +6,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pytest
 
-from hermes_cli.active_sessions import try_acquire_active_session
+from sage_cli.active_sessions import try_acquire_active_session
 
 
 def test_discovery_uses_exact_profile_and_owner_handshake(tmp_path):
-    from hermes_cli.shared_session_attach import discover_attach_url
+    from sage_cli.shared_session_attach import discover_attach_url
 
     home = tmp_path / "profile"
     other = tmp_path / "other"
@@ -44,7 +44,7 @@ def test_discovery_uses_exact_profile_and_owner_handshake(tmp_path):
         assert requests == []
         assert discover_attach_url("same-id", registry_home=home) == reply["websocket_url"]
         assert len(requests) == 1
-        from hermes_cli.shared_session_attach import configure_tui_attachment
+        from sage_cli.shared_session_attach import configure_tui_attachment
         env = {"HERMES_TUI_GATEWAY_URL": "   "}
         configure_tui_attachment(env, "same-id", registry_home=home)
         assert env["HERMES_TUI_GATEWAY_URL"] == reply["websocket_url"]
@@ -63,8 +63,8 @@ def test_discovery_uses_exact_profile_and_owner_handshake(tmp_path):
 
 
 def test_discovery_refuses_unsupported_owner_without_releasing_lease(tmp_path, monkeypatch):
-    from hermes_cli.shared_session_attach import discover_attach_url
-    from hermes_cli.active_sessions import active_session_registry_snapshot
+    from sage_cli.shared_session_attach import discover_attach_url
+    from sage_cli.active_sessions import active_session_registry_snapshot
 
     lease, error = try_acquire_active_session(
         session_id="old", surface="desktop", config={}, registry_home=tmp_path,

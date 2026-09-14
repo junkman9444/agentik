@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Set
 
-from hermes_constants import hermes_home_key
+from sage_constants import hermes_home_key
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ def _discovery_cache_path() -> Optional[Path]:
     """Path of the tool-discovery verdict cache, or None if unresolvable."""
     try:
         # Deferred import keeps tools/registry.py a no-deps leaf at import time.
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         return Path(get_hermes_home()) / "cache" / "tool_discovery_cache.json"
     except Exception:
         return None
@@ -256,7 +256,7 @@ def check_fn_cache_scope() -> Optional[str]:
         pass
     try:
         from agent.secret_scope import is_multiplex_active
-        from hermes_constants import get_hermes_home_override
+        from sage_constants import get_hermes_home_override
         if not is_multiplex_active():
             return None
         override = get_hermes_home_override()

@@ -3,9 +3,9 @@
 
 Refs #90471 / #89614.  The three patched Windows ``taskkill`` boundaries:
 
-- ``hermes_cli/_subprocess_compat.pid_is_hermes`` / ``kill_process_tree``
-- ``hermes_cli/dashboard_procs._kill_stale_dashboard_processes`` (win32)
-- ``hermes_cli/update_cmd._stop_process_trees``
+- ``sage_cli/_subprocess_compat.pid_is_hermes`` / ``kill_process_tree``
+- ``sage_cli/dashboard_procs._kill_stale_dashboard_processes`` (win32)
+- ``sage_cli/update_cmd._stop_process_trees``
 
 Acceptance from #90471:
 1. missing / unreadable / non-matching identity fails closed -> no taskkill
@@ -18,9 +18,9 @@ from unittest import mock
 
 import pytest
 
-from hermes_cli import _subprocess_compat
-from hermes_cli import dashboard_procs
-from hermes_cli import update_cmd
+from sage_cli import _subprocess_compat
+from sage_cli import dashboard_procs
+from sage_cli import update_cmd
 
 
 def _probe_stdout(value: str) -> mock.Mock:
@@ -50,7 +50,7 @@ class TestPidIsHermes:
             r"c:\users\shermesa\app.exe"
         ) is False
         assert _subprocess_compat._text_names_hermes(
-            r"C:\Users\x\.hermes-runtime\python.exe -m hermes_cli.main"
+            r"C:\Users\x\.hermes-runtime\python.exe -m sage_cli.main"
         ) is True
         assert _subprocess_compat._text_names_hermes(
             "/opt/hermes-agent/venv/bin/python"
@@ -146,7 +146,7 @@ class TestStopProcessTrees:
         with mock.patch(
             "gateway.status.get_process_start_time", return_value=123
         ), mock.patch(
-            "hermes_cli._subprocess_compat.pid_is_hermes", return_value=False
+            "sage_cli._subprocess_compat.pid_is_hermes", return_value=False
         ), mock.patch.object(update_cmd.subprocess, "run") as run:
             update_cmd._stop_process_trees([1111, 2222])
         run.assert_not_called()
@@ -155,7 +155,7 @@ class TestStopProcessTrees:
         with mock.patch(
             "gateway.status.get_process_start_time", return_value=123
         ), mock.patch(
-            "hermes_cli._subprocess_compat.pid_is_hermes", return_value=True
+            "sage_cli._subprocess_compat.pid_is_hermes", return_value=True
         ), mock.patch.object(
             update_cmd.subprocess, "run", return_value=mock.Mock(returncode=0)
         ) as run:
@@ -167,7 +167,7 @@ class TestStopProcessTrees:
         with mock.patch(
             "gateway.status.get_process_start_time", return_value=123
         ), mock.patch(
-            "hermes_cli._subprocess_compat.pid_is_hermes", return_value=False
+            "sage_cli._subprocess_compat.pid_is_hermes", return_value=False
         ), mock.patch.object(update_cmd.subprocess, "run") as run:
             update_cmd._stop_process_trees([1111, 2222])  # must not raise
         run.assert_not_called()
@@ -177,7 +177,7 @@ class TestKillStaleDashboardProcesses:
     """dashboard_procs win32 kill branch guard behaviour."""
 
     def _patch_find(self, pids=(12345,)):
-        from hermes_cli import main_dashboard
+        from sage_cli import main_dashboard
 
         return mock.patch.object(main_dashboard, "_find_stale_dashboard_pids", return_value=list(pids))
 
@@ -187,7 +187,7 @@ class TestKillStaleDashboardProcesses:
         ), mock.patch(
             "gateway.status.get_process_start_time", return_value=123
         ), mock.patch(
-            "hermes_cli._subprocess_compat.pid_is_hermes", return_value=False
+            "sage_cli._subprocess_compat.pid_is_hermes", return_value=False
         ), mock.patch.object(dashboard_procs.subprocess, "run") as run:
             result = dashboard_procs._kill_stale_dashboard_processes()
         assert result["killed"] == []
@@ -202,7 +202,7 @@ class TestKillStaleDashboardProcesses:
         ), mock.patch(
             "gateway.status.get_process_start_time", return_value=123
         ), mock.patch(
-            "hermes_cli._subprocess_compat.pid_is_hermes", return_value=True
+            "sage_cli._subprocess_compat.pid_is_hermes", return_value=True
         ), mock.patch.object(
             dashboard_procs.subprocess, "run", return_value=mock.Mock(
                 returncode=0, stderr="", stdout=""

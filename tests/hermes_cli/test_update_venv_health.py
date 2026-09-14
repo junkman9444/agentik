@@ -23,8 +23,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hermes_cli import main as cli_main
-from hermes_cli import update_cmd
+from sage_cli import main as cli_main
+from sage_cli import update_cmd
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +90,7 @@ def test_detect_venv_python_excludes_self_and_ancestors(_winp, tmp_path):
 @patch.object(cli_main, "_is_windows", return_value=True)
 def test_detect_venv_python_prefetches_only_cheap_process_fields(_winp, tmp_path):
     venv_py = str(tmp_path / "venv" / "Scripts" / "python.exe")
-    holder = _proc(101, venv_py, "python.exe", [venv_py, "-m", "hermes_cli.main", "serve"])
+    holder = _proc(101, venv_py, "python.exe", [venv_py, "-m", "sage_cli.main", "serve"])
     unrelated = _proc(102, r"C:\Program Files\Browser\browser.exe", "browser.exe")
     unrelated.cmdline.side_effect = AssertionError("unrelated cmdline must stay lazy")
     unrelated.cwd.side_effect = AssertionError("unrelated cwd must stay lazy")
@@ -125,7 +125,7 @@ def test_detect_venv_python_keeps_external_interpreter_fallback(_winp, tmp_path)
         103,
         r"C:\Python311\python.exe",
         "python.exe",
-        ["python.exe", "-m", "hermes_cli.main", "serve"],
+        ["python.exe", "-m", "sage_cli.main", "serve"],
         str(tmp_path),
     )
     me = MagicMock()
@@ -190,7 +190,7 @@ def _run_update_until_guard(args):
     ), patch.object(
         cli_main,
         "_detect_venv_python_processes",
-        return_value=[(101, "python.exe", "python.exe -m hermes_cli.main serve")],
+        return_value=[(101, "python.exe", "python.exe -m sage_cli.main serve")],
     ), patch.object(
         # Pin the orphan classifier: this test exercises --force/--force-venv
         # gating, not orphan detection (covered in

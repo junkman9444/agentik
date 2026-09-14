@@ -15,8 +15,8 @@ import os
 
 import pytest
 
-from hermes_cli import update_cmd
-import hermes_cli.update_cmd_deps as update_cmd_deps
+from sage_cli import update_cmd
+import sage_cli.update_cmd_deps as update_cmd_deps
 
 
 def _make_fake_venv(tmp_path):

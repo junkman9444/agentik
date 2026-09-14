@@ -1,4 +1,4 @@
-"""Unit tests for _print_loopback_ssh_hint() in hermes_cli/auth.py.
+"""Unit tests for _print_loopback_ssh_hint() in sage_cli/auth.py.
 
 The helper warns users that loopback OAuth flows (Spotify) don't work over
 SSH unless they set up an `ssh -L` port forward between their laptop's
@@ -15,8 +15,8 @@ import contextlib
 import socket
 
 
-from hermes_cli import auth as auth_mod
-import hermes_cli.auth_device_flow as auth_device_flow
+from sage_cli import auth as auth_mod
+import sage_cli.auth_device_flow as auth_device_flow
 
 
 def _cap(fn):

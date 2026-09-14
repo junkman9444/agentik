@@ -30,7 +30,7 @@ def _planning_probe_calls(source: str) -> list[bool]:
 
 
 def test_bootstrap_presets_price_against_capacity():
-    import hermes_cli.local_runtime.bootstrap as bootstrap
+    import sage_cli.local_runtime.bootstrap as bootstrap
 
     calls = _planning_probe_calls(inspect.getsource(bootstrap))
     assert calls, "bootstrap no longer probes a budget? update this test"
@@ -41,7 +41,7 @@ def test_bootstrap_presets_price_against_capacity():
 
 
 def test_growth_refit_prices_against_capacity():
-    import hermes_cli.local_runtime.growth as growth
+    import sage_cli.local_runtime.growth as growth
 
     calls = _planning_probe_calls(inspect.getsource(growth))
     assert calls, "growth no longer probes a budget? update this test"

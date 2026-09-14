@@ -13,7 +13,7 @@ Bug — newly-routed curated aliases vanished on a native Anthropic setup
 
 from unittest.mock import patch
 
-from hermes_cli import models as M
+from sage_cli import models as M
 
 
 def test_anthropic_native_list_keeps_aggregator_flagships():

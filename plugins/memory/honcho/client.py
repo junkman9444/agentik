@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING, Any, Callable
 from urllib.parse import urlparse
 
 from agent.secret_scope import get_secret
-from hermes_cli.profiles import _get_default_hermes_home
-from hermes_constants import get_hermes_home
+from sage_cli.profiles import _get_default_hermes_home
+from sage_constants import get_hermes_home
 
 from plugins.memory.honcho.client_cache import (
     _DEFAULT_HTTP_TIMEOUT, _client_cache_key, _client_slots, _client_slots_lock,
@@ -73,7 +73,7 @@ def resolve_active_host() -> str:
     if explicit:
         return explicit
     try:
-        from hermes_cli.profiles import get_active_profile_name
+        from sage_cli.profiles import get_active_profile_name
         profile_host = profile_host_key(get_active_profile_name())
     except Exception:
         profile_host = HOST
@@ -561,7 +561,7 @@ def _build_client(config: HonchoClientConfig) -> "Honcho":
     base_url, timeout = config.base_url, config.timeout
     if not base_url or timeout is None:
         with contextlib.suppress(Exception):
-            from hermes_cli.config import load_config
+            from sage_cli.config import load_config
             honcho_cfg = load_config().get("honcho", {})
             if isinstance(honcho_cfg, dict):
                 base_url = base_url or _sanitize_url(honcho_cfg.get("base_url", "").strip() or None)
@@ -616,7 +616,7 @@ def __getattr__(name):  # PEP 562 — lazy so no import cycles
     if target is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     import importlib
-    from hermes_cli.plugin_compat import warn_once
+    from sage_cli.plugin_compat import warn_once
     warn_once(__name__, name, *target)
     return getattr(importlib.import_module(target[0]), target[1])
 # ---- END PLUGIN-COMPAT ----

@@ -6,13 +6,13 @@ from __future__ import annotations
 
 import pytest
 
-from hermes_cli.local_runtime.catalog import (
+from sage_cli.local_runtime.catalog import (
     CATALOG,
     catalog_by_id,
     find_entry_for_model,
     select_variant,
 )
-from hermes_cli.local_runtime.estimator import HardwareBudget
+from sage_cli.local_runtime.estimator import HardwareBudget
 
 GIB = 1 << 30
 
@@ -154,10 +154,10 @@ def test_find_entry_for_model_resolves_split_ids():
 def test_hybrid_long_context_stays_cheap():
     """The reason Nemotron/Qwen3.6 headline the catalog: their priced
     64K-floor KV must be a small fraction of a dense model's."""
-    from hermes_cli.local_runtime.catalog import FLOOR
-    from hermes_cli.local_runtime.estimator import ctx_bytes
+    from sage_cli.local_runtime.catalog import FLOOR
+    from sage_cli.local_runtime.estimator import ctx_bytes
 
-    from hermes_cli.local_runtime.estimator import LayerKind, ModelProfile
+    from sage_cli.local_runtime.estimator import LayerKind, ModelProfile
 
     hybrid = catalog_by_id()["qwen3.6-35b-a3b"]
     hybrid_profile = hybrid.profile(hybrid.variants[-1])

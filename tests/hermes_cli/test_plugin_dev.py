@@ -5,7 +5,7 @@ import argparse
 import pytest
 from pathlib import Path
 
-from hermes_cli.subcommands.plugins import build_plugins_parser
+from sage_cli.subcommands.plugins import build_plugins_parser
 
 
 def _parse_plugins_args(*argv: str):
@@ -28,7 +28,7 @@ def test_plugins_parser_exposes_doctor() -> None:
 def test_doctor_uses_registration_to_reject_bad_hook_and_callback_signature(
     tmp_path: Path,
 ) -> None:
-    from hermes_cli.plugin_dev import doctor_plugin
+    from sage_cli.plugin_dev import doctor_plugin
 
     plugin = tmp_path / "bad-plugin"
     plugin.mkdir()
@@ -63,7 +63,7 @@ def test_doctor_uses_registration_to_reject_bad_hook_and_callback_signature(
 
 
 def test_doctor_accepts_manifest_defaults_from_runtime_parser(tmp_path: Path) -> None:
-    from hermes_cli.plugin_dev import doctor_plugin
+    from sage_cli.plugin_dev import doctor_plugin
 
     plugin = tmp_path / "minimal"
     plugin.mkdir()
@@ -81,7 +81,7 @@ def test_doctor_accepts_manifest_defaults_from_runtime_parser(tmp_path: Path) ->
 def test_doctor_restores_global_tool_policy_and_module_state(tmp_path: Path) -> None:
     import sys
 
-    from hermes_cli.plugin_dev import doctor_plugin
+    from sage_cli.plugin_dev import doctor_plugin
     from tools.registry import registry
 
     target = tmp_path / "cleanup-plugin"
@@ -121,7 +121,7 @@ def test_doctor_restores_global_tool_policy_and_module_state(tmp_path: Path) -> 
 
 
 def test_doctor_blocks_live_network(tmp_path: Path) -> None:
-    from hermes_cli.plugin_dev import doctor_plugin
+    from sage_cli.plugin_dev import doctor_plugin
 
     plugin = tmp_path / "network-plugin"
     plugin.mkdir()
@@ -140,7 +140,7 @@ def test_doctor_blocks_live_network(tmp_path: Path) -> None:
 
 def test_resolve_rejects_directory_without_manifest(tmp_path: Path) -> None:
     """A non-plugin directory must not resolve — Doctor copies what it resolves."""
-    from hermes_cli.plugin_dev import resolve_plugin_path
+    from sage_cli.plugin_dev import resolve_plugin_path
 
     not_a_plugin = tmp_path / "home"
     (not_a_plugin / "Documents").mkdir(parents=True)
@@ -164,7 +164,7 @@ def test_doctor_default_target_does_not_copy_cwd(
     import os
     import shutil
 
-    from hermes_cli import plugin_dev
+    from sage_cli import plugin_dev
 
     workdir = tmp_path / "workdir"
     (workdir / "big").mkdir(parents=True)
@@ -188,7 +188,7 @@ def test_doctor_default_target_does_not_copy_cwd(
 
 def test_resolve_accepts_category_layout(tmp_path: Path) -> None:
     """A category directory holds no manifest itself but discovery finds one."""
-    from hermes_cli.plugin_dev import resolve_plugin_path
+    from sage_cli.plugin_dev import resolve_plugin_path
 
     category = tmp_path / "image_gen"
     plugin = category / "openai"
@@ -202,7 +202,7 @@ def test_resolve_prefers_installed_id_over_unrelated_local_dir(
     tmp_path: Path, monkeypatch
 ) -> None:
     """A same-named local directory must not shadow the installed plugin."""
-    from hermes_cli import plugin_dev
+    from sage_cli import plugin_dev
 
     hermes_home = tmp_path / "hermes-home"
     installed = hermes_home / "plugins" / "sample"
@@ -227,7 +227,7 @@ def test_doctor_removes_temp_home_when_staging_copy_fails(
 
 
 
-    from hermes_cli import plugin_dev
+    from sage_cli import plugin_dev
 
     plugin = tmp_path / "sample"
     plugin.mkdir()

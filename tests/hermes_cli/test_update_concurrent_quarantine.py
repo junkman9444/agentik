@@ -17,14 +17,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from hermes_cli import main as cli_main
-from hermes_cli import dashboard_procs
-from hermes_cli import main_install_repair
-from hermes_cli import update_cmd
+from sage_cli import main as cli_main
+from sage_cli import dashboard_procs
+from sage_cli import main_install_repair
+from sage_cli import update_cmd
 
 
 # Tests in this module either exercise the REAL _detect_concurrent_hermes_instances
-# helper (and need the autouse stub in tests/hermes_cli/conftest.py disabled),
+# helper (and need the autouse stub in tests/sage_cli/conftest.py disabled),
 # or supply their own explicit return value via patch.object. Mark the whole
 # module so the conftest fixture skips its default stub.
 pytestmark = pytest.mark.real_concurrent_gate
@@ -200,7 +200,7 @@ def test_pause_windows_gateways_for_update_stops_profile_and_unmapped_pids(
     capsys,
 ):
     import gateway.status as status_mod
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
 
     profile_home = tmp_path / "profiles" / "work"
     profile_home.mkdir(parents=True)
@@ -226,7 +226,7 @@ def test_pause_windows_gateways_for_update_stops_profile_and_unmapped_pids(
     monkeypatch.setattr(
         gateway_mod,
         "_capture_gateway_argv",
-        lambda pid: ["pythonw.exe", "-m", "hermes_cli.main", "gateway", "run"]
+        lambda pid: ["pythonw.exe", "-m", "sage_cli.main", "gateway", "run"]
         if pid == 202
         else None,
     )
@@ -247,7 +247,7 @@ def test_pause_windows_gateways_for_update_stops_profile_and_unmapped_pids(
         "unmapped": [
             {
                 "pid": 202,
-                "argv": ["pythonw.exe", "-m", "hermes_cli.main", "gateway", "run"],
+                "argv": ["pythonw.exe", "-m", "sage_cli.main", "gateway", "run"],
             }
         ],
     }
@@ -276,9 +276,9 @@ def test_pause_and_resume_windows_gateway_service(
 ):
     """A real Windows service is stopped before venv mutation and restarted
     afterward instead of spawning a competing detached gateway."""
-    import hermes_cli.gateway as gateway_mod
-    import hermes_cli.update_cmd as update_cmd
-    import hermes_cli.update_cmd_windows as update_cmd_windows
+    import sage_cli.gateway as gateway_mod
+    import sage_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd_windows as update_cmd_windows
 
     profile_home = tmp_path / "profiles" / "default"
     profile_home.mkdir(parents=True)
@@ -361,9 +361,9 @@ def test_pause_windows_gateway_service_failure_restores_every_attempted_service(
     monkeypatch,
 ):
     """A service that times out after accepting stop is restarted too."""
-    import hermes_cli.gateway as gateway_mod
-    import hermes_cli.update_cmd as update_cmd
-    import hermes_cli.update_cmd_windows as update_cmd_windows
+    import sage_cli.gateway as gateway_mod
+    import sage_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd_windows as update_cmd_windows
 
     services = [
         SimpleNamespace(name="HermesGateway", service_pid=11, service_create_time=11.0, gateway_pid=101, gateway_create_time=101.0, descendant_identities=()),
@@ -405,9 +405,9 @@ def test_pause_windows_gateway_service_surfaces_rollback_start_failure(
     _winp,
     monkeypatch,
 ):
-    import hermes_cli.gateway as gateway_mod
-    import hermes_cli.update_cmd as update_cmd
-    import hermes_cli.update_cmd_windows as update_cmd_windows
+    import sage_cli.gateway as gateway_mod
+    import sage_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd_windows as update_cmd_windows
 
     services = [
         SimpleNamespace(name="HermesGateway", service_pid=11, service_create_time=11.0, gateway_pid=101, gateway_create_time=101.0, descendant_identities=()),
@@ -446,8 +446,8 @@ def test_pause_windows_gateway_service_surfaces_rollback_start_failure(
 
 
 def test_restore_windows_gateway_service_waits_out_stop_pending(monkeypatch):
-    import hermes_cli.update_cmd as update_cmd
-    import hermes_cli.update_cmd_windows as update_cmd_windows
+    import sage_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd_windows as update_cmd_windows
 
     statuses = iter(["stop_pending", "stopped"])
     service = SimpleNamespace(status=lambda: next(statuses))
@@ -476,7 +476,7 @@ def test_pause_windows_gateways_aborts_when_service_discovery_is_indeterminate(
     _winp,
     monkeypatch,
 ):
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
 
     monkeypatch.setattr(
         gateway_mod,
@@ -500,7 +500,7 @@ def test_pause_windows_gateways_aborts_when_gateway_pid_discovery_is_indetermina
     _winp,
     monkeypatch,
 ):
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
 
     monkeypatch.setattr(gateway_mod, "find_windows_gateway_services", lambda **_k: [])
     monkeypatch.setattr(
@@ -517,7 +517,7 @@ def test_stop_windows_gateway_service_waits_for_original_descendants(
     monkeypatch,
 ):
     """SCM STOPPED is insufficient while the original process identity lives."""
-    import hermes_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd as update_cmd
 
     service = SimpleNamespace(status=lambda: "stopped")
     fake_psutil = SimpleNamespace(
@@ -543,8 +543,8 @@ def test_resume_windows_gateway_service_failure_stays_retryable(
     _winp,
     monkeypatch,
 ):
-    import hermes_cli.update_cmd as update_cmd
-    import hermes_cli.update_cmd_windows as update_cmd_windows
+    import sage_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd_windows as update_cmd_windows
 
     token = {
         "resume_needed": True,
@@ -688,7 +688,7 @@ def test_pause_kill_set_covers_venv_guard_abort_set(
     the guard reported the venv-side launcher, so the update aborted forever
     despite a "successful" pause.
     """
-    import hermes_cli.gateway as gateway_mod
+    import sage_cli.gateway as gateway_mod
     import gateway.status as status_mod
 
     venv_exe = str(cli_main.PROJECT_ROOT / "venv" / "Scripts" / "python.exe")
@@ -765,7 +765,7 @@ def test_pause_kill_set_covers_venv_guard_abort_set(
 GATEWAY_ARGV = [
     r"C:\x\venv\Scripts\python.exe",
     "-m",
-    "hermes_cli.main",
+    "sage_cli.main",
     "gateway",
     "run",
 ]
@@ -805,8 +805,8 @@ def test_plain_update_refuses_to_tree_kill_its_gateway_ancestor(
     monkeypatch, capsys
 ):
     """#98814: terminal-launched update must survive to report the refusal."""
-    import hermes_cli.gateway as gateway_cli
-    import hermes_cli.update_cmd as update_cmd
+    import sage_cli.gateway as gateway_cli
+    import sage_cli.update_cmd as update_cmd
 
     monkeypatch.setattr(
         gateway_cli,
@@ -827,8 +827,8 @@ def test_plain_update_refuses_to_tree_kill_its_gateway_ancestor(
 
 def test_gateway_handoff_keeps_leftover_gateway_recovery(monkeypatch, capsys):
     """The detached `/update` hand-off still owns leftover gateway cleanup."""
-    import hermes_cli.gateway as gateway_cli
-    import hermes_cli.update_cmd as update_cmd
+    import sage_cli.gateway as gateway_cli
+    import sage_cli.update_cmd as update_cmd
 
     ancestry_checks = []
     monkeypatch.setattr(
@@ -868,7 +868,7 @@ def test_unreadable_argv_falls_back_to_the_captured_prefix(monkeypatch):
     anything else still refuses.
     """
     monkeypatch.setitem(sys.modules, "psutil", _fake_psutil_cmdlines({}))
-    gateway_prefix = r"venv\Scripts\python.exe -m hermes_cli.main gateway run"
+    gateway_prefix = r"venv\Scripts\python.exe -m sage_cli.main gateway run"
 
     assert cli_main._leftover_pausable_gateway_pids(
         [(300, "python.exe", gateway_prefix)]
@@ -931,7 +931,7 @@ def test_classify_concurrent_instance_recognises_gateway_runtimes(monkeypatch):
     launcher shape (python -m, hermes.exe shim, hermes-gateway.exe,
     gateway/run.py, bare `hermes gateway` which defaults to run)."""
     cases = [
-        [r"C:\venv\Scripts\python.exe", "-m", "hermes_cli.main", "gateway", "run"],
+        [r"C:\venv\Scripts\python.exe", "-m", "sage_cli.main", "gateway", "run"],
         [r"C:\venv\Scripts\hermes.exe", "gateway", "run"],
         [r"C:\venv\Scripts\hermes-gateway.exe"],
         [r"C:\venv\Scripts\python.exe", "gateway/run.py"],
@@ -956,7 +956,7 @@ def test_classify_concurrent_instance_recognises_non_gateways(monkeypatch):
         [r"C:\venv\Scripts\hermes.exe", "dashboard"],
         ["hermes.exe", "gateway", "status"],  # management, not runtime
         ["hermes.exe", "gateway", "stop"],
-        ["python", "-m", "hermes_cli.main"],
+        ["python", "-m", "sage_cli.main"],
         [],
     ]
     for argv in cases:
@@ -1108,12 +1108,12 @@ def test_update_impl_refuses_before_terminating_gateway_ancestor(
 ):
     """#98814: the live holder path must gate the destructive call itself."""
     import gateway.status as status_mod
-    import hermes_cli.gateway as gateway_cli
+    import sage_cli.gateway as gateway_cli
 
     holder = (
         300,
         "python.exe",
-        r"C:\x\venv\Scripts\python.exe -m hermes_cli.main gateway run",
+        r"C:\x\venv\Scripts\python.exe -m sage_cli.main gateway run",
     )
     monkeypatch.setattr(
         gateway_cli,
@@ -1148,7 +1148,7 @@ def test_update_impl_refuses_before_terminating_gateway_ancestor(
 
 
 def test_stop_service_refuses_pid_reuse_before_sc_stop(monkeypatch):
-    import hermes_cli.update_cmd as update_cmd
+    import sage_cli.update_cmd as update_cmd
 
     fake_psutil = SimpleNamespace(
         win_service_get=lambda _name: SimpleNamespace(

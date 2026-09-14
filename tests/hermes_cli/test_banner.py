@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from rich.console import Console
 
-import hermes_cli.banner as banner
+import sage_cli.banner as banner
 import model_tools
 import tools.mcp_tool_discovery
 
@@ -29,7 +29,7 @@ def test_build_welcome_banner_title_falls_back_when_no_tag():
     """Without a resolvable tag, the panel title renders as plain text (no hyperlink escape)."""
     import io
     from unittest.mock import patch as _patch
-    import hermes_cli.banner as _banner
+    import sage_cli.banner as _banner
     import model_tools as _mt
     import tools.mcp_tool as _mcp
     from tools import mcp_tool_discovery as _mcp_discovery
@@ -92,7 +92,7 @@ def test_empty_model_shows_the_free_tier_route_when_it_carries_inference(tmp_pat
     When nothing resolves the red "no model configured" line stays."""
     monkeypatch.setenv("HERMES_HOME", str(tmp_path / ".hermes"))
     (tmp_path / ".hermes").mkdir()
-    import hermes_cli.anon_auth as anon_auth
+    import sage_cli.anon_auth as anon_auth
 
     def render(carries: bool) -> str:
         with (

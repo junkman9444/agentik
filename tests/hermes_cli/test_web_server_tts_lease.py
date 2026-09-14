@@ -12,8 +12,8 @@ import pytest
 
 @pytest.fixture
 def isolated_profiles(tmp_path, monkeypatch, _isolate_hermes_home):
-    from hermes_constants import get_hermes_home
-    from hermes_cli import profiles
+    from sage_constants import get_hermes_home
+    from sage_cli import profiles
 
     default_home = get_hermes_home()
     profiles_root = default_home / "profiles"
@@ -35,11 +35,11 @@ def client(monkeypatch, isolated_profiles):
     except ImportError:
         pytest.skip("fastapi/starlette not installed")
 
-    import hermes_state
-    from hermes_constants import get_hermes_home
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    import sage_state
+    from sage_constants import get_hermes_home
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+    monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
     c = TestClient(app)
     c.headers[_SESSION_HEADER_NAME] = _SESSION_TOKEN
     return c
@@ -139,7 +139,7 @@ def test_acquire_resolves_provider_inside_target_profile(client, isolated_profil
     seen = {}
 
     def _fake_warm(cfg=None, provider=None):
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         seen["home"] = str(get_hermes_home())
         seen["provider"] = tts_tool._get_provider(tts_tool._load_tts_config())

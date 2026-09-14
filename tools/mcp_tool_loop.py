@@ -69,7 +69,7 @@ def _try_acquire_mcp_discovery_lock() -> Any:
     # The cached path lives on the ORIGIN module (tests reset ``tools.mcp_tool._MCP_DISCOVERY_LOCK_PATH``).
     from tools import mcp_tool as _origin
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         if _origin._MCP_DISCOVERY_LOCK_PATH is None:
             _origin._MCP_DISCOVERY_LOCK_PATH = str(get_hermes_home() / ".mcp-discovery.lock")
         fh = open(_origin._MCP_DISCOVERY_LOCK_PATH, "w", encoding="utf-8")
@@ -98,7 +98,7 @@ def _wrap_with_home_override(coro: "Coroutine") -> "Coroutine":
     """Carry the caller's context-local HERMES_HOME override into ``coro`` (task-local on the MCP
     loop, so concurrent scopes don't interfere)."""
     try:
-        from hermes_constants import get_hermes_home_override, reset_hermes_home_override, set_hermes_home_override
+        from sage_constants import get_hermes_home_override, reset_hermes_home_override, set_hermes_home_override
         home_override = get_hermes_home_override()
     except Exception:
         home_override = None

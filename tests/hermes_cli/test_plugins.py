@@ -1,4 +1,4 @@
-"""Tests for the Hermes plugin system (hermes_cli.plugins)."""
+"""Tests for the Hermes plugin system (sage_cli.plugins)."""
 
 import logging
 import json
@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import yaml
 
-from hermes_cli.plugins import (
+from sage_cli.plugins import (
     ENTRY_POINTS_GROUP,
     VALID_HOOKS,
     PluginContext,
@@ -26,8 +26,8 @@ from hermes_cli.plugins import (
     resolve_plugin_command_result,
     _portable_skill_namespace,
 )
-from hermes_cli.relay_plugin_cutover import RELAY_PLUGINS_CONFIG_ENV
-from hermes_cli.middleware import (
+from sage_cli.relay_plugin_cutover import RELAY_PLUGINS_CONFIG_ENV
+from sage_cli.middleware import (
     VALID_MIDDLEWARE,
     apply_llm_request_middleware,
     apply_tool_request_middleware,
@@ -125,7 +125,7 @@ class TestPluginDiscovery:
     def test_removed_relay_plugin_identity_cannot_be_reloaded(
         self, monkeypatch, caplog
     ):
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli import plugins as plugins_mod
 
         manifest = PluginManifest(
             name="nemo_relay",
@@ -162,8 +162,8 @@ class TestPluginDiscovery:
     def test_enabled_portable_plugin_registers_components(
         self, tmp_path, monkeypatch
     ):
-        from hermes_cli.agent_plugins import MCP_SCHEMA_V1, PLUGIN_SCHEMA_V1
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli.agent_plugins import MCP_SCHEMA_V1, PLUGIN_SCHEMA_V1
+        from sage_cli import plugins as plugins_mod
 
         home = tmp_path / "home"
         plugin = home / "plugins" / "portable"
@@ -214,8 +214,8 @@ class TestPluginDiscovery:
         assert manager._plugins["native"].module is not None
 
     def test_disabled_portable_plugin_registers_nothing(self, tmp_path, monkeypatch):
-        from hermes_cli.agent_plugins import PLUGIN_SCHEMA_V1
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli.agent_plugins import PLUGIN_SCHEMA_V1
+        from sage_cli import plugins as plugins_mod
 
         home = tmp_path / "home"
         plugin = home / "plugins" / "portable"
@@ -249,8 +249,8 @@ class TestPluginDiscovery:
     def test_portable_author_object_is_normalized_to_stable_string(
         self, tmp_path, monkeypatch
     ):
-        from hermes_cli.agent_plugins import PLUGIN_SCHEMA_V1
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli.agent_plugins import PLUGIN_SCHEMA_V1
+        from sage_cli import plugins as plugins_mod
 
         home = tmp_path / "home"
         plugin = home / "plugins" / "portable"
@@ -332,7 +332,7 @@ class TestPluginDiscovery:
 
     def test_middleware_helpers_skip_no_listener_work(self, monkeypatch):
         manager = types.SimpleNamespace(_middleware={})
-        monkeypatch.setattr("hermes_cli.plugins.get_plugin_manager", lambda: manager)
+        monkeypatch.setattr("sage_cli.plugins.get_plugin_manager", lambda: manager)
 
         request = {"messages": []}
         args = {"path": "README.md"}
@@ -541,7 +541,7 @@ class TestPluginLoading:
             group=ENTRY_POINTS_GROUP,
         )
         monkeypatch.setattr(
-            "hermes_cli.plugins.importlib.metadata.entry_points",
+            "sage_cli.plugins.importlib.metadata.entry_points",
             lambda: SimpleNamespace(
                 select=lambda group: [ep] if group == ENTRY_POINTS_GROUP else []
             ),
@@ -594,7 +594,7 @@ class TestPluginLoading:
             group=ENTRY_POINTS_GROUP,
         )
         monkeypatch.setattr(
-            "hermes_cli.plugins.importlib.metadata.entry_points",
+            "sage_cli.plugins.importlib.metadata.entry_points",
             lambda: SimpleNamespace(
                 select=lambda group: [ep] if group == ENTRY_POINTS_GROUP else []
             ),
@@ -656,7 +656,7 @@ class TestPluginLoading:
             group=ENTRY_POINTS_GROUP,
         )
         monkeypatch.setattr(
-            "hermes_cli.plugins.importlib.metadata.entry_points",
+            "sage_cli.plugins.importlib.metadata.entry_points",
             lambda: SimpleNamespace(
                 select=lambda group: [ep] if group == ENTRY_POINTS_GROUP else []
             ),
@@ -749,7 +749,7 @@ class TestPluginLoading:
             group=ENTRY_POINTS_GROUP,
         )
         monkeypatch.setattr(
-            "hermes_cli.plugins.importlib.metadata.entry_points",
+            "sage_cli.plugins.importlib.metadata.entry_points",
             lambda: SimpleNamespace(
                 select=lambda group: [ep] if group == ENTRY_POINTS_GROUP else []
             ),
@@ -856,7 +856,7 @@ class TestDeliveryParity:
 
     def _fresh_manager(self, monkeypatch, register_body):
         """Build an undiscovered manager whose sweep registers via plugins."""
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         mgr = PluginManager()
         assert mgr._discovered is False
@@ -869,7 +869,7 @@ class TestDeliveryParity:
         return mgr
 
     def test_module_invoke_hook_lazily_discovers(self, monkeypatch):
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         fired = []
         mgr = self._fresh_manager(
@@ -889,7 +889,7 @@ class TestDeliveryParity:
         assert results == ["ok"]
 
     def test_module_invoke_middleware_lazily_discovers(self, monkeypatch):
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         mgr = self._fresh_manager(
             monkeypatch,
@@ -904,7 +904,7 @@ class TestDeliveryParity:
         assert results == ["mw-ok"]
 
     def test_module_has_hook_and_has_middleware_lazily_discover(self, monkeypatch):
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         def _register(m):
             m._hooks.setdefault("post_llm_call", []).append(lambda **kw: None)
@@ -922,7 +922,7 @@ class TestDeliveryParity:
         """Test doubles without _discovered are invoked untouched."""
         import types
 
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         stub = types.SimpleNamespace(invoke_hook=lambda name, **kw: ["stubbed"])
         monkeypatch.setattr(plugins_mod, "get_plugin_manager", lambda: stub)
@@ -999,7 +999,7 @@ class TestForceReloadSymmetry:
 
     def test_re_register_config_hooks_clears_idempotence_set(self, monkeypatch):
         import agent.shell_hooks as shell_hooks_mod
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
 
         recorded = {}
         monkeypatch.setattr(
@@ -1008,7 +1008,7 @@ class TestForceReloadSymmetry:
             lambda cfg: recorded.setdefault("cfg", cfg) or [],
         )
         monkeypatch.setattr(
-            "hermes_cli.config.load_config", lambda: {"hooks": {}}
+            "sage_cli.config.load_config", lambda: {"hooks": {}}
         )
         home_key = str(get_hermes_home().expanduser().resolve())
         with shell_hooks_mod._registered_lock:
@@ -1029,7 +1029,7 @@ class TestForceReloadSymmetry:
         import time
 
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 0.15
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 0.15
         )
 
         hold = threading.Event()
@@ -1062,7 +1062,7 @@ class TestForceReloadSymmetry:
 
     def test_hook_callback_within_timeout_returns_value(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
         )
         mgr = PluginManager()
         mgr._hooks["pre_llm_call"] = [lambda **_kw: {"context": "hi"}]
@@ -1072,7 +1072,7 @@ class TestForceReloadSymmetry:
 
     def test_hook_exception_still_isolated_under_timeout_path(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
         )
 
         def boom(**_kwargs):
@@ -1090,19 +1090,19 @@ class TestForceReloadSymmetry:
         )
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
 
-        import hermes_cli.config as config_mod
+        import sage_cli.config as config_mod
 
         config_mod._LOAD_CONFIG_CACHE.clear()
         config_mod._RAW_CONFIG_CACHE.clear()
 
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         assert plugins_mod._resolve_hook_callback_timeout() == 0.12
 
     def test_subagent_stop_stays_on_caller_thread(self, monkeypatch):
         """Caller-thread hooks must not move the body onto a timeout worker."""
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
         )
         seen = {}
 
@@ -1121,7 +1121,7 @@ class TestForceReloadSymmetry:
         import time
 
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
         )
 
         hold = threading.Event()
@@ -1148,13 +1148,13 @@ class TestForceReloadSymmetry:
         """Timed-out pre_tool_call must return a block directive, not allow."""
         import time
 
-        from hermes_cli.plugins import (
+        from sage_cli.plugins import (
             _PRE_TOOL_CALL_TIMEOUT_BLOCK_MESSAGE,
             resolve_pre_tool_block,
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
         )
 
         hold = threading.Event()
@@ -1166,7 +1166,7 @@ class TestForceReloadSymmetry:
         mgr = PluginManager()
         mgr._hooks["pre_tool_call"] = [hung_policy]
 
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         monkeypatch.setattr(plugins_mod, "_plugin_manager", mgr)
 
@@ -1186,10 +1186,10 @@ class TestForceReloadSymmetry:
         self, monkeypatch
     ):
         """A transient worker-start failure must not poison later hook calls."""
-        from hermes_cli.plugins import _PRE_TOOL_CALL_TIMEOUT_BLOCK_MESSAGE
+        from sage_cli.plugins import _PRE_TOOL_CALL_TIMEOUT_BLOCK_MESSAGE
 
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 1.0
         )
 
         calls = []
@@ -1223,10 +1223,10 @@ class TestForceReloadSymmetry:
         """E2E: timed-out pre_tool_call blocks handle_function_call before dispatch."""
         import json
 
-        from hermes_cli.plugins import _PRE_TOOL_CALL_TIMEOUT_BLOCK_MESSAGE
+        from sage_cli.plugins import _PRE_TOOL_CALL_TIMEOUT_BLOCK_MESSAGE
 
         monkeypatch.setattr(
-            "hermes_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
+            "sage_cli.plugins._resolve_hook_callback_timeout", lambda: 0.1
         )
 
         hold = threading.Event()
@@ -1238,7 +1238,7 @@ class TestForceReloadSymmetry:
         mgr = PluginManager()
         mgr._hooks["pre_tool_call"] = [hung_policy]
 
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         monkeypatch.setattr(plugins_mod, "_plugin_manager", mgr)
 
@@ -1270,12 +1270,12 @@ class TestForceReloadSymmetry:
         manager must leave profile B's shell hook registered exactly once —
         not duplicated, not dropped (#92682 review).
         """
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
         import agent.shell_hooks as shell_hooks_mod
 
         cfg = {"hooks": {"on_session_start": [{"command": "/bin/true"}]}}
         monkeypatch.setenv("HERMES_ACCEPT_HOOKS", "1")
-        monkeypatch.setattr("hermes_cli.config.load_config", lambda: cfg)
+        monkeypatch.setattr("sage_cli.config.load_config", lambda: cfg)
         monkeypatch.setattr(
             PluginManager, "_discover_and_load_inner", lambda self_inner: None,
         )
@@ -1315,7 +1315,7 @@ class TestPreToolCallBlocking:
 
     def test_block_message_returned_for_valid_directive(self, monkeypatch):
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [{"action": "block", "message": "blocked by plugin"}],
         )
         assert get_pre_tool_call_block_message("todo", {}, task_id="t1") == "blocked by plugin"
@@ -1325,8 +1325,8 @@ class TestPreToolCallDirective:
     """Tests for the extended (block | approve) directive helper."""
 
     def test_first_party_observer_receives_pre_tool_call(self, monkeypatch):
-        from hermes_cli import observability
-        from hermes_cli.plugins import get_pre_tool_call_directive
+        from sage_cli import observability
+        from sage_cli.plugins import get_pre_tool_call_directive
 
         observed = []
         monkeypatch.setattr(
@@ -1335,7 +1335,7 @@ class TestPreToolCallDirective:
             lambda hook_name, **kwargs: observed.append((hook_name, kwargs)),
         )
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
 
@@ -1363,9 +1363,9 @@ class TestPreToolCallDirective:
         ]
 
     def test_approve_directive_returned(self, monkeypatch):
-        from hermes_cli.plugins import get_pre_tool_call_directive
+        from sage_cli.plugins import get_pre_tool_call_directive
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "approve", "message": "needs human ok"}
             ],
@@ -1375,9 +1375,9 @@ class TestPreToolCallDirective:
 
     def test_approve_without_message_is_valid(self, monkeypatch):
         """approve may omit a message (block may not)."""
-        from hermes_cli.plugins import get_pre_tool_call_directive
+        from sage_cli.plugins import get_pre_tool_call_directive
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [{"action": "approve"}],
         )
         assert get_pre_tool_call_directive("write_file", {}) == ("approve", None)
@@ -1389,13 +1389,13 @@ class TestResolvePreToolBlock:
 
 
     def test_approve_gate_receives_tool_observability_context(self, monkeypatch):
-        from hermes_cli.plugins import resolve_pre_tool_block
+        from sage_cli.plugins import resolve_pre_tool_block
         from tools import approval
         from tools import approval_context
 
         seen = {}
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "approve", "message": "why"}
             ],
@@ -1417,12 +1417,12 @@ class TestResolvePreToolBlock:
         assert seen == {"turn_id": "turn-1", "tool_call_id": "call-1"}
 
     def test_approve_passes_plugin_rule_key_to_gate(self, monkeypatch):
-        from hermes_cli.plugins import resolve_pre_tool_block
+        from sage_cli.plugins import resolve_pre_tool_block
 
         seen = {}
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {
                     "action": "approve",
@@ -1449,9 +1449,9 @@ class TestResolvePreToolBlock:
 
 
     def test_approve_gate_exception_fails_closed(self, monkeypatch):
-        from hermes_cli.plugins import resolve_pre_tool_block
+        from sage_cli.plugins import resolve_pre_tool_block
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [{"action": "approve", "message": "why"}],
         )
         def _boom(*a, **k):
@@ -1467,7 +1467,7 @@ class TestPreToolCallModify:
     def test_modify_returns_merged_args(self, monkeypatch):
         """A single modify hook should return merged args."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": {"path": "/safe/dir"}}
             ],
@@ -1481,7 +1481,7 @@ class TestPreToolCallModify:
     def test_modify_accumulates_multiple_hooks(self, monkeypatch):
         """Multiple modify hooks should accumulate — hook A + hook B both survive."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": {"path": "/safe"}},
                 {"action": "modify", "args": {"content": "fixed"}},
@@ -1496,7 +1496,7 @@ class TestPreToolCallModify:
     def test_modify_last_wins_on_same_key(self, monkeypatch):
         """When two hooks modify the same key, the later hook wins."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": {"path": "/first"}},
                 {"action": "modify", "args": {"path": "/second"}},
@@ -1510,7 +1510,7 @@ class TestPreToolCallModify:
     def test_modify_with_block_returns_both(self, monkeypatch):
         """When a modify precedes a block, both are returned."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": {"path": "/safe"}},
                 {"action": "block", "message": "still blocked"},
@@ -1525,7 +1525,7 @@ class TestPreToolCallModify:
     def test_modify_after_block_is_invisible(self, monkeypatch):
         """A modify after a block is never reached — first block wins."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "block", "message": "stopped"},
                 {"action": "modify", "args": {"path": "/invisible"}},
@@ -1540,7 +1540,7 @@ class TestPreToolCallModify:
     def test_modify_with_none_args(self, monkeypatch):
         """Modify should handle None args gracefully."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": {"path": "/safe"}}
             ],
@@ -1552,7 +1552,7 @@ class TestPreToolCallModify:
     def test_modify_none_when_no_hooks(self, monkeypatch):
         """No hooks → both return values are None."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         block_msg, modified = _dispatch_pre_tool_call_hooks(
@@ -1564,7 +1564,7 @@ class TestPreToolCallModify:
     def test_modify_invalid_args_ignored(self, monkeypatch):
         """Non-dict args and empty dicts should be silently ignored."""
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [
                 {"action": "modify", "args": "not a dict"},
                 {"action": "modify", "args": {}},          # empty
@@ -1582,7 +1582,7 @@ class TestGetPreVerifyContinueMessage:
 
 
     def test_none_when_no_hooks(self, monkeypatch):
-        monkeypatch.setattr("hermes_cli.plugins.invoke_hook", lambda hook_name, **kwargs: [])
+        monkeypatch.setattr("sage_cli.plugins.invoke_hook", lambda hook_name, **kwargs: [])
         assert get_pre_verify_continue_message() is None
 
     def test_forwards_scope_signals_to_hooks(self, monkeypatch):
@@ -1592,7 +1592,7 @@ class TestGetPreVerifyContinueMessage:
             seen.update(kwargs)
             return []
 
-        monkeypatch.setattr("hermes_cli.plugins.invoke_hook", capture)
+        monkeypatch.setattr("sage_cli.plugins.invoke_hook", capture)
         get_pre_verify_continue_message(coding=True, attempt=2, changed_paths=["a.py"])
         assert seen["coding"] is True
         assert seen["attempt"] == 2
@@ -1603,13 +1603,13 @@ class TestThreadToolWhitelist:
     """Tests for the thread-local tool whitelist used by background review forks."""
 
     def test_allowed_tool_passes_through_to_hooks(self, monkeypatch):
-        from hermes_cli.plugins import (
+        from sage_cli.plugins import (
             set_thread_tool_whitelist,
             clear_thread_tool_whitelist,
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         set_thread_tool_whitelist({"memory", "skill_manage"})
@@ -1620,13 +1620,13 @@ class TestThreadToolWhitelist:
 
 
     def test_clear_restores_unrestricted_behavior(self, monkeypatch):
-        from hermes_cli.plugins import (
+        from sage_cli.plugins import (
             set_thread_tool_whitelist,
             clear_thread_tool_whitelist,
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
         set_thread_tool_whitelist({"memory"})
@@ -1639,13 +1639,13 @@ class TestThreadToolWhitelist:
         """Setting a whitelist in one thread must NOT leak into another."""
         import threading
 
-        from hermes_cli.plugins import (
+        from sage_cli.plugins import (
             set_thread_tool_whitelist,
             clear_thread_tool_whitelist,
         )
 
         monkeypatch.setattr(
-            "hermes_cli.plugins.invoke_hook",
+            "sage_cli.plugins.invoke_hook",
             lambda hook_name, **kwargs: [],
         )
 
@@ -1687,7 +1687,7 @@ class TestPluginContext:
         ``shell_exec``, ``write_file``) without the operator's knowledge.
         """
         from tools.registry import registry
-        from hermes_cli.plugins import PluginToolOverrideError
+        from sage_cli.plugins import PluginToolOverrideError
 
         registry.register(
             name="gated_override_target",
@@ -1731,7 +1731,7 @@ class TestPluginContext:
 
             # And the raise path itself works for callers that invoke
             # register_tool directly without going through PluginManager.
-            from hermes_cli.plugins import PluginContext, PluginManifest
+            from sage_cli.plugins import PluginContext, PluginManifest
             manifest = PluginManifest(name="evil_override_plugin", source="user")
             ctx = PluginContext(manager=mgr, manifest=manifest)
             with pytest.raises(PluginToolOverrideError) as excinfo:
@@ -1828,7 +1828,7 @@ class TestPluginToolVisibility:
         listing. 'Reachable' therefore means: present directly OR listed
         in the tool_search bridge description.
         """
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         plugins_dir = tmp_path / "hermes_test" / "plugins"
         plugin_dir = plugins_dir / "vis_plugin"
@@ -2032,7 +2032,7 @@ class TestPluginCommands:
         manifest = PluginManifest(name="test-plugin", source="user")
         ctx = PluginContext(manifest, mgr)
 
-        with caplog.at_level(logging.WARNING, logger="hermes_cli.plugins"):
+        with caplog.at_level(logging.WARNING, logger="sage_cli.plugins"):
             ctx.register_command("", lambda a: a)
         assert len(mgr._plugin_commands) == 0
         assert "empty name" in caplog.text
@@ -2085,7 +2085,7 @@ class TestPluginCommands:
         )
         monkeypatch.setenv("HERMES_HOME", str(hermes_home))
 
-        import hermes_cli.plugins as plugins_mod
+        import sage_cli.plugins as plugins_mod
 
         with patch.object(plugins_mod, "_plugin_manager", None):
             engine = plugins_mod.get_plugin_context_engine()
@@ -2099,12 +2099,12 @@ class TestPluginCommands:
         (``gateway/run.py``'s ``_profile_scope`` context manager) and by
         subagent/embedded callers: it swaps ``HERMES_HOME`` via a
         context-local ContextVar, which — per
-        ``hermes_constants.set_hermes_home_override`` — deliberately does
+        ``sage_constants.set_hermes_home_override`` — deliberately does
         NOT touch ``os.environ``. A regression test that only flips the
         ``HERMES_HOME`` env var never exercises this path.
         """
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
-        import hermes_cli.plugins as plugins_mod
+        from sage_constants import set_hermes_home_override, reset_hermes_home_override
+        import sage_cli.plugins as plugins_mod
 
         def write_engine_plugin(home: Path) -> None:
             _make_plugin_dir(
@@ -2187,8 +2187,8 @@ class TestPluginCommands:
         leaking the previous profile's module-level state (and code) into
         the new profile.
         """
-        from hermes_constants import set_hermes_home_override, reset_hermes_home_override
-        import hermes_cli.plugins as plugins_mod
+        from sage_constants import set_hermes_home_override, reset_hermes_home_override
+        import sage_cli.plugins as plugins_mod
 
         def write_stateful_plugin(home: Path, marker: str) -> None:
             plugin_dir = (home / "plugins" / "stateful-plugin")
@@ -2267,7 +2267,7 @@ class TestPluginCommandResultResolution:
         async def _handler():
             return "threaded-ok"
 
-        monkeypatch.setattr("hermes_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
+        monkeypatch.setattr("sage_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
         assert resolve_plugin_command_result(_handler()) == "threaded-ok"
 
     def test_running_loop_timeout_does_not_hang_forever(self, monkeypatch):
@@ -2281,8 +2281,8 @@ class TestPluginCommandResultResolution:
             await _asyncio.sleep(10)
             return "should-not-reach"
 
-        monkeypatch.setattr("hermes_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
-        monkeypatch.setattr("hermes_cli.plugins._PLUGIN_COMMAND_AWAIT_TIMEOUT_SECS", 0.1)
+        monkeypatch.setattr("sage_cli.plugins.asyncio.get_running_loop", lambda: _Loop())
+        monkeypatch.setattr("sage_cli.plugins._PLUGIN_COMMAND_AWAIT_TIMEOUT_SECS", 0.1)
 
         with pytest.raises(TimeoutError):
             resolve_plugin_command_result(_slow_handler())
@@ -2303,7 +2303,7 @@ class TestPluginDispatchTool:
         mock_registry = MagicMock()
         mock_registry.dispatch.return_value = '{"result": "ok"}'
 
-        with patch("hermes_cli.plugins.PluginContext.dispatch_tool.__module__", "hermes_cli.plugins"):
+        with patch("sage_cli.plugins.PluginContext.dispatch_tool.__module__", "sage_cli.plugins"):
             with patch.dict("sys.modules", {}):
                 with patch("tools.registry.registry", mock_registry):
                     result = ctx.dispatch_tool("web_search", {"query": "test"})
@@ -2340,7 +2340,7 @@ class TestPluginDebugLogging:
     def test_debug_handler_not_installed_when_env_var_absent(self, monkeypatch):
         """Without the env var, no stderr handler is attached."""
         monkeypatch.delenv("HERMES_PLUGINS_DEBUG", raising=False)
-        from hermes_cli import plugins as plugins_mod
+        from sage_cli import plugins as plugins_mod
 
         # Snapshot, then force a re-evaluation.
         original_installed = plugins_mod._DEBUG_HANDLER_INSTALLED

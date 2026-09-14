@@ -33,7 +33,7 @@ _TRANSCRIPT_SPOOL_SEQ = itertools.count()
 
 def _get_flush_dir():
     """Return the pending-messages flush directory under the active HERMES_HOME."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     flush_dir = get_hermes_home() / "pending_messages"
     flush_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     if os.name == "posix":
@@ -209,7 +209,7 @@ def recover_pending_to_db(session_db=None) -> int:
         return 0
     own_db = session_db is None
     if own_db:
-        from hermes_state_registry import acquire
+        from sage_state_registry import acquire
         session_db = acquire()
     recovered = 0
     try:
@@ -224,7 +224,7 @@ def recover_pending_to_db(session_db=None) -> int:
     finally:
         if own_db:  # shutdown cancellation/interrupt must not strand an owned DB
             with contextlib.suppress(Exception):
-                from hermes_state_registry import release_or_close
+                from sage_state_registry import release_or_close
                 release_or_close(session_db)
     if recovered:
         logger.info("Recovered %d pending message(s) from shutdown flush", recovered)

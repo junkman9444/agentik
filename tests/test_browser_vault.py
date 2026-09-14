@@ -563,7 +563,7 @@ class TestVaultHardening:
         assert fs.get_read_block_error(str(f)) is None
 
     def test_backup_secret_names_include_vault_files(self):
-        from hermes_cli.backup import _SECRET_FILE_NAMES
+        from sage_cli.backup import _SECRET_FILE_NAMES
 
         assert "vault.key" in _SECRET_FILE_NAMES
         assert "vault.json.enc" in _SECRET_FILE_NAMES
@@ -571,7 +571,7 @@ class TestVaultHardening:
     def test_ensure_dir_uses_canonical_secure_dir(self, tmp_path, monkeypatch):
         from unittest.mock import MagicMock
 
-        import hermes_cli.config as cfg
+        import sage_cli.config as cfg
         from agent.vault_store import VaultStore
 
         called = MagicMock()

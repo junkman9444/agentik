@@ -57,7 +57,7 @@ def now_iso() -> str:
 
 def _hermes_home() -> Path:
     try:
-        from hermes_constants import get_hermes_home
+        from sage_constants import get_hermes_home
         return Path(get_hermes_home())
     except Exception:
         return Path(os.path.expanduser("~/.sage"))

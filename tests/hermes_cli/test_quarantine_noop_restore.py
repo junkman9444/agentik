@@ -22,8 +22,8 @@ from unittest.mock import patch
 
 import pytest
 
-from hermes_cli import _install_repair as ir
-from hermes_cli import main_install_repair
+from sage_cli import _install_repair as ir
+from sage_cli import main_install_repair
 
 
 def _make_scripts_dir(tmp_path: Path) -> Path:
@@ -88,7 +88,7 @@ def test_main_failure_restores_shims_and_reraises(tmp_path):
 
 
 # ---------------------------------------------------------------------------
-# hermes_cli._install_repair._run_install_cmd (the deferred-recovery path)
+# sage_cli._install_repair._run_install_cmd (the deferred-recovery path)
 # ---------------------------------------------------------------------------
 
 

@@ -21,7 +21,7 @@ import threading
 
 import pytest
 
-from hermes_cli.plugins import (
+from sage_cli.plugins import (
     _EVENT_EMIT_DEPTH_CAP,
     PluginContext,
     PluginManager,
@@ -236,7 +236,7 @@ def test_emit_returns_before_blocking_subscriber_finishes():
 
 
 def test_pending_budget_drops_new_event_without_blocking(monkeypatch, caplog):
-    from hermes_cli import plugins_dispatch
+    from sage_cli import plugins_dispatch
 
     monkeypatch.setattr(plugins_dispatch, "_EVENT_PENDING_CAP", 1)
     manager = _fresh_manager()
@@ -411,7 +411,7 @@ def test_manifest_parse_reads_emits_listens(tmp_path):
         encoding="utf-8",
     )
 
-    from hermes_cli.plugins import parse_manifest_file
+    from sage_cli.plugins import parse_manifest_file
 
     manifest = parse_manifest_file(manifest_file, plugin_dir, "user", "")
     assert manifest is not None
@@ -429,7 +429,7 @@ def test_manifest_parse_absent_emits_listens(tmp_path):
         yaml.safe_dump({"name": "bare"}), encoding="utf-8"
     )
 
-    from hermes_cli.plugins import parse_manifest_file
+    from sage_cli.plugins import parse_manifest_file
 
     manifest = parse_manifest_file(manifest_file, plugin_dir, "user", "")
     assert manifest is not None
@@ -442,7 +442,7 @@ def test_manifest_parse_absent_emits_listens(tmp_path):
 
 def test_plugins_show_includes_emits_listens(tmp_path, monkeypatch, capsys):
     import yaml
-    from hermes_cli import plugins_cmd
+    from sage_cli import plugins_cmd
 
     plugin_dir = tmp_path / "showplug"
     plugin_dir.mkdir()
@@ -477,7 +477,7 @@ def test_plugins_show_includes_emits_listens(tmp_path, monkeypatch, capsys):
 
 
 def test_plugins_show_not_found_exits(monkeypatch, capsys):
-    from hermes_cli import plugins_cmd
+    from sage_cli import plugins_cmd
 
     monkeypatch.setattr(plugins_cmd, "_discover_all_plugins", lambda: [])
     with pytest.raises(SystemExit):

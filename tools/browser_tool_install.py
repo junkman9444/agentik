@@ -11,8 +11,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from hermes_cli._subprocess_compat import windows_hide_flags
-from hermes_constants import agent_browser_runnable, get_hermes_home, is_termux as _is_termux_environment, node_tool_runnable
+from sage_cli._subprocess_compat import windows_hide_flags
+from sage_constants import agent_browser_runnable, get_hermes_home, is_termux as _is_termux_environment, node_tool_runnable
 from tools.browser_tool_origin import origin_module as _origin
 from tools import browser_tool_cdp as _cdp
 from tools import browser_tool_cloud as _cloud
@@ -144,7 +144,7 @@ def _find_agent_browser(*, validate: bool = True) -> str:
     if not validate:
         raise FileNotFoundError("agent-browser CLI not found")
     try:  # Nothing found — try lazy installation before giving up.
-        from hermes_cli.dep_ensure import ensure_dependency
+        from sage_cli.dep_ensure import ensure_dependency
         if ensure_dependency("browser"):
             home = get_hermes_home()
             managed = (home / "node_modules" / ".bin", home / "node" / "bin", home / "node")

@@ -155,12 +155,12 @@ class TokenMapping:
 
 
 def _hermes_bin_dir() -> Path:
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return get_hermes_home() / "bin"
 
 
 def _proxy_state_dir_ro() -> Path:  # without creating it (status probes, pidfile reads)
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
     return get_hermes_home() / "proxy"
 
 

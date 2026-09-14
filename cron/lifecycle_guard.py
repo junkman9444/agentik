@@ -208,13 +208,13 @@ _BINARY_MAGICS = (
 
 def _current_profile_name() -> Optional[str]:
     """Profile running the guard: ``HERMES_PROFILE_NAME``/``HERMES_PROFILE`` env first, then
-    ``hermes_cli.profiles.get_active_profile_name`` (from ``HERMES_HOME``); ``None`` if neither."""
+    ``sage_cli.profiles.get_active_profile_name`` (from ``HERMES_HOME``); ``None`` if neither."""
     for env_name in ("HERMES_PROFILE_NAME", "HERMES_PROFILE"):
         value = os.environ.get(env_name)
         if value and value.strip():
             return value.strip()
     try:
-        from hermes_cli.profiles import get_active_profile_name
+        from sage_cli.profiles import get_active_profile_name
 
         return get_active_profile_name() or None
     except Exception:
@@ -653,7 +653,7 @@ def _resolved_or_nothing(candidate: str, cwd: Optional[str]) -> Iterator[Path]:
 def _resolve_script_path(script_path: str) -> Optional[Path]:
     """Resolve a cron ``script`` value the way ``cron.scheduler`` does (relative paths live under
     ``<HERMES_HOME>/scripts/``) so the guard scans the file that will actually run."""
-    from hermes_constants import get_hermes_home
+    from sage_constants import get_hermes_home
 
     raw = _expand_candidate_path(script_path)
     if raw is None:

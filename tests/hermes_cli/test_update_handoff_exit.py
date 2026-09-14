@@ -20,10 +20,10 @@ from types import SimpleNamespace
 
 import pytest
 
-import hermes_cli.main as main_mod
-from hermes_cli import update_cmd
-from hermes_cli.main import cmd_update
-from hermes_cli.update_receipt import COMMAND_BOUNDARY_STOP_REASON
+import sage_cli.main as main_mod
+from sage_cli import update_cmd
+from sage_cli.main import cmd_update
+from sage_cli.update_receipt import COMMAND_BOUNDARY_STOP_REASON
 
 
 class _FakeLock:
@@ -61,13 +61,13 @@ def _run_cmd_update(monkeypatch, impl, *, reexec: bool):
         events["order"].append("hard-exit")
         events["exit_codes"].append(code)
 
-    monkeypatch.setattr("hermes_cli.config.is_managed", lambda: False)
-    monkeypatch.setattr("hermes_cli.config.detect_install_method", lambda root: "git")
-    monkeypatch.setattr("hermes_cli.update_lock.UpdateLock", lambda: _FakeLock(events["order"]))
+    monkeypatch.setattr("sage_cli.config.is_managed", lambda: False)
+    monkeypatch.setattr("sage_cli.config.detect_install_method", lambda root: "git")
+    monkeypatch.setattr("sage_cli.update_lock.UpdateLock", lambda: _FakeLock(events["order"]))
     monkeypatch.setattr(update_cmd, "_cmd_update_impl", fake_impl)
     monkeypatch.setattr(main_mod, "_install_hangup_protection", lambda gateway_mode=False: None)
     monkeypatch.setattr(main_mod, "_finalize_update_output", fake_finalize_io)
-    monkeypatch.setattr("hermes_cli.update_receipt.finalize_pending_update_receipt", fake_receipt)
+    monkeypatch.setattr("sage_cli.update_receipt.finalize_pending_update_receipt", fake_receipt)
     monkeypatch.setattr("os._exit", fake_exit)
     if reexec:
         monkeypatch.setenv("HERMES_UPDATE_REEXEC", "1")

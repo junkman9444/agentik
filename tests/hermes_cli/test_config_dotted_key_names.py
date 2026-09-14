@@ -26,7 +26,7 @@ from unittest.mock import patch
 import pytest
 import yaml
 
-from hermes_cli.config import (
+from sage_cli.config import (
     _MISSING,
     _get_nested,
     _greedy_literal_match,

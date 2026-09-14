@@ -17,9 +17,9 @@ from pathlib import Path
 
 import pytest
 
-from hermes_cli import update_cmd
-from hermes_constants import venv_bin_dir, venv_python_path
-from hermes_cli import main_install_repair
+from sage_cli import update_cmd
+from sage_constants import venv_bin_dir, venv_python_path
+from sage_cli import main_install_repair
 
 
 # ---------------------------------------------------------------------------
@@ -152,7 +152,7 @@ def test_venv_helpers_are_platform_consistent():
 
 
 def test_managed_uv_helper_delegates_to_the_shared_one():
-    from hermes_cli.managed_uv import _venv_python
+    from sage_cli.managed_uv import _venv_python
 
     v = Path("/opt/proj/venv")
     assert _venv_python(v) == venv_python_path(v)
@@ -170,10 +170,10 @@ def test_no_open_coded_venv_layout_remains_in_hermes_cli():
     (which branches on the host platform) would be the wrong tool there.
     """
     import ast
-    import hermes_cli
+    import sage_cli
 
     exempt = {"stdio.py"}
-    pkg = Path(hermes_cli.__file__).parent
+    pkg = Path(sage_cli.__file__).parent
     offenders = []
     for py in pkg.rglob("*.py"):
         if py.name in exempt:
@@ -189,7 +189,7 @@ def test_no_open_coded_venv_layout_remains_in_hermes_cli():
             if isinstance(node, ast.Constant) and node.value == "Scripts":
                 offenders.append(f"{py.relative_to(pkg)}:{node.lineno}")
     assert not offenders, (
-        "open-coded venv layout found (use hermes_constants.venv_bin_dir):\n"
+        "open-coded venv layout found (use sage_constants.venv_bin_dir):\n"
         + "\n".join(offenders)
     )
 
@@ -200,7 +200,7 @@ def test_no_open_coded_venv_layout_remains_in_hermes_cli():
 
 def test_top_level_files_are_swapped_atomically(tmp_path):
     """The repo root holds 20 first-party modules (run_agent.py, cli.py,
-    hermes_constants.py, ...). Covering only directories would leave exactly
+    sage_constants.py, ...). Covering only directories would leave exactly
     the bug class this PR closes."""
     live, new = tmp_path / "live", tmp_path / "new"
     live.mkdir()
@@ -336,7 +336,7 @@ def test_patched_is_windows_reaches_the_venv_path_derivation():
     """End-to-end: patching the module predicate must change the derived path."""
     from unittest.mock import patch
 
-    from hermes_cli import main as hermes_main
+    from sage_cli import main as hermes_main
 
     with patch.object(hermes_main, "_is_windows", return_value=True):
         got = hermes_main._resolve_install_target_python(
@@ -441,7 +441,7 @@ def test_update_via_zip_wires_discard_into_the_commit_failure_path():
     import textwrap
 
     # The swap lives in the download/swap collaborator the ZIP path calls.
-    from hermes_cli import update_cmd_zip
+    from sage_cli import update_cmd_zip
 
     src = textwrap.dedent(inspect.getsource(update_cmd_zip._download_and_swap_zip))
     tree = ast.parse(src)

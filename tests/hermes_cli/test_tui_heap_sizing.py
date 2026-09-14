@@ -11,8 +11,8 @@ import builtins
 import io
 from unittest import mock
 
-import hermes_cli.main as m
-from hermes_cli import main_tui_launch
+import sage_cli.main as m
+from sage_cli import main_tui_launch
 
 V2 = "/sys/fs/cgroup/memory.max"
 V1 = "/sys/fs/cgroup/memory/memory.limit_in_bytes"

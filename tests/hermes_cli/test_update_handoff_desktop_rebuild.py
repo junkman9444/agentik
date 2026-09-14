@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from hermes_cli import update_cmd
+from sage_cli import update_cmd
 
 
 def test_current_checkout_repair_rebuilds_desktop_under_project_root():

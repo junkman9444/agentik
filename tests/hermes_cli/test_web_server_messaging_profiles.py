@@ -19,8 +19,8 @@ _VALID_BODY_BOT_TOKEN = "987654321:ZYXWVUTSRQPONMLKJIHGFEDCBA_4321"
 @pytest.fixture
 def isolated_profiles(tmp_path, monkeypatch, _isolate_hermes_home):
     """Isolated default home + one named profile, each with its own .env."""
-    from hermes_constants import get_hermes_home
-    from hermes_cli import profiles
+    from sage_constants import get_hermes_home
+    from sage_cli import profiles
 
     default_home = get_hermes_home()
     profiles_root = default_home / "profiles"
@@ -46,11 +46,11 @@ def client(monkeypatch, isolated_profiles):
     except ImportError:
         pytest.skip("fastapi/starlette not installed")
 
-    import hermes_state
-    from hermes_constants import get_hermes_home
-    from hermes_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
+    import sage_state
+    from sage_constants import get_hermes_home
+    from sage_cli.web_server import app, _SESSION_HEADER_NAME, _SESSION_TOKEN
 
-    monkeypatch.setattr(hermes_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
+    monkeypatch.setattr(sage_state, "DEFAULT_DB_PATH", get_hermes_home() / "state.db")
     # The dashboard process's os.environ may carry root-install credentials;
     # make sure the scoped path never falls back to them.
     monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
@@ -91,7 +91,7 @@ class TestProfileScopedMessagingReads:
     def test_scoped_read_returns_profile_path_command_and_startup_failure(
         self, client, isolated_profiles, monkeypatch
     ):
-        import hermes_cli.web_server as web_server
+        import sage_cli.web_server as web_server
 
         worker_home = isolated_profiles["worker_alpha"]
         (worker_home / ".env").write_text(
@@ -269,8 +269,8 @@ class TestMultiplexPortBindingGuard:
             assert resp.status_code == 200
 
 def test_named_current_home_matches_unscoped(client, isolated_profiles, monkeypatch):
-    from hermes_cli.web_server_profiles import _config_profile_scope, _hermes_home_scope
-    from hermes_constants import get_hermes_home
+    from sage_cli.web_server_profiles import _config_profile_scope, _hermes_home_scope
+    from sage_constants import get_hermes_home
 
     monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "root-token")
     for scope in (None, "current", "default"):
@@ -293,7 +293,7 @@ def test_scoped_enablement_uses_only_own_credentials(client, isolated_profiles, 
     assert _telegram(payload)["enabled"] is True
     assert _telegram(payload)["configured"] is True
     assert _telegram(payload)["state"] != "disabled"
-    from hermes_cli.web_server_messaging import _messaging_platform_catalog
+    from sage_cli.web_server_messaging import _messaging_platform_catalog
     empty = {entry["id"] for entry in _messaging_platform_catalog() if not entry["required_env"]}
     for platform in payload["platforms"]:
         if platform["id"] in empty:
