@@ -80,7 +80,7 @@ def is_interactive_stdin() -> bool:
 def print_noninteractive_setup_guidance(reason: str | None = None) -> None:
     """Print guidance for headless/non-interactive setup flows."""
     print()
-    print(color("⚕ Hermes Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
+    print(color("⚕ Sage Setup — Non-interactive mode", Colors.CYAN, Colors.BOLD))
     print()
     if reason:
         print_info(reason)
@@ -588,7 +588,7 @@ def _run_setup_section(config: dict, section: str) -> None:
         print_info(f"Available sections: {', '.join(k for k, _, _ in SETUP_SECTIONS)}")
         return
     label, func = entry
-    _print_banner(f"│     ⚕ Hermes Setup — {label:<34s} │")
+    _print_banner(f"│     ⚕ Sage Setup — {label:<36s} │")
     _run_setup_steps([(label, lambda: func(config))])
     save_config(config)
     print()
