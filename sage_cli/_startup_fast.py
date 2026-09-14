@@ -127,7 +127,7 @@ def read_install_method() -> str | None:
     return (method or "").strip().lower() or None
 
 
-def print_fast_version_info(*, check_updates: bool = True) -> None:
+def print_fast_version_info(*, check_updates: bool = False) -> None:
     """THE canonical ``hermes --version`` output (also used by /version).
 
     Every lazy block degrades gracefully — a broken/heavy import can never take the basic version
