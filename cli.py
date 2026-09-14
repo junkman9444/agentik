@@ -796,11 +796,13 @@ def _shutdown_cached_aux_clients() -> None:
 
 
 # Ordered teardown steps (attribute names, resolved at call time so tests can patch them)
-# and the exception class each swallows.
+# and the exception class each swallows. A second Ctrl+C mid-shutdown raises KeyboardInterrupt
+# (a BaseException, not caught by `Exception`) from inside whichever step is running -- every
+# step swallows it too so teardown always finishes instead of dumping an unhandled traceback.
 _CLEANUP_STEPS = (
-    ("_stop_cli_wake_word", Exception), ("_cleanup_all_terminals", Exception),
-    ("_interrupt_async_delegations", Exception), ("_cleanup_all_browsers", Exception),
-    ("_shutdown_mcp_servers", BaseException), ("_shutdown_cached_aux_clients", Exception),
+    ("_stop_cli_wake_word", BaseException), ("_cleanup_all_terminals", BaseException),
+    ("_interrupt_async_delegations", BaseException), ("_cleanup_all_browsers", BaseException),
+    ("_shutdown_mcp_servers", BaseException), ("_shutdown_cached_aux_clients", BaseException),
 )
 
 

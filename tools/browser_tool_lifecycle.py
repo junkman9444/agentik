@@ -56,10 +56,16 @@ def _session_has_expired(
 
 
 def _best_effort(label: str, fn) -> None:
-    """Run ``fn()``; log (debug) and swallow any exception — teardown must never abort."""
+    """Run ``fn()``; log (debug) and swallow any exception — teardown must never abort.
+
+    Explicitly catches ``KeyboardInterrupt``/``SystemExit`` too, not just ``Exception``: a second
+    Ctrl+C landing mid-shutdown (e.g. inside a slow glob.glob() during orphan browser-session
+    reaping) is a real, reachable case -- ``except Exception`` alone lets it propagate straight
+    through every caller as an unhandled traceback instead of finishing cleanup quietly, which
+    directly contradicts this function's whole contract."""
     try:
         fn()
-    except Exception as e:
+    except (Exception, KeyboardInterrupt, SystemExit) as e:
         _bt.logger.debug("%s failed: %s", label, e)
 
 
