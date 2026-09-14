@@ -55,30 +55,16 @@ def _run_nous_flow(config: dict, *, context: str, cancel_exc: tuple, cancel_line
 
 
 def _run_portal_one_shot(config: dict) -> None:
-    """One-shot Nous Portal setup (``hermes setup --portal`` / ``hermes portal``)."""
-    from sage_cli.setup import _info, _print_banner, print_error, print_info, print_success
-    _print_banner("│     ⚕ Hermes Setup — Nous Portal (one-shot)             │")
-    _info(None, "  One subscription, 300+ models, plus the Tool Gateway:",
-          "    web search, image generation, TTS, browser automation",
-          "    — all routed through your Nous Portal sub.", None,
-          "  Sign up: https://portal.nousresearch.com/manage-subscription", None)
-
-    def _on_error(exc: Exception) -> None:
-        print()
-        print_error(f"  Nous Portal setup encountered an error: {exc}")
-        print_info("  You can retry later with `hermes portal`.")
-
-    if not _run_nous_flow(config, context="`hermes portal`", cancel_exc=(KeyboardInterrupt, EOFError, SystemExit),
-                          cancel_lines=(None, "  Setup cancelled.", "  You can retry later with `hermes portal`."),
-                          print_error=_on_error):
-        return
-
-    # Re-sync from disk so a caller's later save_config(config) can't clobber the login save.
-    with contextlib.suppress(Exception):
-        _reload_config_into(config, dict_only=True)
+    """``hermes setup --portal`` / ``hermes portal``: Nous Portal support has been removed from
+    this fork (see sage_cli/auth.py's "Nous Portal core-path subsystem removed" block and the
+    PROVIDER_REGISTRY comment above _REGISTRY_ROWS). Previously this called _run_nous_flow ->
+    _model_flow_nous -> _login_nous, which raises a bare SystemExit -- an unhandled crash, not a
+    graceful message. Report the removal cleanly instead and point at a real path forward."""
+    from sage_cli.setup import print_error, print_info
     print()
-    print_success("Portal setup complete.")
-    _info("  Run `hermes portal info` to inspect routing.", "  Run `hermes` to start chatting.")
+    print_error("Nous Portal support has been removed from this fork.")
+    print_info("  Bring your own API key instead: run `hermes model` and pick a provider "
+               "(Anthropic, OpenAI, OpenRouter, a self-hosted endpoint, etc).")
 
 
 def _run_first_time_quick_setup(config: dict, hermes_home, is_existing: bool):

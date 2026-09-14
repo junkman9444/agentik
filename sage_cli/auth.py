@@ -359,11 +359,14 @@ def _api_key_provider(
 # Registry rows in priority order (resolve_provider() scans api_key rows in this order). A tuple
 # row is ``_api_key_provider(id, name, inference_base_url, api_key_env_vars[, base_url_env_var
 # [, auth_type]])``; OAuth / bespoke rows are full ``ProviderConfig`` objects.
+#
+# NOTE: "nous" (Nous Portal) is intentionally NOT registered here. This fork removed Nous Portal
+# support (auth.py's _login_nous/_nous_device_code_login/etc. are stubbed to raise SystemExit --
+# see "Nous Portal core-path subsystem removed in this fork" above), but the registry row itself
+# was accidentally left in place, meaning the interactive `hermes model`/`hermes auth add` picker
+# still offered "Nous Portal" as the FIRST, default-highlighted choice -- selecting it crashed the
+# CLI outright. Do not re-add a "nous"/"Nous Portal" row here.
 _REGISTRY_ROWS: Tuple[Any, ...] = (
-    ProviderConfig(
-        "nous", "Nous Portal", "oauth_device_code", portal_base_url=DEFAULT_NOUS_PORTAL_URL,
-        inference_base_url=DEFAULT_NOUS_INFERENCE_URL, client_id=DEFAULT_NOUS_CLIENT_ID,
-        scope=DEFAULT_NOUS_SCOPE),
     ProviderConfig("openai-codex", "OpenAI Codex", "oauth_external", inference_base_url=DEFAULT_CODEX_BASE_URL),
     ("openai-api", "OpenAI API", "https://api.openai.com/v1", ("OPENAI_API_KEY",), "OPENAI_BASE_URL"),
     ProviderConfig(
