@@ -63,20 +63,24 @@ SAGE_LOGO = """[bold #C6007E]╭─╮╭─╮╭─╴╭─╴         ╭─
 
 # Sekuro brand mark, rendered as ASCII from the real sekuro.io logo (three-shard
 # pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_user_provided.png.
-# Regenerated small (12x28) to fit the terminal banner cleanly -- the original hand-drawn
-# 27x60 version was too large and rendered "botched"/cut off in normal-width terminals.
-SAGE_SEKURO_MARK = """[bold #C6007E] ..:-==++*##*=.      +#**+. [/]
-[bold #C6007E] *@@@@@@@@#=:        %@@@@. [/]
-[#B8036F]  %@@@%=.            #@@@:  [/]
-[#AA0562]   *-                %@@-   [/]
-[#9C0756]                     @@-    [/]
-[#8E094A]  .                  @=     [/]
-[#800B3F]  -#=                :      [/]
-[#720D35]   :@@%=.                   [/]
-[#640F2B]     %@@@@+:                [/]
-[#560F22]      +@@@@@@=              [/]
-[#48101A]       :@@@@#.              [/]
-[#3A1013]         +@-                [/]"""
+# Uses block-shading characters (░▒▓█) sampled directly from the source image's pixel
+# density, not a hand-drawn approximation -- renders as recognizable triangular shards
+# instead of a blob (otter_space: "not like a rounded triangle").
+SAGE_SEKURO_MARK = """[#4A0030]░░░░░░░░         ░░░░░   [/]
+[bold #C6007E] ░▒▓▓▓▓▓▓▓███▓▒░░        ░▓██▓█▓  [/]
+[#B8036F] ░▓█▓████▓▒▒░             ▓▓▓▓▓░  [/]
+[#AA0562]  ░▓█▓▓▒░                 ▓▓▓█░   [/]
+[#9C0756]   ░▒░                   ░▓▓█░    [/]
+[#8E094A]                         ░▓█▒     [/]
+[#800B3F]                         ░█▒      [/]
+[#720D35]       ░░                ░▒       [/]
+[#640F2B]        ░▓▒░                      [/]
+[#560F22]         ░▓█▓▒░                   [/]
+[#48101A]           ▒███▓▓▒░               [/]
+[#3A1013]            ▒▓█▓██▓▓▒░            [/]
+[#2C0F0D]             ░▓█▓▓▓█▓             [/]
+[#1E0C08]               ▒▓█▓▒              [/]
+[#1E0C08]                ░▒░               [/]"""
 
 # Back-compat aliases during the Hermes -> Sage rebrand; downstream code that still
 # imports the old names keeps working until all call sites are migrated.
