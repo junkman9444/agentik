@@ -61,7 +61,8 @@ SAGE_LOGO = """[bold #C6007E]██████    ████    ████�
 [bold #C6007E]██        ██  ██  ██       ██       [/]
 [#C6007E] █████   ███████  ██  ████ ██████   [/]
 [#C6007E]      ██ ██    ██ ██    ██ ██       [/]
-[#8A0058]██████   ██    ██  ██████  ████████[/]"""
+[#8A0058]██████   ██    ██  ██████  ████████[/]
+[dim #8A0058]        Sekuro AGEnt[/]"""
 
 # Sekuro brand mark, rendered as ASCII from the real sekuro.io logo (three-shard
 # pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_source.png.
@@ -832,7 +833,7 @@ def _banner_left_lines(model: str, cwd: str, session_id, context_length, provide
         return f" [dim {dim}]·[/] [dim {dim}]{label}[/]"
     lines = []
     ctx_str = _dim_sep(f"{_format_context_length(context_length)} context") if context_length else ""
-    nous_str = _dim_sep("Nous Research")
+    sekuro_str = _dim_sep("Sekuro Pte Ltd")
     if not (model or "").strip():
         # Credentials resolve lazily on the first message; the banner prints first. Ask the route
         # the same question so a fresh free-tier install shows its model, not a red "unconfigured".
@@ -841,13 +842,13 @@ def _banner_left_lines(model: str, cwd: str, session_id, context_length, provide
         # MoA virtual provider: ``model`` is a preset name; show it with its aggregator.
         agg_label = _quiet(lambda: _moa_aggregator_label(model), "")
         agg_str = _dim_sep(f"agg {agg_label}") if agg_label else ""
-        lines.append(f"[{accent}]MoA: {_short_label(model)}[/]{agg_str}{ctx_str}{nous_str}")
+        lines.append(f"[{accent}]MoA: {_short_label(model)}[/]{agg_str}{ctx_str}{sekuro_str}")
     elif not (model or "").strip() or (model or "").strip().lower() == "unknown":
         # Unconfigured install: the clearest place to say what is wrong and how to fix it.
-        lines.append(f"[bold red]no model configured[/] [dim {dim}]— run /model or hermes setup[/]")
+        lines.append(f"[bold red]no model configured[/] [dim {dim}]— run /model or sage setup[/]")
     else:
         model_short = model.split("/")[-1].removesuffix(".gguf")
-        lines.append(f"[{accent}]{_short_label(model_short)}[/]{ctx_str}{nous_str}")
+        lines.append(f"[{accent}]{_short_label(model_short)}[/]{ctx_str}{sekuro_str}")
     if os.getenv("HERMES_YOLO_MODE"):
         lines.append(f"[bold red]⚠ YOLO mode[/] [dim {dim}]— all approval prompts bypassed[/]")
     lines.append(f"[dim {dim}]{cwd}[/]")

@@ -55,9 +55,11 @@ def _wings(*glyphs) -> List[List[str]]:
             for g in glyphs]
 
 
-# Branding shared by every Hermes-named built-in (mono/daylight override help_header).
-_HERMES_BRANDING: Dict[str, str] = _branding(
-    "Hermes", "⚕", "Goodbye! ⚕", prompt="❯", help_header="(^_^)? Available Commands")
+# Branding shared by every Sage-named built-in (mono/daylight override help_header).
+_SAGE_BRANDING: Dict[str, str] = {
+    **_branding("Sage", "⚕", "Goodbye! ⚕", prompt="❯", help_header="(^_^)? Available Commands"),
+    "welcome": "Welcome to SAGE! Type your message or /help for commands."}
+_HERMES_BRANDING = _SAGE_BRANDING  # back-compat alias during the Hermes -> Sage rebrand
 
 _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
     "default": {
