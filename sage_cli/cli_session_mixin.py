@@ -705,7 +705,7 @@ class CLISessionMixin:
             # tools/subprocesses on this thread resolve HERMES_SESSION_ID to the child id after an
             # out-of-place rotation (idempotent when no rotation happened).
             if self.session_id:
-                print(f"       Resume the live session with: hermes --resume {self.session_id}")
+                print(f"       Resume the live session with: sage --resume {self.session_id}")
         except Exception as e:
             print(f"(x_x) Failed to save: {e}")
 
@@ -1323,9 +1323,9 @@ class CLISessionMixin:
         except Exception:
             _active_profile = "default"
         profile_flag = "" if _active_profile in ("default", "custom") else f" -p {_active_profile}"
-        print(f"  hermes --resume {self.session_id}{profile_flag}")
+        print(f"  sage --resume {self.session_id}{profile_flag}")
         if session_title:
-            print(f"  hermes -c \"{session_title}\"{profile_flag}")
+            print(f"  sage -c \"{session_title}\"{profile_flag}")
         print()
         print(f"Session:        {self.session_id}")
         if session_title:

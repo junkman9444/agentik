@@ -1482,7 +1482,7 @@ def _import_foreign_resume(args) -> None:
         print(f"Error: {e}")
         sys.exit(1)
     print(f"✓ Imported as {_imported_id} — resuming it now.")
-    print(f"  (later: hermes --resume {_imported_id})")
+    print(f"  (later: sage --resume {_imported_id})")
     args.resume = _imported_id
 
 
