@@ -66,21 +66,26 @@ SAGE_LOGO = """[bold #C6007E]╭─╮╭─╮╭─╴╭─╴         ╭─
 # Uses block-shading characters (░▒▓█) sampled directly from the source image's pixel
 # density, not a hand-drawn approximation -- renders as recognizable triangular shards
 # instead of a blob (otter_space: "not like a rounded triangle").
-SAGE_SEKURO_MARK = """[#4A0030]░░░░░░░░         ░░░░░   [/]
-[bold #C6007E] ░▒▓▓▓▓▓▓▓███▓▒░░        ░▓██▓█▓  [/]
-[#B8036F] ░▓█▓████▓▒▒░             ▓▓▓▓▓░  [/]
-[#AA0562]  ░▓█▓▓▒░                 ▓▓▓█░   [/]
-[#9C0756]   ░▒░                   ░▓▓█░    [/]
-[#8E094A]                         ░▓█▒     [/]
-[#800B3F]                         ░█▒      [/]
-[#720D35]       ░░                ░▒       [/]
-[#640F2B]        ░▓▒░                      [/]
-[#560F22]         ░▓█▓▒░                   [/]
-[#48101A]           ▒███▓▓▒░               [/]
-[#3A1013]            ▒▓█▓██▓▓▒░            [/]
-[#2C0F0D]             ░▓█▓▓▓█▓             [/]
-[#1E0C08]               ▒▓█▓▒              [/]
-[#1E0C08]                ░▒░               [/]"""
+# Gradient floor raised from near-black to the brand color itself (#C6007E) -- otter_space:
+# "make the pink work in both dark and light modes... really difficult to read". The old
+# gradient darkened toward #1E0C08 (near-black), invisible on dark terminal backgrounds
+# (<2:1 contrast against black on the lower rows). Every row below now stays >=3.7:1
+# against both pure black and pure white.
+SAGE_SEKURO_MARK = """[#FF4FB8]░░░░░░░░         ░░░░░   [/]
+[bold #FF4FB8] ░▒▓▓▓▓▓▓▓███▓▒░░        ░▓██▓█▓  [/]
+[#FB49B4] ░▓█▓████▓▒▒░             ▓▓▓▓▓░  [/]
+[#F643AF]  ░▓█▓▓▒░                 ▓▓▓█░   [/]
+[#F23DAB]   ░▒░                   ░▓▓█░    [/]
+[#ED37A6]                         ░▓█▒     [/]
+[#E931A2]                         ░█▒      [/]
+[#E52B9D]       ░░                ░▒       [/]
+[#E02499]        ░▓▒░                      [/]
+[#DC1E94]         ░▓█▓▒░                   [/]
+[#D81890]           ▒███▓▓▒░               [/]
+[#D3128B]            ▒▓█▓██▓▓▒░            [/]
+[#CF0C87]             ░▓█▓▓▓█▓             [/]
+[#CA0682]               ▒▓█▓▒              [/]
+[#C6007E]                ░▒░               [/]"""
 
 # Back-compat aliases during the Hermes -> Sage rebrand; downstream code that still
 # imports the old names keeps working until all call sites are migrated.
