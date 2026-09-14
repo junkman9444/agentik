@@ -57,16 +57,9 @@ def _skin_color(key: str, fallback: str) -> str:
 
 from sage_cli import __version__ as VERSION, __release_date__ as RELEASE_DATE
 
-SAGE_LOGO = """[bold #C6007E] _____  ___  _____  _____ [/]
-[bold #C6007E]/  ___|/ _ \\|  __ \\|  ___|[/]
-[#B8036F]\\ `--./ /_\\ \\ |  \\/| |__  [/]
-[#AA0562] `--. \\  _  | | __ |  __| [/]
-[#9C0756]/\\__/ / | | | |_\\ \\| |___ [/]
-[#8E094A]\\____/\\_| |_/\\____/\\____/ [/]
-[dim #8A0058] ___      _                    _   ___ ___     _   [/]
-[dim #8A0058]/ __| ___| |___  _ _ _ ___    /_\\ / __| __|_ _| |_ [/]
-[dim #8A0058]\\__ \\/ -_) / / || | '_/ _ \\  / _ \\ (_ | _|| ' \\  _|[/]
-[dim #8A0058]|___/\\___|_\\_\\\\_,_|_| \\___/ /_/ \\_\\___|___|_||_\\__|[/]"""
+SAGE_LOGO = """[bold #C6007E]╭─╮╭─╮╭─╴╭─╴         ╭─╮╭─╴╷╭ ╷ ╷╭─╮╭─╮   ╭─╮╭─╴╭─╴╭╮╷╶┬╴[/]
+[bold #C6007E]╰─╮├─┤│╶╮├╴    ╶─╴   ╰─╮├╴ ├┴╮│ │├┬╯│ │   ├─┤│╶╮├╴ │╰┤ │ [/]
+[#8A0058]╰─╯╵ ╵╰─╯╰─╴         ╰─╯╰─╴╵ ╵╰─╯╵╰╴╰─╯   ╵ ╵╰─╯╰─╴╵ ╵ ╵ [/]"""
 
 # Sekuro brand mark, rendered as ASCII from the real sekuro.io logo (three-shard
 # pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_user_provided.png.
