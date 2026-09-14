@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from sage_constants import get_hermes_home
+from sage_cli.banner import SAGE_LOGO, SAGE_SEKURO_MARK
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,38 @@ _SAGE_BRANDING: Dict[str, str] = {
 _HERMES_BRANDING = _SAGE_BRANDING  # back-compat alias during the Hermes -> Sage rebrand
 
 _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
+    "sekuro": {
+        "name": "sekuro", "description": "Sekuro brand — magenta #C6007E, the default Sage theme",
+        # Dark-authored; brand color C6007E as the primary accent throughout.
+        "colors": {
+            "banner_border": "#8A0058", "banner_title": "#FF4FB8", "banner_accent": "#E6009A",
+            "banner_dim": "#A3006E", "banner_text": "#FBDCEF", "ui_accent": "#E6009A",
+            "ui_label": "#C6007E", "ui_ok": "#4caf50", "ui_error": "#ef5350", "ui_warn": "#ffa726",
+            "prompt": "#FBDCEF", "input_rule": "#8A0058", "response_border": "#FF4FB8",
+            "status_bar_bg": "#1E0C1A", "status_bar_text": "#D8B8CE",
+            "status_bar_strong": "#FF4FB8", "status_bar_dim": "#7A4A6A",
+            "status_bar_good": "#8FBC8F", "status_bar_warn": "#FF4FB8", "status_bar_bad": "#FF6B9D",
+            "status_bar_critical": "#FF6B6B", "session_label": "#C6007E",
+            "session_border": "#8B6882", "completion_menu_bg": "#1E0C1A",
+            "completion_menu_current_bg": "#3A1530", "selection_bg": "#451A38",
+            "shell_dollar": "#4dabf7", "voice_status_bg": "#1E0C1A"},
+        # Light overlay: on white, vivid #FF4FB8/#E6009A read as glare and a WCAG-darkened
+        # magenta (#8A0058) as mud; keep the brand hue, tame saturation for contrast.
+        "light_colors": {
+            "banner_title": "#A3006E", "banner_accent": "#C6007E", "banner_dim": "#8A0058",
+            "banner_text": "#5C0A42", "ui_accent": "#C6007E", "ui_label": "#8A0058",
+            "ui_ok": "#2E7D32", "ui_error": "#C62828", "ui_warn": "#D97706", "prompt": "#5C0A42",
+            "response_border": "#A3006E", "session_label": "#8A0058", "status_bar_text": "#6F6F6F",
+            "status_bar_strong": "#A3006E", "status_bar_dim": "#9A7690",
+            "status_bar_good": "#2E7D32", "status_bar_warn": "#A3006E", "status_bar_bad": "#C2410C",
+            "status_bar_critical": "#B91C1C", "shell_dollar": "#1E6FC0",
+            "completion_menu_bg": "#F5F5F5", "completion_menu_current_bg": "#F0D9E8",
+            "selection_bg": "#D4E4F7", "status_bar_bg": "#F5F5F5", "voice_status_bg": "#F5F5F5"},
+        "spinner": {},  # empty = hardcoded defaults in display.py
+        "branding": _SAGE_BRANDING,
+        "banner_logo": SAGE_LOGO,
+        "banner_hero": SAGE_SEKURO_MARK,
+        "tool_prefix": "┊"},
     "default": {
         "name": "default", "description": "Classic Hermes — gold and kawaii",
         # Dark-authored; values match the TUI's DARK_THEME so both render the same gold.

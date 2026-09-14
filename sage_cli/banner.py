@@ -65,34 +65,21 @@ SAGE_LOGO = """[bold #C6007E]██████    ████    ████�
 [dim #8A0058]        Sekuro AGEnt[/]"""
 
 # Sekuro brand mark, rendered as ASCII from the real sekuro.io logo (three-shard
-# pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_source.png.
-SAGE_SEKURO_MARK = """[bold #C6007E]       ...::::-----======++++=:.                ++++++===--.[/]
-[bold #C6007E]:-==++++++++++++++++++*++=-:                    ++++++++++*=[/]
-[bold #C6007E]=*+++++++++++++++++++=-:                        +++++++++++.[/]
-[bold #C6007E] =++++++++++++++++=:.                           =+++++++++:[/]
-[bold #C6007E]  ++++++++++++=-.                               =++++++++-[/]
-[bold #C6007E]   ++++++++=:                                   =+++++++-[/]
-[bold #C6007E]    =*++-.                                      +++++++=[/]
-[bold #C6007E]     -.                                         ++++++=[/]
-[bold #C6007E]                                                +++++=[/]
-[bold #C6007E]                                                ++++=[/]
-[bold #C6007E]                                               .+++=[/]
-[bold #C6007E]                                               .++=[/]
-[bold #C6007E]                                               .*-[/]
-[bold #C6007E]            ::                                 -=[/]
-[bold #C6007E]             -+=:                              .[/]
-[bold #C6007E]              :+*+=:[/]
-[bold #C6007E]               .+++++=:.[/]
-[bold #C6007E]                 =++++++=-.[/]
-[bold #C6007E]                  -+++++++++-:[/]
-[bold #C6007E]                   .+++++++++++=:.[/]
-[bold #C6007E]                     =+++++++++++++-:[/]
-[bold #C6007E]                      :+++++++++++++++=.[/]
-[bold #C6007E]                       .=+++++++++++++:[/]
-[bold #C6007E]                         -+++++++++++.[/]
-[bold #C6007E]                          .++++++++=[/]
-[bold #C6007E]                            -+++++:[/]
-[bold #C6007E]                             .-+-.[/]"""
+# pinwheel), sampled color #C6007E. See assets/brand/sekuro_logo_user_provided.png.
+# Regenerated small (12x28) to fit the terminal banner cleanly -- the original hand-drawn
+# 27x60 version was too large and rendered "botched"/cut off in normal-width terminals.
+SAGE_SEKURO_MARK = """[bold #C6007E] ..:-==++*##*=.      +#**+. [/]
+[bold #C6007E] *@@@@@@@@#=:        %@@@@. [/]
+[#B8036F]  %@@@%=.            #@@@:  [/]
+[#AA0562]   *-                %@@-   [/]
+[#9C0756]                     @@-    [/]
+[#8E094A]      .              @=     [/]
+[#800B3F]      -#=            :      [/]
+[#720D35]       :@@%=.               [/]
+[#640F2B]         %@@@@+:            [/]
+[#560F22]          +@@@@@@=          [/]
+[#48101A]           :@@@@#.          [/]
+[#3A1013]             +@-            [/]"""
 
 # Back-compat aliases during the Hermes -> Sage rebrand; downstream code that still
 # imports the old names keeps working until all call sites are migrated.
@@ -969,13 +956,17 @@ def build_welcome_banner(
     # Update check — NEVER block the banner on it: the prefetch does git/network work that rarely
     # finishes before render, so a blocking wait adds its full timeout to every startup. If not
     # ready, a daemon thread prints the same notice above the prompt when it lands.
-    def _update_line():
-        behind = get_update_result(timeout=0.05)
-        if behind is None and not _update_check_done.is_set():
-            _defer_update_notice()
-        elif behind is not None and behind != 0:
-            right_lines.append(_format_update_notice(behind))
-    _quiet(_update_line)  # Never break the banner over an update check
+    # Update check disabled: this fork tracks a pinned local branch, not upstream HEAD, so
+    # "N commits behind" is expected/permanent noise, not a signal to act on (otter_space:
+    # "this will be internal tool for now with a fork" -- see also the `sage --version`
+    # fast-path fix in _startup_fast.py's print_fast_version_info default).
+    # def _update_line():
+    #     behind = get_update_result(timeout=0.05)
+    #     if behind is None and not _update_check_done.is_set():
+    #         _defer_update_notice()
+    #     elif behind is not None and behind != 0:
+    #         right_lines.append(_format_update_notice(behind))
+    # _quiet(_update_line)  # Never break the banner over an update check
     layout_table = Table.grid(padding=(0, 2))
     layout_table.add_column("left", justify="center")
     layout_table.add_column("right", justify="left")
