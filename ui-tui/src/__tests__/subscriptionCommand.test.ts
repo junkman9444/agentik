@@ -92,11 +92,11 @@ describe('/subscription slash command', () => {
     expect(getOverlayState().subscription).toBeNull()
   })
 
-  it('/upgrade alias resolves to the same command', () => {
-    expect(findSlashCommand('upgrade')).toBe(subscriptionCommand)
+  it('/upgrade is not registered in this fork (Nous billing/subscription overlay is disabled)', () => {
+    expect(findSlashCommand('upgrade')).toBeUndefined()
   })
 
-  it('/subscription resolves to the same command', () => {
-    expect(findSlashCommand('subscription')).toBe(subscriptionCommand)
+  it('/subscription is not registered in this fork (Nous billing/subscription overlay is disabled)', () => {
+    expect(findSlashCommand('subscription')).toBeUndefined()
   })
 })

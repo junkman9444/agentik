@@ -120,7 +120,7 @@ describe('createGatewayEventHandler', () => {
     expect(getTurnState().todos).toEqual([])
   })
 
-  it('opens a billing confirm dialog routing Nous to /topup', () => {
+  it('falls through to generic provider-billing copy for is_nous (Nous billing removed from this fork)', () => {
     const appended: Msg[] = []
     const ctx = buildCtx(appended)
     const onEvent = createGatewayEventHandler(ctx)
@@ -141,11 +141,15 @@ describe('createGatewayEventHandler', () => {
     } as any)
 
     const { confirm } = getOverlayState()
-    expect(confirm?.title).toContain('Nous')
-    expect(confirm?.confirmLabel).toBe('Top up')
+    // is_nous is a legacy field that can never actually be true in this fork (no Nous
+    // provider in the credential pool), but if the gateway ever sends it anyway, the UI
+    // must not recommend the removed /topup command -- it falls through to the generic
+    // provider-billing copy instead, same as any other provider with no billing_url.
+    expect(confirm?.title).toContain('Nous Portal')
+    expect(confirm?.confirmLabel).toBe('Switch provider')
 
     confirm!.onConfirm()
-    expect(ctx.submission.submitRef.current).toHaveBeenCalledWith('/topup')
+    expect(ctx.submission.submitRef.current).toHaveBeenCalledWith('/model')
   })
 
   it('deep-links a third-party provider billing page from the confirm dialog', () => {

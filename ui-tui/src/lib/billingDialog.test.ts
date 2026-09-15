@@ -16,10 +16,10 @@ function makeBlock(overrides: Partial<BillingBlock> = {}): BillingBlock {
 }
 
 describe('billingDialogCopy', () => {
-  it('routes Nous to the /topup flow', () => {
+  it('falls through to generic copy for is_nous (Nous billing removed from this fork)', () => {
     const copy = billingDialogCopy(makeBlock({ is_nous: true, provider: 'nous', provider_label: 'Nous Portal' }))
-    expect(copy.title).toContain('Nous')
-    expect(copy.confirmLabel).toBe('Top up')
+    expect(copy.title).toContain('Nous Portal')
+    expect(copy.confirmLabel).toBe('Open billing page')
     expect(copy.cancelLabel).toBe('Dismiss')
   })
 

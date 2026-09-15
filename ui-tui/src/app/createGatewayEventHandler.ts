@@ -1513,9 +1513,10 @@ export function createGatewayEventHandler(ctx: GatewayEventHandlerContext): (ev:
               confirmLabel: copy.confirmLabel,
               detail: copy.detail,
               onConfirm: () => {
-                if (block.is_nous) {
-                  submitRef.current('/topup')
-                } else if (block.billing_url) {
+                // block.is_nous can never be true in this fork (no Nous provider in the
+                // credential pool, see billingDialog.ts's is_nous doc comment) -- the /topup
+                // branch that used to handle it was removed with the Nous billing overlay.
+                if (block.billing_url) {
                   openExternalUrl(block.billing_url)
                 } else {
                   submitRef.current('/model')
