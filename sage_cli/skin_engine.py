@@ -76,16 +76,16 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         # screenshot) -- all clear 5:1+, most 6-10:1+.
         "colors": {
             "banner_border": "#FF4FB8", "banner_title": "#FF4FB8", "banner_accent": "#FF6BC4",
-            "banner_dim": "#FF8FCE", "banner_text": "#FFFFFF", "ui_accent": "#FF6BC4",
+            "banner_dim": "#FF8FCE", "banner_text": "#FF4FB8", "ui_accent": "#FF6BC4",
             "ui_label": "#FF8FCE", "ui_ok": "#6FDD6F", "ui_error": "#FF5555", "ui_warn": "#FFC24D",
-            "prompt": "#FFFFFF", "input_rule": "#FF4FB8", "response_border": "#FF4FB8",
-            "status_bar_bg": "#1E0C1A", "status_bar_text": "#FFFFFF",
+            "prompt": "#FF4FB8", "input_rule": "#FF4FB8", "response_border": "#FF4FB8",
+            "status_bar_bg": "#1E0C1A", "status_bar_text": "#FF4FB8",
             "status_bar_strong": "#FF4FB8", "status_bar_dim": "#FF8FCE",
             "status_bar_good": "#6FDD6F", "status_bar_warn": "#FF4FB8", "status_bar_bad": "#FF6B9D",
             "status_bar_critical": "#FF5555", "session_label": "#FF8FCE",
             "session_border": "#FF8FCE", "completion_menu_bg": "#1E0C1A",
             "completion_menu_current_bg": "#3A1530", "selection_bg": "#451A38",
-            "shell_dollar": "#4dabf7", "voice_status_bg": "#1E0C1A"},
+            "shell_dollar": "#FF6BC4", "voice_status_bg": "#1E0C1A"},
         # Light overlay: authored SEPARATELY against white (not derived from the dark palette above,
         # which would glare) -- full-saturation brand magenta for accents, pure black for body text.
         # Every key the dark palette defines is ALSO defined here (no gaps): a skin key missing from
@@ -93,13 +93,13 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
         # which is exactly how a dark-tuned color leaked through onto a light TUI background before.
         "light_colors": {
             "banner_title": "#C6007E", "banner_accent": "#C6007E", "banner_border": "#C6007E",
-            "banner_dim": "#A3006E", "banner_text": "#000000", "ui_accent": "#C6007E",
+            "banner_dim": "#A3006E", "banner_text": "#C6007E", "ui_accent": "#C6007E",
             "ui_label": "#A3006E", "ui_ok": "#157A15", "ui_error": "#C62828", "ui_warn": "#B45300",
-            "prompt": "#000000", "input_rule": "#C6007E", "response_border": "#C6007E",
-            "session_label": "#A3006E", "status_bar_text": "#000000",
+            "prompt": "#C6007E", "input_rule": "#C6007E", "response_border": "#C6007E",
+            "session_label": "#A3006E", "status_bar_text": "#C6007E",
             "status_bar_strong": "#C6007E", "status_bar_dim": "#A3006E",
             "status_bar_good": "#157A15", "status_bar_warn": "#C6007E", "status_bar_bad": "#C2185B",
-            "status_bar_critical": "#C62828", "session_border": "#A3006E", "shell_dollar": "#1E6FC0",
+            "status_bar_critical": "#C62828", "session_border": "#A3006E", "shell_dollar": "#C6007E",
             "completion_menu_bg": "#F5F5F5", "completion_menu_current_bg": "#F0D9E8",
             "selection_bg": "#D4E4F7", "status_bar_bg": "#F5F5F5", "voice_status_bg": "#F5F5F5"},
         "spinner": {},  # empty = hardcoded defaults in display.py
