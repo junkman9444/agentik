@@ -236,20 +236,11 @@ class CLIBillingMixin:
     # ── /subscription — view plan + change it (CLI surface) ──
 
     def _show_subscription(self):
-        """`/subscription` (alias `/upgrade`). Deep-links NAS's ``/manage-subscription`` (NOT Stripe); never charges."""
-        from agent.subscription_view import build_subscription_state, subscription_manage_url
-        state = build_subscription_state()
-        if not state.logged_in:
-            self._print_logged_out(state, "Could not load subscription", "/subscription")
-            return
-        if state.context == "team":  # no personal plan — teams run on a shared balance
-            self._block_header("⚕", "Team subscription")
-            self._print_org_line(state)
-            print(f"  This terminal is connected to {state.org_name or 'a team org'}. Teams run on a shared")
-            print("  balance · use /topup to add funds.")
-            self._dim('Personal subscriptions live on your personal account.')
-            return
-        self._subscription_overview(state, subscription_manage_url(state))
+        """`/subscription` (alias `/upgrade`). Nous Portal billing/subscriptions have been removed
+        from this fork -- always dead at runtime anyway (gated on HERMES_GUEST_ONBOARDING=1, which
+        nothing in this fork sets), but the command now says so immediately instead of running the
+        full logged-out/precondition dance to reach the same answer."""
+        print("  🔴 Subscription management is not available in this fork.")
 
     def _subscription_overview(self, state, manage_url):
         """Plan read block, then the action: portal hand-off (member / non-interactive), catalog (Free), change menu."""
@@ -481,14 +472,10 @@ class CLIBillingMixin:
     # ── /topup — Remote Spending (CLI surface, all 5 screens) ──
 
     def _show_billing(self, command: str = "/topup"):
-        """`/topup` — ZERO sub-commands (argument ignored; Overview is the only route). Non-interactive never
-        prompts. Money is Decimal end-to-end; the terminal never collects card details."""
-        from agent.billing_view import build_billing_state
-        state = build_billing_state()
-        if not state.logged_in:
-            self._print_logged_out(state, "Couldn't load billing", "/topup")
-            return
-        self._billing_overview(state)
+        """`/topup`. Nous Portal billing has been removed from this fork -- always dead at runtime
+        anyway (gated on HERMES_GUEST_ONBOARDING=1, which nothing in this fork sets), but the command
+        now says so immediately instead of running the full logged-out/state-fetch dance."""
+        print("  🔴 Billing top-up is not available in this fork.")
 
     def _billing_portal_hint(self, state, *, reason: str = "") -> None:
         """Print a portal deep-link line (the funnel for portal-only actions)."""
