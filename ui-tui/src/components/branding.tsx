@@ -464,22 +464,10 @@ export function SessionPanel({ info, maxWidth, sid, t }: SessionPanelProps) {
         <Text color={t.color.muted}>/help for commands</Text>
       </Text>
 
-      {typeof info.update_behind === 'number' && info.update_behind > 0 && (
-        <Text bold color={t.color.warn}>
-          ! {info.update_behind} {info.update_behind === 1 ? 'commit' : 'commits'} behind
-          <Text bold={false} color={t.color.warn} dimColor>
-            {' '}
-            - run{' '}
-          </Text>
-          <Text bold color={t.color.warn}>
-            {info.update_command || 'hermes update'}
-          </Text>
-          <Text bold={false} color={t.color.warn} dimColor>
-            {' '}
-            to update
-          </Text>
-        </Text>
-      )}
+      {/* Update-behind nag removed: this fork tracks a pinned local branch, not upstream HEAD,
+          so "N commits behind" is expected/permanent noise here, not a signal to act on
+          (otter_space: "this will be internal tool for now with a fork" -- same reasoning
+          already applied to the CLI-side --version/startup banner in sage_cli/banner.py). */}
 
       {info.install_warning && (
         <Text bold color={t.color.warn} wrap="wrap">
