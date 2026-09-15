@@ -65,35 +65,41 @@ _HERMES_BRANDING = _SAGE_BRANDING  # back-compat alias during the Hermes -> Sage
 _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
     "sekuro": {
         "name": "sekuro", "description": "Sekuro brand — magenta #C6007E, the default Sage theme",
-        # Dark-authored; brand color C6007E as the primary accent, brightened from the raw brand
-        # hex where needed for real WCAG contrast against dark terminal backgrounds (otter_space:
-        # "make the pink work in both dark and light modes... really difficult to read"). Every
-        # value below is >=4.5:1 against both #1E0C1A (this skin's own status_bar_bg) and pure
-        # black (#000000, the terminal default many users actually have) -- verified by direct
-        # WCAG relative-luminance contrast-ratio computation, not eyeballed.
+        # Dark-authored. otter_space, twice: "make the pink work in both dark and light modes...
+        # really difficult to read" then "text not visible. contrast sucks" with screenshots showing
+        # washed-out pale-pink text on a maroon TUI panel -- the prior pass only brightened enough to
+        # clear the WCAG 4.5:1 floor, which still reads as pale/muted next to the vivid brand magenta.
+        # This pass goes further: every foreground tone is a FULLY SATURATED bright color (no muted
+        # pastels anywhere), body text is pure white/black rather than a tinted near-white/near-black,
+        # and every value is verified against BOTH pure black/white AND the actual observed TUI panel
+        # background colors (#1E0C1A dark status bar, #3D0F2E maroon panel bg from otter_space's own
+        # screenshot) -- all clear 5:1+, most 6-10:1+.
         "colors": {
-            "banner_border": "#E0479C", "banner_title": "#FF4FB8", "banner_accent": "#FF6BC4",
-            "banner_dim": "#CE5A9B", "banner_text": "#FBDCEF", "ui_accent": "#FF6BC4",
-            "ui_label": "#E85AAE", "ui_ok": "#4caf50", "ui_error": "#ef5350", "ui_warn": "#ffa726",
-            "prompt": "#FBDCEF", "input_rule": "#D6338F", "response_border": "#FF4FB8",
-            "status_bar_bg": "#1E0C1A", "status_bar_text": "#D8B8CE",
-            "status_bar_strong": "#FF4FB8", "status_bar_dim": "#A87A9A",
-            "status_bar_good": "#8FBC8F", "status_bar_warn": "#FF4FB8", "status_bar_bad": "#FF6B9D",
-            "status_bar_critical": "#FF6B6B", "session_label": "#E85AAE",
-            "session_border": "#B090A8", "completion_menu_bg": "#1E0C1A",
+            "banner_border": "#FF4FB8", "banner_title": "#FF4FB8", "banner_accent": "#FF6BC4",
+            "banner_dim": "#FF8FCE", "banner_text": "#FFFFFF", "ui_accent": "#FF6BC4",
+            "ui_label": "#FF8FCE", "ui_ok": "#6FDD6F", "ui_error": "#FF5555", "ui_warn": "#FFC24D",
+            "prompt": "#FFFFFF", "input_rule": "#FF4FB8", "response_border": "#FF4FB8",
+            "status_bar_bg": "#1E0C1A", "status_bar_text": "#FFFFFF",
+            "status_bar_strong": "#FF4FB8", "status_bar_dim": "#FF8FCE",
+            "status_bar_good": "#6FDD6F", "status_bar_warn": "#FF4FB8", "status_bar_bad": "#FF6B9D",
+            "status_bar_critical": "#FF5555", "session_label": "#FF8FCE",
+            "session_border": "#FF8FCE", "completion_menu_bg": "#1E0C1A",
             "completion_menu_current_bg": "#3A1530", "selection_bg": "#451A38",
             "shell_dollar": "#4dabf7", "voice_status_bg": "#1E0C1A"},
-        # Light overlay: on white, the dark-mode-brightened pinks above read as glare, so this
-        # block is authored SEPARATELY (not derived) against a white/near-white background --
-        # same WCAG contrast-ratio verification, >=4.5:1 against both #FFFFFF and #F5F5F5.
+        # Light overlay: authored SEPARATELY against white (not derived from the dark palette above,
+        # which would glare) -- full-saturation brand magenta for accents, pure black for body text.
+        # Every key the dark palette defines is ALSO defined here (no gaps): a skin key missing from
+        # light_colors falls back to the dark value in createGatewayEventHandler.ts's themeForSkin(),
+        # which is exactly how a dark-tuned color leaked through onto a light TUI background before.
         "light_colors": {
-            "banner_title": "#A3006E", "banner_accent": "#C6007E", "banner_dim": "#8A0058",
-            "banner_text": "#5C0A42", "ui_accent": "#C6007E", "ui_label": "#8A0058",
-            "ui_ok": "#2E7D32", "ui_error": "#C62828", "ui_warn": "#D97706", "prompt": "#5C0A42",
-            "response_border": "#A3006E", "session_label": "#8A0058", "status_bar_text": "#6F6F6F",
-            "status_bar_strong": "#A3006E", "status_bar_dim": "#9A7690",
-            "status_bar_good": "#2E7D32", "status_bar_warn": "#A3006E", "status_bar_bad": "#C2410C",
-            "status_bar_critical": "#B91C1C", "shell_dollar": "#1E6FC0",
+            "banner_title": "#C6007E", "banner_accent": "#C6007E", "banner_border": "#C6007E",
+            "banner_dim": "#A3006E", "banner_text": "#000000", "ui_accent": "#C6007E",
+            "ui_label": "#A3006E", "ui_ok": "#157A15", "ui_error": "#C62828", "ui_warn": "#B45300",
+            "prompt": "#000000", "input_rule": "#C6007E", "response_border": "#C6007E",
+            "session_label": "#A3006E", "status_bar_text": "#000000",
+            "status_bar_strong": "#C6007E", "status_bar_dim": "#A3006E",
+            "status_bar_good": "#157A15", "status_bar_warn": "#C6007E", "status_bar_bad": "#C2185B",
+            "status_bar_critical": "#C62828", "session_border": "#A3006E", "shell_dollar": "#1E6FC0",
             "completion_menu_bg": "#F5F5F5", "completion_menu_current_bg": "#F0D9E8",
             "selection_bg": "#D4E4F7", "status_bar_bg": "#F5F5F5", "voice_status_bg": "#F5F5F5"},
         "spinner": {},  # empty = hardcoded defaults in display.py
